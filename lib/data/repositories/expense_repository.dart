@@ -1,26 +1,34 @@
 import 'package:uuid/uuid.dart';
 import '../../core/database/database_helper.dart';
 import '../models/expense_model.dart';
+import '../models/category_model.dart';
 import '../models/transfer_model.dart';
+import 'account_repository.dart';
 
 /// Repository for Expense and Transfer database operations
 class ExpenseRepository {
   final DatabaseHelper _dbHelper;
   final Uuid _uuid;
+  final AccountRepository _accountRepository;
 
-  ExpenseRepository({DatabaseHelper? dbHelper, Uuid? uuid})
-      : _dbHelper = dbHelper ?? DatabaseHelper.instance,
-        _uuid = uuid ?? const Uuid();
+  ExpenseRepository({
+    DatabaseHelper? dbHelper,
+    Uuid? uuid,
+    AccountRepository? accountRepository,
+  })  : _dbHelper = dbHelper ?? DatabaseHelper.instance,
+        _uuid = uuid ?? const Uuid(),
+        _accountRepository =
+            accountRepository ?? AccountRepository(dbHelper: dbHelper ?? DatabaseHelper.instance);
 
   static const String _expenseTable = 'expenses';
   static const String _transferTable = 'transfers';
 
   // ============ EXPENSE OPERATIONS ============
 
-  /// Add new expense
+  /// Add new expense and deduct from account in one transaction.
   Future<Expense> addExpense({
     required double amount,
-    required ExpenseCategory category,
+    required Category category,
     required String accountId,
     required DateTime date,
     String? note,
@@ -34,38 +42,93 @@ class ExpenseRepository {
       note: note,
       createdAt: DateTime.now(),
     );
-    await _dbHelper.insert(_expenseTable, expense.toMap());
+    await _dbHelper.transaction((txn) async {
+      await txn.insert(_expenseTable, expense.toMap());
+      await _accountRepository.applyBalanceDeltaTxn(txn, accountId, -amount);
+    });
     return expense;
   }
 
   /// Get all expenses
   Future<List<Expense>> getAllExpenses() async {
-    final maps = await _dbHelper.queryAll(_expenseTable);
-    return maps.map((map) => Expense.fromMap(map)).toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final db = await _dbHelper.database;
+    final results = await db.rawQuery('''
+      SELECT 
+        e.*,
+        c.id as categoryId,
+        c.name as categoryName,
+        c.iconCode as categoryIconCode,
+        c.colorValue as categoryColorValue,
+        c.isEnabled as categoryIsEnabled,
+        c.isSystem as categoryIsSystem
+      FROM $_expenseTable e
+      LEFT JOIN categories c ON e.category = c.id OR (e.category = c.name COLLATE NOCASE) -- Handle legacy enum strings
+      ORDER BY e.date DESC
+    ''');
+    
+    return results.map((map) => Expense.fromMap(map)).toList();
   }
 
   /// Get expense by id
   Future<Expense?> getExpenseById(String id) async {
-    final map = await _dbHelper.queryById(_expenseTable, id);
-    return map != null ? Expense.fromMap(map) : null;
+    final db = await _dbHelper.database;
+    final results = await db.rawQuery('''
+      SELECT 
+        e.*,
+        c.id as categoryId,
+        c.name as categoryName,
+        c.iconCode as categoryIconCode,
+        c.colorValue as categoryColorValue,
+        c.isEnabled as categoryIsEnabled,
+        c.isSystem as categoryIsSystem
+      FROM $_expenseTable e
+      LEFT JOIN categories c ON e.category = c.id OR (e.category = c.name COLLATE NOCASE)
+      WHERE e.id = ?
+    ''', [id]);
+    
+    return results.isNotEmpty ? Expense.fromMap(results.first) : null;
   }
 
   /// Get expenses by date range
   Future<List<Expense>> getExpensesByDateRange(DateTime start, DateTime end) async {
-    final maps = await _dbHelper.getExpensesByDateRange(start, end);
-    return maps.map((map) => Expense.fromMap(map)).toList();
+    final db = await _dbHelper.database;
+    final results = await db.rawQuery('''
+      SELECT 
+        e.*,
+        c.id as categoryId,
+        c.name as categoryName,
+        c.iconCode as categoryIconCode,
+        c.colorValue as categoryColorValue,
+        c.isEnabled as categoryIsEnabled,
+        c.isSystem as categoryIsSystem
+      FROM $_expenseTable e
+      LEFT JOIN categories c ON e.category = c.id OR (e.category = c.name COLLATE NOCASE)
+      WHERE e.date >= ? AND e.date <= ?
+      ORDER BY e.date DESC
+    ''', [start.toIso8601String(), end.toIso8601String()]);
+
+    return results.map((map) => Expense.fromMap(map)).toList();
   }
 
   /// Get expenses by category
-  Future<List<Expense>> getExpensesByCategory(ExpenseCategory category) async {
-    final maps = await _dbHelper.queryWhere(
-      _expenseTable,
-      'category = ?',
-      [category.name],
-    );
-    return maps.map((map) => Expense.fromMap(map)).toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+  Future<List<Expense>> getExpensesByCategory(Category category) async {
+    final db = await _dbHelper.database;
+    final results = await db.rawQuery('''
+      SELECT 
+        e.*,
+        c.id as categoryId,
+        c.name as categoryName,
+        c.iconCode as categoryIconCode,
+        c.colorValue as categoryColorValue,
+        c.isEnabled as categoryIsEnabled,
+        c.isSystem as categoryIsSystem
+      FROM $_expenseTable e
+      LEFT JOIN categories c ON e.category = c.id OR (e.category = c.name COLLATE NOCASE)
+      WHERE e.category = ?
+      ORDER BY e.date DESC
+    ''', [category.id]);
+
+    return results.map((map) => Expense.fromMap(map)).toList();
   }
 
   /// Get expenses for a specific month
@@ -86,33 +149,47 @@ class ExpenseRepository {
   }
 
   /// Get expenses grouped by category for a date range
-  Future<Map<ExpenseCategory, double>> getExpensesByCategories(
+  Future<Map<Category, double>> getExpensesByCategories(
     DateTime start,
     DateTime end,
   ) async {
     final expenses = await getExpensesByDateRange(start, end);
-    final Map<ExpenseCategory, double> result = {};
+    final Map<Category, double> result = {};
     
     for (final expense in expenses) {
-      result[expense.category] = (result[expense.category] ?? 0) + expense.amount;
+      // Use map key equality based on id (since Category overrides ==)
+      final existingTotal = result[expense.category] ?? 0.0;
+      result[expense.category] = existingTotal + expense.amount;
     }
     
     return result;
   }
 
-  /// Update expense
-  Future<void> updateExpense(Expense expense) async {
-    await _dbHelper.update(_expenseTable, expense.toMap(), expense.id);
+  /// Revert ledger for [original], apply new amounts for [updated], persist row.
+  Future<void> updateExpenseWithLedger(Expense original, Expense updated) async {
+    await _dbHelper.transaction((txn) async {
+      await _accountRepository.applyBalanceDeltaTxn(txn, original.accountId, original.amount);
+      await _accountRepository.applyBalanceDeltaTxn(txn, updated.accountId, -updated.amount);
+      await txn.update(
+        _expenseTable,
+        updated.toMap(),
+        where: 'id = ?',
+        whereArgs: [updated.id],
+      );
+    });
   }
 
-  /// Delete expense
-  Future<void> deleteExpense(String id) async {
-    await _dbHelper.delete(_expenseTable, id);
+  /// Delete expense row and credit balance back in one transaction.
+  Future<void> deleteExpenseWithLedger(Expense expense) async {
+    await _dbHelper.transaction((txn) async {
+      await txn.delete(_expenseTable, where: 'id = ?', whereArgs: [expense.id]);
+      await _accountRepository.applyBalanceDeltaTxn(txn, expense.accountId, expense.amount);
+    });
   }
 
   // ============ TRANSFER OPERATIONS ============
 
-  /// Add new transfer
+  /// Insert transfer and update both account balances atomically.
   Future<Transfer> addTransfer({
     required String fromAccountId,
     required String toAccountId,
@@ -129,7 +206,11 @@ class ExpenseRepository {
       note: note,
       createdAt: DateTime.now(),
     );
-    await _dbHelper.insert(_transferTable, transfer.toMap());
+    await _dbHelper.transaction((txn) async {
+      await txn.insert(_transferTable, transfer.toMap());
+      await _accountRepository.applyBalanceDeltaTxn(txn, fromAccountId, -amount);
+      await _accountRepository.applyBalanceDeltaTxn(txn, toAccountId, amount);
+    });
     return transfer;
   }
 

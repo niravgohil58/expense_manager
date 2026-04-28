@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../presentation/screens/screens.dart';
 import '../../presentation/screens/add_income_screen.dart';
+import '../../data/models/expense_model.dart';
 import '../../presentation/widgets/bottom_nav_shell.dart';
 
 /// Application router configuration using go_router
@@ -53,7 +54,11 @@ class AppRouter {
         path: '/add-expense',
         name: 'add-expense',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AddExpenseScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          final expense = extra is Expense ? extra : null;
+          return AddExpenseScreen(expense: expense);
+        },
       ),
       GoRoute(
         path: '/add-income',
@@ -87,6 +92,18 @@ class AppRouter {
         name: 'add-account',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const AddAccountScreen(),
+      ),
+      GoRoute(
+        path: '/manage-categories',
+        name: 'manage-categories',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ManageCategoriesScreen(),
+      ),
+      GoRoute(
+        path: '/add-category',
+        name: 'add-category',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AddCategoryScreen(),
       ),
     ],
   );

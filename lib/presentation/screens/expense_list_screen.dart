@@ -102,57 +102,63 @@ class _ExpenseCard extends StatelessWidget {
     );
     final dateFormatter = DateFormat('dd MMM yyyy');
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: DesignConstants.spacingSm),
-      padding: DesignConstants.paddingMd,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: DesignConstants.borderRadiusMd,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: DesignConstants.paddingSm,
-            decoration: BoxDecoration(
-              color: expense.category.color.withValues(alpha: 0.1),
-              borderRadius: DesignConstants.borderRadiusSm,
+    return InkWell(
+      onTap: () {
+        context.push('/add-expense', extra: expense);
+      },
+      borderRadius: DesignConstants.borderRadiusMd,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: DesignConstants.spacingSm),
+        padding: DesignConstants.paddingMd,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: DesignConstants.borderRadiusMd,
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: DesignConstants.paddingSm,
+              decoration: BoxDecoration(
+                color: expense.category.color.withValues(alpha: 0.1),
+                borderRadius: DesignConstants.borderRadiusSm,
+              ),
+              child: Icon(
+                expense.category.icon,
+                color: expense.category.color,
+              ),
             ),
-            child: Icon(
-              expense.category.icon,
-              color: expense.category.color,
-            ),
-          ),
-          const SizedBox(width: DesignConstants.spacingMd),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  expense.category.displayName,
-                  style: AppTextStyles.labelMedium,
-                ),
-                Text(
-                  dateFormatter.format(expense.date),
-                  style: AppTextStyles.caption,
-                ),
-                if (expense.note != null && expense.note!.isNotEmpty)
+            const SizedBox(width: DesignConstants.spacingMd),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    expense.note!,
-                    style: AppTextStyles.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    expense.category.name,
+                    style: AppTextStyles.labelMedium,
                   ),
-              ],
+                  Text(
+                    dateFormatter.format(expense.date),
+                    style: AppTextStyles.caption,
+                  ),
+                  if (expense.note != null && expense.note!.isNotEmpty)
+                    Text(
+                      expense.note!,
+                      style: AppTextStyles.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
             ),
-          ),
-          Text(
-            '- ${formatter.format(expense.amount)}',
-            style: AppTextStyles.amountSmall.copyWith(
-              color: AppColors.expense,
+            Text(
+              '- ${formatter.format(expense.amount)}',
+              style: AppTextStyles.amountSmall.copyWith(
+                color: AppColors.expense,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

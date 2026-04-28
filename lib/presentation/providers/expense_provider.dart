@@ -1,5 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
+import '../../core/errors/app_exceptions.dart';
 import '../../data/models/expense_model.dart';
+import '../../data/models/category_model.dart';
 import '../../data/models/transfer_model.dart';
 import '../../data/repositories/expense_repository.dart';
 import 'account_provider.dart';
@@ -27,13 +29,13 @@ class ExpenseProvider extends ChangeNotifier {
   String? get error => _error;
 
   /// Get recent expenses (last 10)
-  List<Expense> get recentExpenses => 
+  List<Expense> get recentExpenses =>
       _expenses.take(10).toList();
 
   /// Get expenses for current month
   List<Expense> get currentMonthExpenses {
     final now = DateTime.now();
-    return _expenses.where((e) => 
+    return _expenses.where((e) =>
       e.date.month == now.month && e.date.year == now.year
     ).toList();
   }
@@ -88,7 +90,7 @@ class ExpenseProvider extends ChangeNotifier {
   /// Add new expense
   Future<bool> addExpense({
     required double amount,
-    required ExpenseCategory category,
+    required Category category,
     required String accountId,
     required DateTime date,
     String? note,
@@ -101,12 +103,37 @@ class ExpenseProvider extends ChangeNotifier {
         date: date,
         note: note,
       );
-      // Deduct from account balance
-      await _accountProvider.subtractFromBalance(accountId, amount);
       await loadExpenses();
+      await _accountProvider.loadAccounts();
       return true;
+    } on InsufficientBalanceException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = 'Failed to add expense: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Update expense
+  Future<bool> updateExpense(Expense updatedExpense) async {
+    try {
+      final originalExpense =
+          _expenses.firstWhere((e) => e.id == updatedExpense.id);
+
+      await _repository.updateExpenseWithLedger(originalExpense, updatedExpense);
+
+      await loadExpenses();
+      await _accountProvider.loadAccounts();
+      return true;
+    } on InsufficientBalanceException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = 'Failed to update expense: $e';
       notifyListeners();
       return false;
     }
@@ -116,10 +143,9 @@ class ExpenseProvider extends ChangeNotifier {
   Future<bool> deleteExpense(String id) async {
     try {
       final expense = _expenses.firstWhere((e) => e.id == id);
-      await _repository.deleteExpense(id);
-      // Add back to account balance
-      await _accountProvider.addToBalance(expense.accountId, expense.amount);
+      await _repository.deleteExpenseWithLedger(expense);
       await loadExpenses();
+      await _accountProvider.loadAccounts();
       return true;
     } catch (e) {
       _error = 'Failed to delete expense: $e';
@@ -150,14 +176,13 @@ class ExpenseProvider extends ChangeNotifier {
         date: date,
         note: note,
       );
-      // Update account balances
-      await _accountProvider.transferBetweenAccounts(
-        fromAccountId,
-        toAccountId,
-        amount,
-      );
       await loadTransfers();
+      await _accountProvider.loadAccounts();
       return true;
+    } on InsufficientBalanceException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = 'Failed to add transfer: $e';
       notifyListeners();
@@ -184,7 +209,7 @@ class ExpenseProvider extends ChangeNotifier {
   }
 
   /// Get expenses grouped by category
-  Future<Map<ExpenseCategory, double>> getExpensesByCategories(
+  Future<Map<Category, double>> getExpensesByCategories(
     DateTime start,
     DateTime end,
   ) async {

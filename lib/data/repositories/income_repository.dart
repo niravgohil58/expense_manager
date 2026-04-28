@@ -1,12 +1,18 @@
 import '../models/income_model.dart';
 import '../../core/database/database_helper.dart';
+import 'account_repository.dart';
 
 /// Repository for Income operations
 class IncomeRepository {
   final DatabaseHelper _databaseHelper;
+  final AccountRepository _accountRepository;
 
-  IncomeRepository({DatabaseHelper? databaseHelper})
-      : _databaseHelper = databaseHelper ?? DatabaseHelper.instance;
+  IncomeRepository({
+    DatabaseHelper? databaseHelper,
+    AccountRepository? accountRepository,
+  })  : _databaseHelper = databaseHelper ?? DatabaseHelper.instance,
+        _accountRepository = accountRepository ??
+            AccountRepository(dbHelper: databaseHelper ?? DatabaseHelper.instance);
 
   /// Get all incomes
   Future<List<Income>> getAllIncomes() async {
@@ -21,15 +27,17 @@ class IncomeRepository {
       'date >= ? AND date <= ?',
       [start.toIso8601String(), end.toIso8601String()],
     );
-    // Sort by date DESC
     final incomes = result.map((map) => Income.fromMap(map)).toList();
     incomes.sort((a, b) => b.date.compareTo(a.date));
     return incomes;
   }
 
-  /// Add income
+  /// Insert income and credit account in one transaction.
   Future<void> addIncome(Income income) async {
-    await _databaseHelper.insert('incomes', income.toMap());
+    await _databaseHelper.transaction((txn) async {
+      await txn.insert('incomes', income.toMap());
+      await _accountRepository.applyBalanceDeltaTxn(txn, income.accountId, income.amount);
+    });
   }
 
   /// Update income

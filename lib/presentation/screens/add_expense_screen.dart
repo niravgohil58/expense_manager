@@ -9,9 +9,18 @@ import '../../data/models/expense_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 
+import '../providers/category_provider.dart';
+import '../../data/models/category_model.dart';
+// For ManageCategoriesScreen route
+
 /// Add expense screen with form
 class AddExpenseScreen extends StatefulWidget {
-  const AddExpenseScreen({super.key});
+  final Expense? expense;
+
+  const AddExpenseScreen({
+    super.key,
+    this.expense,
+  });
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -19,21 +28,36 @@ class AddExpenseScreen extends StatefulWidget {
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _amountController = TextEditingController();
-  final _noteController = TextEditingController();
+  late final TextEditingController _amountController;
+  late final TextEditingController _noteController;
 
-  ExpenseCategory _selectedCategory = ExpenseCategory.food;
+  Category? _selectedCategory;
   String? _selectedAccountId;
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
   bool _isLoading = false;
+
+  bool get _isEditing => widget.expense != null;
 
   @override
   void initState() {
     super.initState();
-    // Default to cash account
+    _amountController = TextEditingController(
+      text: widget.expense?.amount.toString(),
+    );
+    _noteController = TextEditingController(text: widget.expense?.note);
+    _selectedCategory = widget.expense?.category;
+    _selectedDate = widget.expense?.date ?? DateTime.now();
+
+    // Default to cash account or existing expense account
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final accounts = context.read<AccountProvider>().accounts;
-      if (accounts.isNotEmpty) {
+      context.read<CategoryProvider>().loadCategories(); // Load categories
+      
+      if (widget.expense != null) {
+        setState(() {
+          _selectedAccountId = widget.expense!.accountId;
+        });
+      } else if (accounts.isNotEmpty) {
         setState(() {
           _selectedAccountId = accounts.first.id;
         });
@@ -70,24 +94,47 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       );
       return;
     }
+    if (_selectedCategory == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a category')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
-    final success = await context.read<ExpenseProvider>().addExpense(
+    final provider = context.read<ExpenseProvider>();
+    bool success;
+
+    if (_isEditing) {
+      success = await provider.updateExpense(
+        widget.expense!.copyWith(
           amount: double.parse(_amountController.text),
           category: _selectedCategory,
           accountId: _selectedAccountId!,
           date: _selectedDate,
           note: _noteController.text.isNotEmpty ? _noteController.text : null,
-        );
+        ),
+      );
+    } else {
+      success = await provider.addExpense(
+        amount: double.parse(_amountController.text),
+        category: _selectedCategory!,
+        accountId: _selectedAccountId!,
+        date: _selectedDate,
+        note: _noteController.text.isNotEmpty ? _noteController.text : null,
+      );
+    }
 
     setState(() => _isLoading = false);
 
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Expense added successfully'),
+          SnackBar(
+            content: Text(_isEditing
+                ? 'Expense updated successfully'
+                : 'Expense added successfully'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -95,10 +142,61 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.read<ExpenseProvider>().error ?? 'Failed to add expense'),
+            content: Text(provider.error ??
+                (_isEditing
+                    ? 'Failed to update expense'
+                    : 'Failed to add expense')),
             backgroundColor: AppColors.error,
           ),
         );
+      }
+    }
+  }
+
+  Future<void> _deleteExpense() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Expense'),
+        content: const Text('Are you sure you want to delete this expense?'),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() => _isLoading = true);
+      final success =
+          await context.read<ExpenseProvider>().deleteExpense(widget.expense!.id);
+      setState(() => _isLoading = false);
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Expense deleted successfully'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          context.pop();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.read<ExpenseProvider>().error ??
+                  'Failed to delete expense'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     }
   }
@@ -108,10 +206,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Add Expense'),
+        title: Text(_isEditing ? 'Edit Expense' : 'Add Expense'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
+        actions: [
+          if (_isEditing)
+            IconButton(
+              onPressed: _isLoading ? null : _deleteExpense,
+              icon: const Icon(Icons.delete),
+            ),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -125,7 +230,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -148,7 +254,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter amount';
                   }
-                  if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                  if (double.tryParse(value) == null ||
+                      double.parse(value) <= 0) {
                     return 'Please enter a valid amount';
                   }
                   return null;
@@ -157,51 +264,99 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Category Selection
-              Text('Category', style: AppTextStyles.labelMedium),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Category', style: AppTextStyles.labelMedium),
+                  TextButton(
+                    onPressed: () => context.push('/manage-categories'),
+                    child: const Text('Manage'),
+                  ),
+                ],
+              ),
               const SizedBox(height: DesignConstants.spacingXs),
-              Wrap(
-                spacing: DesignConstants.spacingSm,
-                runSpacing: DesignConstants.spacingSm,
-                children: ExpenseCategory.values.map((category) {
-                  final isSelected = _selectedCategory == category;
-                  return InkWell(
-                    onTap: () => setState(() => _selectedCategory = category),
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: DesignConstants.spacingMd,
-                        vertical: DesignConstants.spacingSm,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? category.color.withValues(alpha: 0.2)
-                            : AppColors.surface,
+              Consumer<CategoryProvider>(
+                builder: (context, provider, _) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // Use enabled categories, or if editing and current category is disabled, include it
+                  final categories = provider.enabledCategories;
+                  if (_isEditing && _selectedCategory != null && !categories.contains(_selectedCategory)) {
+                     // Ensure the currently selected category is visible even if disabled
+                     // Note: This check relies on object equality or ID equality.
+                     // Since we load fresh categories, the object instance might be different.
+                     // We should match by ID.
+                  }
+                  
+                  // Helper to check if category is in list
+                  bool containsCategory(List<Category> list, Category? c) {
+                    if (c == null) return false;
+                    return list.any((element) => element.id == c.id);
+                  }
+
+                  // Verify specific selected category is in the list
+                  if (_selectedCategory != null && !containsCategory(categories, _selectedCategory)) {
+                    // It's hidden/disabled or custom.
+                    // We need to display it as selected.
+                    // If the provider list doesn't have it, we might need to fetch all or manually add it to display list
+                    // For now, let's just use the selected instance if it's not in the list.
+                     // Ideally we should use the one from the provider's full list if available
+                     final fullList = provider.categories;
+                     final found = fullList.firstWhere((e) => e.id == _selectedCategory!.id, orElse: () => _selectedCategory!);
+                      if (!containsCategory(categories, found)) {
+                        categories.add(found);
+                      }
+                  }
+
+                  return Wrap(
+                    spacing: DesignConstants.spacingSm,
+                    runSpacing: DesignConstants.spacingSm,
+                    children: categories.map((category) {
+                      final isSelected = _selectedCategory?.id == category.id;
+                      return InkWell(
+                        onTap: () => setState(() => _selectedCategory = category),
                         borderRadius: DesignConstants.borderRadiusMd,
-                        border: Border.all(
-                          color: isSelected ? category.color : AppColors.border,
-                          width: isSelected ? 2 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            category.icon,
-                            color: category.color,
-                            size: DesignConstants.iconSizeSm,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: DesignConstants.spacingMd,
+                            vertical: DesignConstants.spacingSm,
                           ),
-                          const SizedBox(width: DesignConstants.spacingXs),
-                          Text(
-                            category.displayName,
-                            style: AppTextStyles.labelSmall.copyWith(
-                              color: isSelected ? category.color : AppColors.textPrimary,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? category.color.withValues(alpha: 0.2)
+                                : AppColors.surface,
+                            borderRadius: DesignConstants.borderRadiusMd,
+                            border: Border.all(
+                              color: isSelected ? category.color : AppColors.border,
+                              width: isSelected ? 2 : 1,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                category.icon,
+                                color: category.color,
+                                size: DesignConstants.iconSizeSm,
+                              ),
+                              const SizedBox(width: DesignConstants.spacingXs),
+                              Text(
+                                category.name,
+                                style: AppTextStyles.labelSmall.copyWith(
+                                  color: isSelected
+                                      ? category.color
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   );
-                }).toList(),
+                },
               ),
               const SizedBox(height: DesignConstants.spacingLg),
 
@@ -310,7 +465,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             color: AppColors.textOnPrimary,
                           ),
                         )
-                      : Text('Save Expense', style: AppTextStyles.button),
+                      : Text(
+                          _isEditing ? 'Update Expense' : 'Save Expense',
+                          style: AppTextStyles.button,
+                        ),
                 ),
               ),
             ],

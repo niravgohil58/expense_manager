@@ -59,29 +59,29 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
   Future<void> _saveIncome() async {
     if (_formKey.currentState!.validate() && _selectedAccountId != null) {
-      try {
-        final amount = double.parse(_amountController.text);
-        
-        await context.read<IncomeProvider>().addIncome(
-          amount: amount,
-          category: _categoryController.text.trim(),
-          accountId: _selectedAccountId!,
-          date: _selectedDate,
-          note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
-        );
+      final amount = double.parse(_amountController.text);
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Income added successfully')),
-          );
-          context.pop();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
-          );
-        }
+      final provider = context.read<IncomeProvider>();
+      final ok = await provider.addIncome(
+        amount: amount,
+        category: _categoryController.text.trim(),
+        accountId: _selectedAccountId!,
+        date: _selectedDate,
+        note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Income added successfully')),
+        );
+        context.pop();
+      } else {
+        final message = provider.error ?? 'Could not add income';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
       }
     }
   }

@@ -5,7 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
-import '../../data/models/expense_model.dart';
+import '../../data/models/category_model.dart';
 import '../providers/expense_provider.dart';
 import '../providers/udhar_provider.dart';
 
@@ -19,7 +19,7 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   int _selectedYear = DateTime.now().year;
-  Map<ExpenseCategory, double> _categoryData = {};
+  Map<Category, double> _categoryData = {};
   List<double> _monthlyData = List.filled(12, 0);
   bool _isLoading = true;
 
@@ -342,7 +342,7 @@ class _ReportScreenState extends State<ReportScreen> {
             ),
             const SizedBox(width: DesignConstants.spacingXs),
             Text(
-              '${entry.key.displayName}: ${formatter.format(entry.value)}',
+              '${entry.key.name}: ${formatter.format(entry.value)}',
               style: AppTextStyles.bodySmall,
             ),
           ],

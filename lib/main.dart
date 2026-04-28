@@ -7,6 +7,7 @@ import 'core/router/app_router.dart';
 import 'presentation/providers/account_provider.dart';
 import 'presentation/providers/expense_provider.dart';
 import 'presentation/providers/udhar_provider.dart';
+import 'presentation/providers/category_provider.dart';
 import 'presentation/providers/income_provider.dart';
 
 void main() {
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AccountProvider(),
         ),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()), // Added this provider
         ChangeNotifierProxyProvider<AccountProvider, ExpenseProvider>(
           create: (context) => ExpenseProvider(
             accountProvider: context.read<AccountProvider>(),

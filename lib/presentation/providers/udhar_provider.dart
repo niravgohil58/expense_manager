@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../core/errors/app_exceptions.dart';
 import '../../data/models/udhar_model.dart';
 import '../../data/models/udhar_settlement_model.dart';
 import '../../data/repositories/udhar_repository.dart';
@@ -87,9 +88,7 @@ class UdharProvider extends ChangeNotifier {
     }
   }
 
-  /// Add new udhar
-  /// Udhar Dena → balance decreases (you gave money)
-  /// Udhar Lena → balance increases (you received money)
+  /// Add new udhar (balance adjusted in repository transaction).
   Future<bool> addUdhar({
     required String personName,
     required UdharType type,
@@ -108,17 +107,13 @@ class UdharProvider extends ChangeNotifier {
         note: note,
       );
 
-      // Update account balance based on type
-      if (type == UdharType.dena) {
-        // Money given - decrease balance
-        await _accountProvider.subtractFromBalance(accountId, amount);
-      } else {
-        // Money taken - increase balance
-        await _accountProvider.addToBalance(accountId, amount);
-      }
-
       await loadUdhar();
+      await _accountProvider.loadAccounts();
       return true;
+    } on InsufficientBalanceException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = 'Failed to add udhar: $e';
       notifyListeners();
@@ -126,9 +121,7 @@ class UdharProvider extends ChangeNotifier {
     }
   }
 
-  /// Add settlement to udhar
-  /// For Dena: settlement adds money back (you received what was owed)
-  /// For Lena: settlement removes money (you paid what you owed)
+  /// Add settlement (balance adjusted in repository transaction).
   Future<bool> addSettlement({
     required String udharId,
     required double amount,
@@ -138,8 +131,7 @@ class UdharProvider extends ChangeNotifier {
   }) async {
     try {
       final udhar = _udharList.firstWhere((u) => u.id == udharId);
-      
-      // Validate amount
+
       if (amount > udhar.pendingAmount) {
         _error = 'Settlement amount cannot exceed pending amount';
         notifyListeners();
@@ -154,18 +146,14 @@ class UdharProvider extends ChangeNotifier {
         note: note,
       );
 
-      // Update account balance based on udhar type
-      if (udhar.type == UdharType.dena) {
-        // You received money back
-        await _accountProvider.addToBalance(accountId, amount);
-      } else {
-        // You paid money
-        await _accountProvider.subtractFromBalance(accountId, amount);
-      }
-
       await loadUdhar();
       await loadSettlements(udharId);
+      await _accountProvider.loadAccounts();
       return true;
+    } on InsufficientBalanceException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = 'Failed to add settlement: $e';
       notifyListeners();
@@ -173,12 +161,17 @@ class UdharProvider extends ChangeNotifier {
     }
   }
 
-  /// Delete udhar
+  /// Delete udhar (ledger reversal in repository).
   Future<bool> deleteUdhar(String id) async {
     try {
       await _repository.deleteUdhar(id);
       await loadUdhar();
+      await _accountProvider.loadAccounts();
       return true;
+    } on InsufficientBalanceException catch (e) {
+      _error = e.message;
+      notifyListeners();
+      return false;
     } catch (e) {
       _error = 'Failed to delete udhar: $e';
       notifyListeners();

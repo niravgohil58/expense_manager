@@ -80,19 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: DesignConstants.spacingSm),
-              // Debug info
-              Consumer<AccountProvider>(
-                builder: (context, provider, _) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(
-                      'Debug: Loaded ${provider.accounts.length} accounts',
-                      style: const TextStyle(color: Colors.grey, fontSize: 10),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: DesignConstants.spacingSm),
               _buildAccountCards(),
               const SizedBox(height: DesignConstants.spacingLg),
 

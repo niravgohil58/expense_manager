@@ -1,72 +1,12 @@
-import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
+import 'category_model.dart';
 
-/// Enum for expense categories
-enum ExpenseCategory {
-  food,
-  travel,
-  rent,
-  shopping,
-  other;
 
-  String get displayName {
-    switch (this) {
-      case ExpenseCategory.food:
-        return 'Food';
-      case ExpenseCategory.travel:
-        return 'Travel';
-      case ExpenseCategory.rent:
-        return 'Rent';
-      case ExpenseCategory.shopping:
-        return 'Shopping';
-      case ExpenseCategory.other:
-        return 'Other';
-    }
-  }
-
-  IconData get icon {
-    switch (this) {
-      case ExpenseCategory.food:
-        return Icons.restaurant;
-      case ExpenseCategory.travel:
-        return Icons.directions_car;
-      case ExpenseCategory.rent:
-        return Icons.home;
-      case ExpenseCategory.shopping:
-        return Icons.shopping_bag;
-      case ExpenseCategory.other:
-        return Icons.more_horiz;
-    }
-  }
-
-  Color get color {
-    switch (this) {
-      case ExpenseCategory.food:
-        return AppColors.categoryFood;
-      case ExpenseCategory.travel:
-        return AppColors.categoryTravel;
-      case ExpenseCategory.rent:
-        return AppColors.categoryRent;
-      case ExpenseCategory.shopping:
-        return AppColors.categoryShopping;
-      case ExpenseCategory.other:
-        return AppColors.categoryOther;
-    }
-  }
-
-  static ExpenseCategory fromString(String value) {
-    return ExpenseCategory.values.firstWhere(
-      (e) => e.name.toLowerCase() == value.toLowerCase(),
-      orElse: () => ExpenseCategory.other,
-    );
-  }
-}
 
 /// Expense model representing a single expense entry
 class Expense {
   final String id;
   final double amount;
-  final ExpenseCategory category;
+  final Category category;
   final String accountId;
   final DateTime date;
   final String? note;
@@ -87,7 +27,15 @@ class Expense {
     return Expense(
       id: map['id'] as String,
       amount: (map['amount'] as num).toDouble(),
-      category: ExpenseCategory.fromString(map['category'] as String),
+      category: Category(
+        id: map['categoryId'] as String? ?? 'unknown',
+        name: map['categoryName'] as String? ?? 'Unknown',
+        iconCode: map['categoryIconCode'] as int? ?? 0xe402, // Default to other
+        colorValue: map['categoryColorValue'] as int? ?? 0xFF90A4AE, // Default to grey
+        isEnabled: (map['categoryIsEnabled'] as int? ?? 1) == 1,
+        isSystem: (map['categoryIsSystem'] as int? ?? 0) == 1,
+        createdAt: DateTime.now(), // Placeholder as it's a join
+      ),
       accountId: map['accountId'] as String,
       date: DateTime.parse(map['date'] as String),
       note: map['note'] as String?,
@@ -100,7 +48,7 @@ class Expense {
     return {
       'id': id,
       'amount': amount,
-      'category': category.name,
+      'category': category.id, // Store category ID
       'accountId': accountId,
       'date': date.toIso8601String(),
       'note': note,
@@ -112,7 +60,7 @@ class Expense {
   Expense copyWith({
     String? id,
     double? amount,
-    ExpenseCategory? category,
+    Category? category,
     String? accountId,
     DateTime? date,
     String? note,
@@ -131,7 +79,7 @@ class Expense {
 
   @override
   String toString() {
-    return 'Expense(id: $id, amount: $amount, category: $category, date: $date)';
+    return 'Expense(id: $id, amount: $amount, category: ${category.name}, date: $date)';
   }
 
   @override

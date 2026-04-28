@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../data/models/income_model.dart';
 import '../../data/repositories/income_repository.dart';
 import 'account_provider.dart';
@@ -39,20 +40,13 @@ class IncomeProvider extends ChangeNotifier {
     return total;
   }
 
-  /// Load incomes (defaults to current month)
   Future<void> loadIncomes() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // Load largely for the last year for now, or just all?
-      // Let's load all for simplicity or match ExpenseProvider pattern
-      // Checking implementation_plan, we didn't specify.
-      // Let's load all for now.
       _incomes = await _repository.getAllIncomes();
-      
-      // Sort by date DESC
       _incomes.sort((a, b) => b.date.compareTo(a.date));
     } catch (e) {
       _error = 'Failed to load incomes: $e';
@@ -62,20 +56,20 @@ class IncomeProvider extends ChangeNotifier {
     }
   }
 
-  /// Add income
-  Future<void> addIncome({
+  /// Add income; returns false on failure ([error] is set).
+  Future<bool> addIncome({
     required double amount,
     required String category,
     required String accountId,
     required DateTime date,
     String? note,
   }) async {
-    try {
-      _isLoading = true;
-      notifyListeners();
+    _error = null;
+    notifyListeners();
 
+    try {
       final income = Income(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // Simple ID generation
+        id: const Uuid().v4(),
         amount: amount,
         category: category,
         accountId: accountId,
@@ -85,16 +79,20 @@ class IncomeProvider extends ChangeNotifier {
       );
 
       await _repository.addIncome(income);
-      
-      // Update account balance
-      await _accountProvider.addToBalance(accountId, amount);
-      
+
       await loadIncomes();
+      await _accountProvider.loadAccounts();
+      return true;
     } catch (e) {
       _error = 'Failed to add income: $e';
-      _isLoading = false;
       notifyListeners();
-      rethrow;
+      return false;
     }
+  }
+
+  /// Clear error
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 }

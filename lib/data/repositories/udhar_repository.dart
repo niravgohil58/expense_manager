@@ -1,23 +1,32 @@
+import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/database/database_helper.dart';
 import '../models/udhar_model.dart';
 import '../models/udhar_settlement_model.dart';
+import 'account_repository.dart';
 
 /// Repository for Udhar and UdharSettlement database operations
 class UdharRepository {
   final DatabaseHelper _dbHelper;
   final Uuid _uuid;
+  final AccountRepository _accountRepository;
 
-  UdharRepository({DatabaseHelper? dbHelper, Uuid? uuid})
-      : _dbHelper = dbHelper ?? DatabaseHelper.instance,
-        _uuid = uuid ?? const Uuid();
+  UdharRepository({
+    DatabaseHelper? dbHelper,
+    Uuid? uuid,
+    AccountRepository? accountRepository,
+  })  : _dbHelper = dbHelper ?? DatabaseHelper.instance,
+        _uuid = uuid ?? const Uuid(),
+        _accountRepository =
+            accountRepository ?? AccountRepository(dbHelper: dbHelper ?? DatabaseHelper.instance);
 
   static const String _udharTable = 'udhar';
   static const String _settlementTable = 'udhar_settlements';
+  static const double _eps = 1e-9;
 
   // ============ UDHAR OPERATIONS ============
 
-  /// Add new udhar
+  /// Add new udhar and adjust account balance atomically.
   Future<Udhar> addUdhar({
     required String personName,
     required UdharType type,
@@ -40,7 +49,14 @@ class UdharRepository {
       createdAt: now,
       updatedAt: now,
     );
-    await _dbHelper.insert(_udharTable, udhar.toMap());
+    await _dbHelper.transaction((txn) async {
+      await txn.insert(_udharTable, udhar.toMap());
+      if (type == UdharType.dena) {
+        await _accountRepository.applyBalanceDeltaTxn(txn, accountId, -amount);
+      } else {
+        await _accountRepository.applyBalanceDeltaTxn(txn, accountId, amount);
+      }
+    });
     return udhar;
   }
 
@@ -115,20 +131,45 @@ class UdharRepository {
     await _dbHelper.update(_udharTable, udhar.toMap(), udhar.id);
   }
 
-  /// Delete udhar
+  /// Delete udhar, reverse all ledger effects, remove settlements.
   Future<void> deleteUdhar(String id) async {
-    // Delete all settlements first
+    final udhar = await getUdharById(id);
+    if (udhar == null) return;
     final settlements = await getSettlementsForUdhar(id);
-    for (final settlement in settlements) {
-      await _dbHelper.delete(_settlementTable, settlement.id);
+
+    await _dbHelper.transaction((txn) async {
+      for (final s in settlements) {
+        await _reverseSettlementBalance(txn, udhar.type, s);
+        await txn.delete(_settlementTable, where: 'id = ?', whereArgs: [s.id]);
+      }
+      await _reversePrincipal(txn, udhar);
+      await txn.delete(_udharTable, where: 'id = ?', whereArgs: [id]);
+    });
+  }
+
+  Future<void> _reverseSettlementBalance(
+    Transaction txn,
+    UdharType type,
+    UdharSettlement s,
+  ) async {
+    if (type == UdharType.dena) {
+      await _accountRepository.applyBalanceDeltaTxn(txn, s.accountId, -s.amount);
+    } else {
+      await _accountRepository.applyBalanceDeltaTxn(txn, s.accountId, s.amount);
     }
-    // Then delete the udhar
-    await _dbHelper.delete(_udharTable, id);
+  }
+
+  Future<void> _reversePrincipal(Transaction txn, Udhar udhar) async {
+    if (udhar.type == UdharType.dena) {
+      await _accountRepository.applyBalanceDeltaTxn(txn, udhar.accountId, udhar.amount);
+    } else {
+      await _accountRepository.applyBalanceDeltaTxn(txn, udhar.accountId, -udhar.amount);
+    }
   }
 
   // ============ SETTLEMENT OPERATIONS ============
 
-  /// Add settlement to udhar
+  /// Add settlement, update udhar, adjust balance atomically.
   Future<UdharSettlement> addSettlement({
     required String udharId,
     required double amount,
@@ -145,21 +186,44 @@ class UdharRepository {
       note: note,
       createdAt: DateTime.now(),
     );
-    await _dbHelper.insert(_settlementTable, settlement.toMap());
 
-    // Update udhar paid amount and status
-    final udhar = await getUdharById(udharId);
-    if (udhar != null) {
+    await _dbHelper.transaction((txn) async {
+      final udharRows = await txn.query(_udharTable, where: 'id = ?', whereArgs: [udharId]);
+      if (udharRows.isEmpty) {
+        throw StateError('Udhar not found: $udharId');
+      }
+      final udhar = Udhar.fromMap(udharRows.first);
+      final pending = udhar.amount - udhar.paidAmount;
+      if (amount - pending > _eps) {
+        throw StateError('Settlement exceeds pending amount');
+      }
+
+      await txn.insert(_settlementTable, settlement.toMap());
+
       final newPaidAmount = udhar.paidAmount + amount;
-      final newStatus = newPaidAmount >= udhar.amount
+      final newStatus = newPaidAmount >= udhar.amount - _eps
           ? UdharStatus.completed
           : UdharStatus.partial;
-      
-      await updateUdhar(udhar.copyWith(
-        paidAmount: newPaidAmount,
-        status: newStatus,
-      ));
-    }
+
+      await txn.update(
+        _udharTable,
+        udhar
+            .copyWith(
+              paidAmount: newPaidAmount,
+              status: newStatus,
+              updatedAt: DateTime.now(),
+            )
+            .toMap(),
+        where: 'id = ?',
+        whereArgs: [udharId],
+      );
+
+      if (udhar.type == UdharType.dena) {
+        await _accountRepository.applyBalanceDeltaTxn(txn, accountId, amount);
+      } else {
+        await _accountRepository.applyBalanceDeltaTxn(txn, accountId, -amount);
+      }
+    });
 
     return settlement;
   }
@@ -170,8 +234,48 @@ class UdharRepository {
     return maps.map((map) => UdharSettlement.fromMap(map)).toList();
   }
 
-  /// Delete settlement
-  Future<void> deleteSettlement(String id) async {
-    await _dbHelper.delete(_settlementTable, id);
+  /// Remove settlement and reverse its ledger and udhar paid amount.
+  Future<void> deleteSettlement(String settlementId) async {
+    await _dbHelper.transaction((txn) async {
+      final rows = await txn.query(
+        _settlementTable,
+        where: 'id = ?',
+        whereArgs: [settlementId],
+      );
+      if (rows.isEmpty) return;
+      final settlement = UdharSettlement.fromMap(rows.first);
+
+      final udharRows = await txn.query(_udharTable, where: 'id = ?', whereArgs: [settlement.udharId]);
+      if (udharRows.isEmpty) {
+        throw StateError('Udhar missing for settlement');
+      }
+      final udhar = Udhar.fromMap(udharRows.first);
+
+      if (udhar.type == UdharType.dena) {
+        await _accountRepository.applyBalanceDeltaTxn(txn, settlement.accountId, -settlement.amount);
+      } else {
+        await _accountRepository.applyBalanceDeltaTxn(txn, settlement.accountId, settlement.amount);
+      }
+
+      final rawPaid = udhar.paidAmount - settlement.amount;
+      final newPaid = rawPaid.clamp(0.0, udhar.amount);
+      final UdharStatus newStatus;
+      if (newPaid <= _eps) {
+        newStatus = UdharStatus.pending;
+      } else if (newPaid >= udhar.amount - _eps) {
+        newStatus = UdharStatus.completed;
+      } else {
+        newStatus = UdharStatus.partial;
+      }
+
+      await txn.update(
+        _udharTable,
+        udhar.copyWith(paidAmount: newPaid, status: newStatus, updatedAt: DateTime.now()).toMap(),
+        where: 'id = ?',
+        whereArgs: [udhar.id],
+      );
+
+      await txn.delete(_settlementTable, where: 'id = ?', whereArgs: [settlementId]);
+    });
   }
 }

@@ -1,5 +1,7 @@
+import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/database/database_helper.dart';
+import '../../core/errors/app_exceptions.dart';
 import '../models/account_model.dart';
 
 /// Repository for Account database operations
@@ -10,6 +12,55 @@ class AccountRepository {
       : _dbHelper = dbHelper ?? DatabaseHelper.instance;
 
   static const String _tableName = 'accounts';
+  static const double _epsilon = 1e-9;
+
+  /// Applies [delta] to [accountId] balance inside an open [transaction].
+  /// Negative balances are rejected unless [allowNegative] is true.
+  Future<void> applyBalanceDeltaTxn(
+    Transaction txn,
+    String accountId,
+    double delta, {
+    bool allowNegative = false,
+  }) async {
+    final rows = await txn.query(
+      _tableName,
+      columns: ['balance'],
+      where: 'id = ?',
+      whereArgs: [accountId],
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      throw StateError('Account not found: $accountId');
+    }
+    final balance = (rows.first['balance'] as num).toDouble();
+    final newBalance = balance + delta;
+    if (!allowNegative && newBalance < -_epsilon) {
+      throw InsufficientBalanceException(
+        'Insufficient balance (have ${balance.toStringAsFixed(2)}, need ${(-delta).toStringAsFixed(2)})',
+      );
+    }
+    await txn.update(
+      _tableName,
+      {
+        'balance': newBalance,
+        'updatedAt': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [accountId],
+    );
+  }
+
+  /// Atomically moves [amount] from [fromAccountId] to [toAccountId].
+  Future<void> transferBetweenAccountsAtomic(
+    String fromAccountId,
+    String toAccountId,
+    double amount,
+  ) async {
+    await _dbHelper.transaction((txn) async {
+      await applyBalanceDeltaTxn(txn, fromAccountId, -amount);
+      await applyBalanceDeltaTxn(txn, toAccountId, amount);
+    });
+  }
 
   /// Get all accounts
   Future<List<Account>> getAllAccounts() async {
@@ -40,7 +91,13 @@ class AccountRepository {
   Future<void> subtractFromBalance(String accountId, double amount) async {
     final account = await getAccountById(accountId);
     if (account != null) {
-      await updateBalance(accountId, account.balance - amount);
+      final newBalance = account.balance - amount;
+      if (newBalance < -_epsilon) {
+        throw InsufficientBalanceException(
+          'Insufficient balance (have ${account.balance.toStringAsFixed(2)}, need ${amount.toStringAsFixed(2)})',
+        );
+      }
+      await updateBalance(accountId, newBalance);
     }
   }
 

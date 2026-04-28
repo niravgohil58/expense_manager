@@ -21,10 +21,21 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
+  }
+
+  /// Runs [action] in a single SQLite transaction.
+  Future<T> transaction<T>(
+    Future<T> Function(Transaction txn) action,
+  ) async {
+    final db = await database;
+    return db.transaction(action);
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
@@ -43,6 +54,39 @@ class DatabaseHelper {
         )
       ''');
     }
+    
+    if (oldVersion < 3) {
+      // Categories table
+      await db.execute('''
+        CREATE TABLE categories (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          iconCode INTEGER NOT NULL,
+          colorValue INTEGER NOT NULL,
+          isEnabled INTEGER NOT NULL DEFAULT 1,
+          isSystem INTEGER NOT NULL DEFAULT 0,
+          createdAt TEXT NOT NULL
+        )
+      ''');
+
+      // Insert default categories
+      final now = DateTime.now().toIso8601String();
+      final defaultCategories = [
+        {'id': 'food', 'name': 'Food', 'iconCode': 0xe532, 'colorValue': 0xFFE57373, 'isSystem': 1}, // Icons.restaurant
+        {'id': 'travel', 'name': 'Travel', 'iconCode': 0xe1d5, 'colorValue': 0xFF64B5F6, 'isSystem': 1}, // Icons.directions_car
+        {'id': 'rent', 'name': 'Rent', 'iconCode': 0xe318, 'colorValue': 0xFF81C784, 'isSystem': 1}, // Icons.home
+        {'id': 'shopping', 'name': 'Shopping', 'iconCode': 0xe59c, 'colorValue': 0xFFBA68C8, 'isSystem': 1}, // Icons.shopping_bag
+        {'id': 'other', 'name': 'Other', 'iconCode': 0xe402, 'colorValue': 0xFF90A4AE, 'isSystem': 1}, // Icons.more_horiz
+      ];
+
+      for (final cat in defaultCategories) {
+        await db.insert('categories', {
+          ...cat,
+          'isEnabled': 1,
+          'createdAt': now,
+        });
+      }
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -58,17 +102,49 @@ class DatabaseHelper {
       )
     ''');
 
+    // Categories table
+    await db.execute('''
+      CREATE TABLE categories (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        iconCode INTEGER NOT NULL,
+        colorValue INTEGER NOT NULL,
+        isEnabled INTEGER NOT NULL DEFAULT 1,
+        isSystem INTEGER NOT NULL DEFAULT 0,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+    
+    // Insert default categories
+    final now = DateTime.now().toIso8601String();
+    final defaultCategories = [
+      {'id': 'food', 'name': 'Food', 'iconCode': 0xe532, 'colorValue': 0xFFE57373, 'isSystem': 1},
+      {'id': 'travel', 'name': 'Travel', 'iconCode': 0xe1d5, 'colorValue': 0xFF64B5F6, 'isSystem': 1},
+      {'id': 'rent', 'name': 'Rent', 'iconCode': 0xe318, 'colorValue': 0xFF81C784, 'isSystem': 1},
+      {'id': 'shopping', 'name': 'Shopping', 'iconCode': 0xe59c, 'colorValue': 0xFFBA68C8, 'isSystem': 1},
+      {'id': 'other', 'name': 'Other', 'iconCode': 0xe402, 'colorValue': 0xFF90A4AE, 'isSystem': 1},
+    ];
+
+    for (final cat in defaultCategories) {
+      await db.insert('categories', {
+        ...cat,
+        'isEnabled': 1,
+        'createdAt': now,
+      });
+    }
+
     // Expenses table
     await db.execute('''
       CREATE TABLE expenses (
         id TEXT PRIMARY KEY,
         amount REAL NOT NULL,
-        category TEXT NOT NULL,
+        category TEXT NOT NULL, -- This will now store categoryId
         accountId TEXT NOT NULL,
         date TEXT NOT NULL,
         note TEXT,
         createdAt TEXT NOT NULL,
-        FOREIGN KEY (accountId) REFERENCES accounts (id)
+        FOREIGN KEY (accountId) REFERENCES accounts (id),
+        FOREIGN KEY (category) REFERENCES categories (id)
       )
     ''');
 
@@ -135,7 +211,6 @@ class DatabaseHelper {
     ''');
 
     // Insert default accounts
-    final now = DateTime.now().toIso8601String();
     await db.insert('accounts', {
       'id': 'cash',
       'name': 'Cash',

@@ -94,15 +94,18 @@ class AccountProvider extends ChangeNotifier {
     }
   }
 
-  /// Transfer between accounts
+  /// Transfer between accounts (single DB transaction)
   Future<void> transferBetweenAccounts(
     String fromAccountId,
     String toAccountId,
     double amount,
   ) async {
     try {
-      await _repository.subtractFromBalance(fromAccountId, amount);
-      await _repository.addToBalance(toAccountId, amount);
+      await _repository.transferBetweenAccountsAtomic(
+        fromAccountId,
+        toAccountId,
+        amount,
+      );
       await loadAccounts();
     } catch (e) {
       _error = 'Failed to transfer: $e';

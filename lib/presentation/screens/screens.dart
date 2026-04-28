@@ -8,3 +8,5 @@ export 'add_udhar_screen.dart';
 export 'udhar_detail_screen.dart';
 export 'add_account_screen.dart';
 export 'report_screen.dart';
+export 'manage_categories_screen.dart';
+export 'add_category_screen.dart';
