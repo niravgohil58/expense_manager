@@ -5,8 +5,10 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
+import '../../core/formatting/app_currency.dart';
 import '../../data/models/account_model.dart';
 import '../providers/account_provider.dart';
+import '../providers/settings_provider.dart';
 
 /// Screen for adding a new account
 class AddAccountScreen extends StatefulWidget {
@@ -37,38 +39,37 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
     setState(() => _isLoading = true);
 
     await context.read<AccountProvider>().addAccount(
-          name: _nameController.text.trim(),
-          type: _selectedType,
-          balance: double.parse(_balanceController.text),
-        );
+      name: _nameController.text.trim(),
+      type: _selectedType,
+      balance: double.parse(_balanceController.text),
+    );
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (mounted) {
-      final error = context.read<AccountProvider>().error;
-      if (error == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account added successfully'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        context.pop();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+    final error = context.read<AccountProvider>().error;
+    if (error == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account added successfully'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: AppColors.error),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final currencyCode = context.watch<SettingsProvider>().currencyCode;
+    final cf = AppCurrencyFormat(currencyCode);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('Add Account'),
         backgroundColor: AppColors.primary,
@@ -96,7 +97,10 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
                     borderRadius: DesignConstants.borderRadiusMd,
                     borderSide: BorderSide(color: AppColors.border),
                   ),
-                  prefixIcon: Icon(Icons.account_balance, color: AppColors.primary),
+                  prefixIcon: Icon(
+                    Icons.account_balance,
+                    color: AppColors.primary,
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -150,12 +154,14 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _balanceController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  prefixText: '${DesignConstants.currencySymbol} ',
+                  prefixText: cf.prefix,
                   hintText: '0.00',
                   filled: true,
                   fillColor: AppColors.surface,

@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+import '../../core/formatting/app_currency.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
 import '../../data/models/account_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/income_provider.dart';
+import '../providers/settings_provider.dart';
 
 /// Home screen with account balances and quick actions
 class HomeScreen extends StatefulWidget {
@@ -23,29 +25,41 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
+      _loadData(silentReload: false);
     });
   }
 
-  Future<void> _loadData() async {
+  /// [silentReload] avoids provider-level loading flags (use on pull-to-refresh;
+  /// initial load keeps spinners on accounts list until data arrives).
+  Future<void> _loadData({bool silentReload = false}) async {
     final accountProvider = context.read<AccountProvider>();
     final expenseProvider = context.read<ExpenseProvider>();
-    await accountProvider.loadAccounts();
-    await expenseProvider.loadExpenses();
+    final incomeProvider = context.read<IncomeProvider>();
+    final showLoading = !silentReload;
+    await accountProvider.loadAccounts(showLoading: showLoading);
+    await expenseProvider.loadExpenses(showLoading: showLoading);
+    await incomeProvider.loadIncomes(showLoading: showLoading);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('Expense Manager'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
+        actions: [
+          IconButton(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadData,
+        onRefresh: () => _loadData(silentReload: true),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: DesignConstants.screenPadding,
@@ -67,12 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: TextButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Opening Add Account Screen...'), duration: Duration(milliseconds: 500)),
-                        );
-                        context.push('/add-account');
-                      },
+                      onPressed: () => context.push('/add-account'),
                       icon: const Icon(Icons.add_circle, color: AppColors.primary),
                       label: Text('ADD ACCOUNT', style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
                     ),
@@ -101,13 +110,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTotalBalanceCard() {
-    return Consumer<AccountProvider>(
-      builder: (context, provider, _) {
-        final formatter = NumberFormat.currency(
-          locale: 'en_IN',
-          symbol: DesignConstants.currencySymbol,
-          decimalDigits: 2,
-        );
+    return Consumer2<AccountProvider, SettingsProvider>(
+      builder: (context, provider, settings, _) {
+        final formatter =
+            AppCurrencyFormat(settings.currencyCode).formatter();
 
         return Container(
           width: double.infinity,
@@ -151,8 +157,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAccountCards() {
-    return Consumer<AccountProvider>(
-      builder: (context, provider, _) {
+    return Consumer2<AccountProvider, SettingsProvider>(
+      builder: (context, provider, settings, _) {
         if (provider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -163,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(bottom: DesignConstants.spacingSm),
               child: _AccountCard(
                 account: account,
+                currencyCode: settings.currencyCode,
                 onTap: (a) => _showAccountOptions(context, a),
               ),
             );
@@ -180,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.add_circle_outline,
             label: 'Income',
             color: AppColors.success,
-            onTap: () => context.push('/add-income'),
+            onTap: () => context.push('/income'),
           ),
         ),
         const SizedBox(width: DesignConstants.spacingXs),
@@ -215,13 +222,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMonthSummary() {
-    return Consumer<ExpenseProvider>(
-      builder: (context, provider, _) {
-        final formatter = NumberFormat.currency(
-          locale: 'en_IN',
-          symbol: DesignConstants.currencySymbol,
-          decimalDigits: 2,
-        );
+    return Consumer3<ExpenseProvider, IncomeProvider, SettingsProvider>(
+      builder: (context, expense, income, settings, _) {
+        final formatter =
+            AppCurrencyFormat(settings.currencyCode).formatter();
+
+        final spent = expense.currentMonthTotal;
+        final earned = income.currentMonthTotal;
+        final net = earned - spent;
 
         return Container(
           width: double.infinity,
@@ -231,29 +239,129 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: DesignConstants.borderRadiusMd,
             border: Border.all(color: AppColors.border),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: DesignConstants.paddingSm,
-                decoration: BoxDecoration(
-                  color: AppColors.expense.withValues(alpha: 0.1),
-                  borderRadius: DesignConstants.borderRadiusSm,
-                ),
-                child: Icon(
-                  Icons.trending_down,
-                  color: AppColors.expense,
-                  size: DesignConstants.iconSizeLg,
-                ),
-              ),
-              const SizedBox(width: DesignConstants.spacingMd),
-              Column(
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Total Spent', style: AppTextStyles.labelSmall),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => context.go('/expenses'),
+                      borderRadius: DesignConstants.borderRadiusSm,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          right: DesignConstants.spacingSm,
+                          bottom: DesignConstants.spacingXs,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: DesignConstants.paddingSm,
+                              decoration: BoxDecoration(
+                                color: AppColors.expense.withValues(alpha: 0.1),
+                                borderRadius: DesignConstants.borderRadiusSm,
+                              ),
+                              child: Icon(
+                                Icons.trending_down,
+                                color: AppColors.expense,
+                                size: DesignConstants.iconSizeMd,
+                              ),
+                            ),
+                            const SizedBox(width: DesignConstants.spacingSm),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Spent',
+                                    style: AppTextStyles.labelSmall,
+                                  ),
+                                  Text(
+                                    formatter.format(spent),
+                                    style: AppTextStyles.amountMedium.copyWith(
+                                      color: AppColors.expense,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    color: AppColors.border,
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => context.go('/income'),
+                      borderRadius: DesignConstants.borderRadiusSm,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: DesignConstants.spacingSm,
+                          bottom: DesignConstants.spacingXs,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: DesignConstants.paddingSm,
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.success.withValues(alpha: 0.12),
+                                borderRadius: DesignConstants.borderRadiusSm,
+                              ),
+                              child: Icon(
+                                Icons.trending_up,
+                                color: AppColors.success,
+                                size: DesignConstants.iconSizeMd,
+                              ),
+                            ),
+                            const SizedBox(width: DesignConstants.spacingSm),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Earned',
+                                    style: AppTextStyles.labelSmall,
+                                  ),
+                                  Text(
+                                    formatter.format(earned),
+                                    style: AppTextStyles.amountMedium.copyWith(
+                                      color: AppColors.income,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: DesignConstants.spacingSm),
+              Divider(height: 1, color: AppColors.border),
+              const SizedBox(height: DesignConstants.spacingXs),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Text(
-                    formatter.format(provider.currentMonthTotal),
-                    style: AppTextStyles.amountMedium.copyWith(
-                      color: AppColors.expense,
+                    'Net this month',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    '${net >= 0 ? '+' : ''}${formatter.format(net)}',
+                    style: AppTextStyles.amountSmall.copyWith(
+                      color: net >= 0 ? AppColors.income : AppColors.expense,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -279,13 +387,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 title: Text(account.name, style: AppTextStyles.heading4),
                 subtitle: Text(account.type.displayName),
-                trailing: Text(
-                  NumberFormat.currency(
-                    locale: 'en_IN',
-                    symbol: DesignConstants.currencySymbol,
-                    decimalDigits: 2,
-                  ).format(account.balance),
-                  style: AppTextStyles.amountMedium,
+                trailing: Consumer<SettingsProvider>(
+                  builder: (context, settings, _) => Text(
+                    AppCurrencyFormat(settings.currencyCode)
+                        .formatter()
+                        .format(account.balance),
+                    style: AppTextStyles.amountMedium,
+                  ),
                 ),
               ),
               const Divider(),
@@ -369,9 +477,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Amount',
-                  prefixText: '₹ ',
+                  prefixText: AppCurrencyFormat(
+                    context.read<SettingsProvider>().currencyCode,
+                  ).prefix,
                 ),
               ),
             ],
@@ -403,17 +513,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _AccountCard extends StatelessWidget {
   final Account account;
+  final String currencyCode;
   final Function(Account) onTap;
 
-  const _AccountCard({required this.account, required this.onTap});
+  const _AccountCard({
+    required this.account,
+    required this.currencyCode,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: DesignConstants.currencySymbol,
-      decimalDigits: 2,
-    );
+    final formatter =
+        AppCurrencyFormat(currencyCode).formatter();
 
     final isCash = account.type == AccountType.cash;
     final color = isCash ? AppColors.cash : AppColors.bank;

@@ -6,11 +6,17 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
+import '../../core/formatting/app_currency.dart';
+import '../../data/models/income_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/income_provider.dart';
+import '../providers/settings_provider.dart';
 
+/// Add or edit income.
 class AddIncomeScreen extends StatefulWidget {
-  const AddIncomeScreen({super.key});
+  const AddIncomeScreen({super.key, this.income});
+
+  final Income? income;
 
   @override
   State<AddIncomeScreen> createState() => _AddIncomeScreenState();
@@ -21,18 +27,46 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   final _amountController = TextEditingController();
   final _categoryController = TextEditingController();
   final _noteController = TextEditingController();
-  
+
   String? _selectedAccountId;
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
+  bool _isLoading = false;
+
+  bool get _isEditing => widget.income != null;
 
   @override
   void initState() {
     super.initState();
-    // Pre-select first account if available
-    final accountProvider = context.read<AccountProvider>();
-    if (accountProvider.accounts.isNotEmpty) {
-      _selectedAccountId = accountProvider.accounts.first.id;
+    final inc = widget.income;
+    if (inc != null) {
+      _amountController.text = inc.amount.toString();
+      _categoryController.text = inc.category;
+      _noteController.text = inc.note ?? '';
+      _selectedDate = inc.date;
+      _selectedAccountId = inc.accountId;
+    } else {
+      _selectedDate = DateTime.now();
+      final accountProvider = context.read<AccountProvider>();
+      if (accountProvider.accounts.isNotEmpty) {
+        _selectedAccountId = accountProvider.accounts.first.id;
+      }
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await context.read<AccountProvider>().loadAccounts(showLoading: false);
+      if (!mounted) return;
+      final accounts = context.read<AccountProvider>().accounts;
+      if (_selectedAccountId != null &&
+          !accounts.any((a) => a.id == _selectedAccountId)) {
+        setState(() {
+          _selectedAccountId =
+              accounts.isNotEmpty ? accounts.first.id : null;
+        });
+      } else if (_selectedAccountId == null && accounts.isNotEmpty) {
+        setState(() => _selectedAccountId = accounts.first.id);
+      }
+    });
   }
 
   @override
@@ -58,46 +92,126 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   }
 
   Future<void> _saveIncome() async {
-    if (_formKey.currentState!.validate() && _selectedAccountId != null) {
-      final amount = double.parse(_amountController.text);
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedAccountId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an account')),
+      );
+      return;
+    }
 
-      final provider = context.read<IncomeProvider>();
-      final ok = await provider.addIncome(
+    setState(() => _isLoading = true);
+
+    final provider = context.read<IncomeProvider>();
+    final amount = double.parse(_amountController.text);
+    final trimmedCategory = _categoryController.text.trim();
+    final trimmedNote =
+        _noteController.text.trim().isEmpty ? null : _noteController.text.trim();
+
+    late final bool ok;
+    if (_isEditing) {
+      ok = await provider.updateIncome(
+        widget.income!.copyWith(
+          amount: amount,
+          category: trimmedCategory,
+          accountId: _selectedAccountId!,
+          date: _selectedDate,
+          note: trimmedNote,
+        ),
+      );
+    } else {
+      ok = await provider.addIncome(
         amount: amount,
-        category: _categoryController.text.trim(),
+        category: trimmedCategory,
         accountId: _selectedAccountId!,
         date: _selectedDate,
-        note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+        note: trimmedNote,
       );
-
-      if (!mounted) return;
-
-      if (ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Income added successfully')),
-        );
-        context.pop();
-      } else {
-        final message = provider.error ?? 'Could not add income';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
-      }
     }
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    final message = provider.error ??
+        (!_isEditing ? 'Could not add income' : 'Could not update income');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok
+            ? (_isEditing ? 'Income updated' : 'Income added successfully')
+            : message),
+        backgroundColor:
+            ok ? AppColors.success : AppColors.error,
+      ),
+    );
+    if (ok) context.pop();
+  }
+
+  Future<void> _deleteIncome() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete income'),
+        content: const Text(
+          'This removes the income and adjusts the selected account balance. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted || widget.income == null) return;
+
+    setState(() => _isLoading = true);
+    final ok =
+        await context.read<IncomeProvider>().deleteIncome(widget.income!.id);
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    final err = context.read<IncomeProvider>().error;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? 'Income deleted' : (err ?? 'Could not delete income'),
+        ),
+        backgroundColor: ok ? AppColors.success : AppColors.error,
+      ),
+    );
+    if (ok) context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final currencyCode = context.watch<SettingsProvider>().currencyCode;
+    final cf = AppCurrencyFormat(currencyCode);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Add Income'),
-        backgroundColor: AppColors.success, // Green for income!
+        title: Text(_isEditing ? 'Edit Income' : 'Add Income'),
+        backgroundColor: AppColors.success,
         foregroundColor: Colors.white,
+        actions: [
+          if (_isEditing)
+            IconButton(
+              onPressed: _isLoading ? null : _deleteIncome,
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete',
+            ),
+        ],
       ),
       body: Consumer<AccountProvider>(
         builder: (context, accountProvider, child) {
-          if (accountProvider.isLoading) {
+          if (accountProvider.isLoading && accountProvider.accounts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -106,32 +220,36 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
             child: ListView(
               padding: DesignConstants.screenPadding,
               children: [
-                // Amount Field
                 TextFormField(
                   controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                  ],
-                  decoration: const InputDecoration(
-                    labelText: 'Amount',
-                    prefixText: '₹ ',
-                    border: OutlineInputBorder(),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  style: AppTextStyles.amountLarge.copyWith(color: AppColors.textPrimary),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d+\.?\d{0,2}'),
+                    ),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    prefixText: cf.prefix,
+                    border: const OutlineInputBorder(),
+                  ),
+                  style: AppTextStyles.amountLarge.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter amount';
                     }
-                    if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                    if (double.tryParse(value) == null ||
+                        double.parse(value) <= 0) {
                       return 'Please enter valid amount';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: DesignConstants.spacingMd),
-
-                // Category Field
                 TextFormField(
                   controller: _categoryController,
                   textCapitalization: TextCapitalization.words,
@@ -148,32 +266,39 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                   },
                 ),
                 const SizedBox(height: DesignConstants.spacingMd),
-
-                // Account Dropdown
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedAccountId,
+                InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'Account',
                     border: OutlineInputBorder(),
                   ),
-                  items: accountProvider.accounts.map((account) {
-                    return DropdownMenuItem(
-                      value: account.id,
-                      child: Text('${account.name} (${account.type.displayName})'),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedAccountId = value;
-                    });
-                  },
-                  validator: (value) => value == null ? 'Please select account' : null,
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: _selectedAccountId != null &&
+                              accountProvider.accounts
+                                  .any((a) => a.id == _selectedAccountId)
+                          ? _selectedAccountId
+                          : null,
+                      hint: const Text('Select account'),
+                      items: accountProvider.accounts.map((account) {
+                        return DropdownMenuItem(
+                          value: account.id,
+                          child: Text(
+                            '${account.name} (${account.type.displayName})',
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: _isLoading
+                          ? null
+                          : (value) {
+                              setState(() => _selectedAccountId = value);
+                            },
+                    ),
+                  ),
                 ),
                 const SizedBox(height: DesignConstants.spacingMd),
-
-                // Date Picker
                 InkWell(
-                  onTap: () => _selectDate(context),
+                  onTap: _isLoading ? null : () => _selectDate(context),
                   child: InputDecorator(
                     decoration: const InputDecoration(
                       labelText: 'Date',
@@ -186,8 +311,6 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                   ),
                 ),
                 const SizedBox(height: DesignConstants.spacingMd),
-
-                // Note Field
                 TextFormField(
                   controller: _noteController,
                   textCapitalization: TextCapitalization.sentences,
@@ -198,13 +321,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: DesignConstants.spacingLg),
-
-                // Save Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _saveIncome,
+                    onPressed: _isLoading ? null : _saveIncome,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.success,
                       foregroundColor: Colors.white,
@@ -212,7 +333,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('SAVE INCOME', style: AppTextStyles.button),
+                    child: Text(
+                      _isEditing ? 'UPDATE INCOME' : 'SAVE INCOME',
+                      style: AppTextStyles.button,
+                    ),
                   ),
                 ),
               ],

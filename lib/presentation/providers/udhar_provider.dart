@@ -60,18 +60,25 @@ class UdharProvider extends ChangeNotifier {
   List<UdharSettlement> getSettlements(String udharId) =>
       _settlements[udharId] ?? [];
 
-  /// Load all udhar records
-  Future<void> loadUdhar() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  /// Load all udhar records.
+  ///
+  /// When [showLoading] is false, [isLoading] is not toggled (e.g. background
+  /// refresh or pull-to-refresh while keeping the list visible).
+  Future<void> loadUdhar({bool showLoading = true}) async {
+    if (showLoading) {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    }
 
     try {
       _udharList = await _repository.getAllUdhar();
     } catch (e) {
       _error = 'Failed to load udhar: $e';
     } finally {
-      _isLoading = false;
+      if (showLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
@@ -107,8 +114,8 @@ class UdharProvider extends ChangeNotifier {
         note: note,
       );
 
-      await loadUdhar();
-      await _accountProvider.loadAccounts();
+      await loadUdhar(showLoading: false);
+      await _accountProvider.loadAccounts(showLoading: false);
       return true;
     } on InsufficientBalanceException catch (e) {
       _error = e.message;
@@ -146,9 +153,9 @@ class UdharProvider extends ChangeNotifier {
         note: note,
       );
 
-      await loadUdhar();
+      await loadUdhar(showLoading: false);
       await loadSettlements(udharId);
-      await _accountProvider.loadAccounts();
+      await _accountProvider.loadAccounts(showLoading: false);
       return true;
     } on InsufficientBalanceException catch (e) {
       _error = e.message;
@@ -165,8 +172,8 @@ class UdharProvider extends ChangeNotifier {
   Future<bool> deleteUdhar(String id) async {
     try {
       await _repository.deleteUdhar(id);
-      await loadUdhar();
-      await _accountProvider.loadAccounts();
+      await loadUdhar(showLoading: false);
+      await _accountProvider.loadAccounts(showLoading: false);
       return true;
     } on InsufficientBalanceException catch (e) {
       _error = e.message;

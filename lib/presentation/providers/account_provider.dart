@@ -45,18 +45,25 @@ class AccountProvider extends ChangeNotifier {
     return total;
   }
 
-  /// Load all accounts from database
-  Future<void> loadAccounts() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  /// Load all accounts from database.
+  ///
+  /// When [showLoading] is false, [isLoading] is not toggled (e.g. refresh after
+  /// an expense save so Home does not show a full-screen spinner).
+  Future<void> loadAccounts({bool showLoading = true}) async {
+    if (showLoading) {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    }
 
     try {
       _accounts = await _repository.getAllAccounts();
     } catch (e) {
       _error = 'Failed to load accounts: $e';
     } finally {
-      _isLoading = false;
+      if (showLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
@@ -65,7 +72,7 @@ class AccountProvider extends ChangeNotifier {
   Future<void> updateBalance(String accountId, double newBalance) async {
     try {
       await _repository.updateBalance(accountId, newBalance);
-      await loadAccounts();
+      await loadAccounts(showLoading: false);
     } catch (e) {
       _error = 'Failed to update balance: $e';
       notifyListeners();
@@ -76,7 +83,7 @@ class AccountProvider extends ChangeNotifier {
   Future<void> addToBalance(String accountId, double amount) async {
     try {
       await _repository.addToBalance(accountId, amount);
-      await loadAccounts();
+      await loadAccounts(showLoading: false);
     } catch (e) {
       _error = 'Failed to add to balance: $e';
       notifyListeners();
@@ -87,7 +94,7 @@ class AccountProvider extends ChangeNotifier {
   Future<void> subtractFromBalance(String accountId, double amount) async {
     try {
       await _repository.subtractFromBalance(accountId, amount);
-      await loadAccounts();
+      await loadAccounts(showLoading: false);
     } catch (e) {
       _error = 'Failed to subtract from balance: $e';
       notifyListeners();
@@ -106,7 +113,7 @@ class AccountProvider extends ChangeNotifier {
         toAccountId,
         amount,
       );
-      await loadAccounts();
+      await loadAccounts(showLoading: false);
     } catch (e) {
       _error = 'Failed to transfer: $e';
       notifyListeners();
@@ -129,10 +136,12 @@ class AccountProvider extends ChangeNotifier {
       if (account != null) {
         final updatedAccount = account.copyWith(name: newName);
         await _repository.updateAccount(updatedAccount);
-        await loadAccounts();
+        await loadAccounts(showLoading: false);
       }
     } catch (e) {
       _error = 'Failed to rename account: $e';
+      notifyListeners();
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
@@ -153,10 +162,12 @@ class AccountProvider extends ChangeNotifier {
         type: type,
         balance: balance,
       );
-      
-      await loadAccounts();
+
+      await loadAccounts(showLoading: false);
     } catch (e) {
       _error = 'Failed to add account: $e';
+      notifyListeners();
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
@@ -169,12 +180,14 @@ class AccountProvider extends ChangeNotifier {
       notifyListeners();
 
       await _repository.deleteAccount(id);
-      
-      await loadAccounts();
+
+      await loadAccounts(showLoading: false);
     } catch (e) {
       _error = 'Failed to delete account: $e';
+      notifyListeners();
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
-}
+  }
 }

@@ -5,8 +5,12 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
+import '../../core/formatting/app_currency.dart';
 import '../../data/models/category_model.dart';
+import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/income_provider.dart';
+import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
 
 /// Report screen with charts
@@ -20,7 +24,8 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   int _selectedYear = DateTime.now().year;
   Map<Category, double> _categoryData = {};
-  List<double> _monthlyData = List.filled(12, 0);
+  List<double> _monthlyExpenseData = List.filled(12, 0);
+  List<double> _monthlyIncomeData = List.filled(12, 0);
   bool _isLoading = true;
 
   @override
@@ -31,40 +36,67 @@ class _ReportScreenState extends State<ReportScreen> {
     });
   }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+  Future<void> _loadData({bool silent = false}) async {
+    if (!silent) {
+      setState(() => _isLoading = true);
+    }
 
-    final provider = context.read<ExpenseProvider>();
+    final expenseProvider = context.read<ExpenseProvider>();
+    final incomeProvider = context.read<IncomeProvider>();
+    final udharProvider = context.read<UdharProvider>();
+    final accountProvider = context.read<AccountProvider>();
+
+    await expenseProvider.loadExpenses(showLoading: !silent);
+    if (!mounted) return;
+    await incomeProvider.loadIncomes(showLoading: !silent);
+    if (!mounted) return;
+    await udharProvider.loadUdhar(showLoading: false);
+    if (!mounted) return;
+    await accountProvider.loadAccounts(showLoading: false);
+    if (!mounted) return;
+
     final start = DateTime(_selectedYear, 1, 1);
     final end = DateTime(_selectedYear, 12, 31, 23, 59, 59);
 
-    // Load category data
-    _categoryData = await provider.getExpensesByCategories(start, end);
+    _categoryData =
+        await expenseProvider.getExpensesByCategories(start, end);
 
-    // Load monthly data
-    _monthlyData = List.filled(12, 0);
+    _monthlyExpenseData = List.filled(12, 0);
+    _monthlyIncomeData = List.filled(12, 0);
     for (int month = 1; month <= 12; month++) {
-      final expenses = await provider.getExpensesForMonth(_selectedYear, month);
-      double total = 0;
+      final expenses =
+          await expenseProvider.getExpensesForMonth(_selectedYear, month);
+      double expenseTotal = 0;
       for (final expense in expenses) {
-        total += expense.amount;
+        expenseTotal += expense.amount;
       }
-      _monthlyData[month - 1] = total;
+      _monthlyExpenseData[month - 1] = expenseTotal;
+
+      final incomes =
+          await incomeProvider.getIncomesForMonth(_selectedYear, month);
+      double incomeTotal = 0;
+      for (final income in incomes) {
+        incomeTotal += income.amount;
+      }
+      _monthlyIncomeData[month - 1] = incomeTotal;
     }
 
-    setState(() => _isLoading = false);
+    if (!mounted) return;
+    setState(() {
+      if (!silent) {
+        _isLoading = false;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: DesignConstants.currencySymbol,
-      decimalDigits: 0,
-    );
+    final currencyCode = context.watch<SettingsProvider>().currencyCode;
+    final formatter =
+        AppCurrencyFormat(currencyCode).formatter(decimalDigits: 0);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('Reports'),
         backgroundColor: AppColors.primary,
@@ -73,9 +105,12 @@ class _ReportScreenState extends State<ReportScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: DesignConstants.screenPadding,
-              child: Column(
+          : RefreshIndicator(
+              onRefresh: () => _loadData(silent: true),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: DesignConstants.screenPadding,
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Year Selector
@@ -118,46 +153,164 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
 
-                  // Yearly Total
-                  Container(
-                    width: double.infinity,
-                    padding: DesignConstants.paddingMd,
-                    decoration: BoxDecoration(
-                      color: AppColors.expense.withValues(alpha: 0.1),
-                      borderRadius: DesignConstants.borderRadiusMd,
-                    ),
-                    child: Column(
-                      children: [
-                        Text('Total Expenses in $_selectedYear',
-                            style: AppTextStyles.labelMedium),
-                        Text(
-                          formatter.format(_monthlyData.fold(0.0, (a, b) => a + b)),
-                          style: AppTextStyles.amountLarge.copyWith(
-                            color: AppColors.expense,
-                          ),
+                  // Year totals (income vs expense)
+                  Builder(
+                    builder: (context) {
+                      final yearExpense = _monthlyExpenseData.fold<double>(
+                        0,
+                        (a, b) => a + b,
+                      );
+                      final yearIncome = _monthlyIncomeData.fold<double>(
+                        0,
+                        (a, b) => a + b,
+                      );
+                      final yearNet = yearIncome - yearExpense;
+                      return Container(
+                        width: double.infinity,
+                        padding: DesignConstants.paddingMd,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: DesignConstants.borderRadiusMd,
+                          border: Border.all(color: AppColors.border),
                         ),
-                      ],
-                    ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: DesignConstants.paddingMd,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.expense.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      borderRadius:
+                                          DesignConstants.borderRadiusMd,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Total spent',
+                                          style: AppTextStyles.labelSmall,
+                                        ),
+                                        Text(
+                                          formatter.format(yearExpense),
+                                          style: AppTextStyles.amountLarge
+                                              .copyWith(
+                                            color: AppColors.expense,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: DesignConstants.spacingMd),
+                                Expanded(
+                                  child: Container(
+                                    padding: DesignConstants.paddingMd,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.success.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      borderRadius:
+                                          DesignConstants.borderRadiusMd,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Total earned',
+                                          style: AppTextStyles.labelSmall,
+                                        ),
+                                        Text(
+                                          formatter.format(yearIncome),
+                                          style: AppTextStyles.amountLarge
+                                              .copyWith(
+                                            color: AppColors.income,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: DesignConstants.spacingMd),
+                            Divider(height: 1, color: AppColors.border),
+                            const SizedBox(height: DesignConstants.spacingSm),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Net for $_selectedYear',
+                                  style: AppTextStyles.labelMedium.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                Text(
+                                  '${yearNet >= 0 ? '+' : ''}${formatter.format(yearNet)}',
+                                  style: AppTextStyles.amountMedium.copyWith(
+                                    color: yearNet >= 0
+                                        ? AppColors.income
+                                        : AppColors.expense,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
 
-                  // Monthly Bar Chart
-                  Text('Monthly Expenses', style: AppTextStyles.heading4),
+                  // Monthly comparison chart
+                  Text(
+                    'Income vs expenses by month',
+                    style: AppTextStyles.heading4,
+                  ),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Container(
-                    height: 200,
                     padding: DesignConstants.paddingMd,
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: DesignConstants.borderRadiusMd,
                       border: Border.all(color: AppColors.border),
                     ),
-                    child: _buildBarChart(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          height: 220,
+                          child: _buildMonthlyComparisonChart(),
+                        ),
+                        const SizedBox(height: DesignConstants.spacingSm),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _reportLegendChip(
+                              color: AppColors.expense,
+                              label: 'Spent',
+                            ),
+                            const SizedBox(width: DesignConstants.spacingMd),
+                            _reportLegendChip(
+                              color: AppColors.success,
+                              label: 'Earned',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
 
-                  // Category Pie Chart
-                  Text('By Category', style: AppTextStyles.heading4),
+                  // Category Pie Chart (expenses only)
+                  Text('Expenses by category', style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Container(
                     padding: DesignConstants.paddingMd,
@@ -246,16 +399,42 @@ class _ReportScreenState extends State<ReportScreen> {
                 ],
               ),
             ),
+            ),
     );
   }
 
-  Widget _buildBarChart() {
-    final maxValue = _monthlyData.reduce((a, b) => a > b ? a : b);
+  Widget _reportLegendChip({required Color color, required String label}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: AppTextStyles.caption),
+      ],
+    );
+  }
+
+  Widget _buildMonthlyComparisonChart() {
+    double maxVal = 0;
+    for (int i = 0; i < 12; i++) {
+      final e = _monthlyExpenseData[i];
+      final inc = _monthlyIncomeData[i];
+      if (e > maxVal) maxVal = e;
+      if (inc > maxVal) maxVal = inc;
+    }
+    final maxY = maxVal == 0 ? 1000.0 : maxVal * 1.15;
 
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: maxValue == 0 ? 1000 : maxValue * 1.2,
+        maxY: maxY,
         barTouchData: BarTouchData(enabled: true),
         titlesData: FlTitlesData(
           show: true,
@@ -263,12 +442,26 @@ class _ReportScreenState extends State<ReportScreen> {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                const months = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-                if (value.toInt() >= 0 && value.toInt() < 12) {
+                const months = [
+                  'J',
+                  'F',
+                  'M',
+                  'A',
+                  'M',
+                  'J',
+                  'J',
+                  'A',
+                  'S',
+                  'O',
+                  'N',
+                  'D',
+                ];
+                final i = value.toInt();
+                if (i >= 0 && i < 12) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      months[value.toInt()],
+                      months[i],
                       style: AppTextStyles.caption,
                     ),
                   );
@@ -277,21 +470,36 @@ class _ReportScreenState extends State<ReportScreen> {
               },
             ),
           ),
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         borderData: FlBorderData(show: false),
         gridData: const FlGridData(show: false),
         barGroups: List.generate(12, (index) {
           return BarChartGroupData(
             x: index,
+            barsSpace: 4,
             barRods: [
               BarChartRodData(
-                toY: _monthlyData[index],
-                color: AppColors.primary,
-                width: 12,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                toY: _monthlyExpenseData[index],
+                color: AppColors.expense,
+                width: 10,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(4)),
+              ),
+              BarChartRodData(
+                toY: _monthlyIncomeData[index],
+                color: AppColors.success,
+                width: 10,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(4)),
               ),
             ],
           );

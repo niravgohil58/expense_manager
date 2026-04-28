@@ -92,6 +92,7 @@ class DesignConstants {
   static const double cardMinHeight = 80.0;
   static const double accountCardHeight = 120.0;
 
-  // Currency Symbol
+  /// Use [AppCurrencyFormat] with [SettingsProvider.currencyCode] instead.
+  @Deprecated('Use AppCurrencyFormat(SettingsProvider.currencyCode)')
   static const String currencySymbol = '₹';
 }

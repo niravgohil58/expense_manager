@@ -5,8 +5,10 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
+import '../../core/formatting/app_currency.dart';
 import '../../data/models/udhar_model.dart';
 import '../providers/account_provider.dart';
+import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
 
 /// Add udhar screen with form
@@ -32,6 +34,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final accounts = context.read<AccountProvider>().accounts;
       if (accounts.isNotEmpty) {
         setState(() => _selectedAccountId = accounts.first.id);
@@ -62,49 +65,51 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
   Future<void> _saveUdhar() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAccountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an account')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select an account')));
       return;
     }
 
     setState(() => _isLoading = true);
 
     final success = await context.read<UdharProvider>().addUdhar(
-          personName: _personNameController.text.trim(),
-          type: _selectedType,
-          amount: double.parse(_amountController.text),
-          accountId: _selectedAccountId!,
-          date: _selectedDate,
-          note: _noteController.text.isNotEmpty ? _noteController.text : null,
-        );
+      personName: _personNameController.text.trim(),
+      type: _selectedType,
+      amount: double.parse(_amountController.text),
+      accountId: _selectedAccountId!,
+      date: _selectedDate,
+      note: _noteController.text.isNotEmpty ? _noteController.text : null,
+    );
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (mounted) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Udhar added successfully'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        context.pop();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.read<UdharProvider>().error ?? 'Failed'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Udhar added successfully'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.read<UdharProvider>().error ?? 'Failed'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final currencyCode = context.watch<SettingsProvider>().currencyCode;
+    final cf = AppCurrencyFormat(currencyCode);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('Add Udhar'),
         backgroundColor: AppColors.primary,
@@ -129,7 +134,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                       subtitle: 'Money you gave',
                       isSelected: _selectedType == UdharType.dena,
                       color: AppColors.udharDena,
-                      onTap: () => setState(() => _selectedType = UdharType.dena),
+                      onTap: () =>
+                          setState(() => _selectedType = UdharType.dena),
                     ),
                   ),
                   const SizedBox(width: DesignConstants.spacingSm),
@@ -139,7 +145,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                       subtitle: 'Money you took',
                       isSelected: _selectedType == UdharType.lena,
                       color: AppColors.udharLena,
-                      onTap: () => setState(() => _selectedType = UdharType.lena),
+                      onTap: () =>
+                          setState(() => _selectedType = UdharType.lena),
                     ),
                   ),
                 ],
@@ -180,12 +187,14 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  prefixText: '${DesignConstants.currencySymbol} ',
+                  prefixText: cf.prefix,
                   hintText: '0.00',
                   filled: true,
                   fillColor: AppColors.surface,
@@ -202,7 +211,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter amount';
                   }
-                  if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                  if (double.tryParse(value) == null ||
+                      double.parse(value) <= 0) {
                     return 'Please enter a valid amount';
                   }
                   return null;
@@ -234,7 +244,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                         child: Text(account.name),
                       );
                     }).toList(),
-                    onChanged: (value) => setState(() => _selectedAccountId = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedAccountId = value),
                   );
                 },
               ),
@@ -358,10 +369,7 @@ class _TypeButton extends StatelessWidget {
                 color: isSelected ? color : AppColors.textPrimary,
               ),
             ),
-            Text(
-              subtitle,
-              style: AppTextStyles.caption,
-            ),
+            Text(subtitle, style: AppTextStyles.caption),
           ],
         ),
       ),

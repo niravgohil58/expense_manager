@@ -4,10 +4,14 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
+import '../../data/models/category_model.dart';
 import '../providers/category_provider.dart';
 
 class AddCategoryScreen extends StatefulWidget {
-  const AddCategoryScreen({super.key});
+  const AddCategoryScreen({super.key, this.category});
+
+  /// When set, screen edits this category (name / icon / color).
+  final Category? category;
 
   @override
   State<AddCategoryScreen> createState() => _AddCategoryScreenState();
@@ -16,7 +20,7 @@ class AddCategoryScreen extends StatefulWidget {
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  
+
   // Predefined icons
   final List<IconData> _icons = [
     Icons.restaurant,
@@ -62,8 +66,15 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedIcon = _icons.first;
-    _selectedColor = _colors.first;
+    final c = widget.category;
+    if (c != null) {
+      _nameController.text = c.name;
+      _selectedIcon = c.icon;
+      _selectedColor = c.color;
+    } else {
+      _selectedIcon = _icons.first;
+      _selectedColor = _colors.first;
+    }
   }
 
   @override
@@ -77,40 +88,57 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
     setState(() => _isLoading = true);
 
-    final success = await context.read<CategoryProvider>().addCategory(
-      name: _nameController.text,
-      icon: _selectedIcon,
-      color: _selectedColor,
-    );
+    final provider = context.read<CategoryProvider>();
+    late final bool success;
+    if (widget.category != null) {
+      success = await provider.updateCategoryFull(
+        id: widget.category!.id,
+        name: _nameController.text,
+        icon: _selectedIcon,
+        color: _selectedColor,
+      );
+    } else {
+      success = await provider.addCategory(
+        name: _nameController.text.trim(),
+        icon: _selectedIcon,
+        color: _selectedColor,
+      );
+    }
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (mounted) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Category added successfully'),
-            backgroundColor: AppColors.success,
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(widget.category != null
+              ? 'Category updated'
+              : 'Category added successfully'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.error ??
+                (widget.category != null
+                    ? 'Failed to update category'
+                    : 'Failed to add category'),
           ),
-        );
-        context.pop();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.read<CategoryProvider>().error ?? 'Failed to add category'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Add Category'),
+        title: Text(widget.category != null ? 'Edit Category' : 'Add Category'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -169,16 +197,22 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                     borderRadius: DesignConstants.borderRadiusSm,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : AppColors.surface,
                         borderRadius: DesignConstants.borderRadiusSm,
                         border: Border.all(
-                          color: isSelected ? AppColors.primary : AppColors.border,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.border,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
                       child: Icon(
                         icon,
-                        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
                       ),
                     ),
                   );
@@ -213,7 +247,11 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             : null,
                       ),
                       child: isSelected
-                          ? const Icon(Icons.check, color: Colors.white, size: 20)
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 20,
+                            )
                           : null,
                     ),
                   );

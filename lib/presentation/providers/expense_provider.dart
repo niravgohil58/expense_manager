@@ -3,6 +3,7 @@ import '../../core/errors/app_exceptions.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/models/category_model.dart';
 import '../../data/models/transfer_model.dart';
+import '../../data/query/expense_filters.dart';
 import '../../data/repositories/expense_repository.dart';
 import 'account_provider.dart';
 
@@ -18,15 +19,24 @@ class ExpenseProvider extends ChangeNotifier {
         _accountProvider = accountProvider;
 
   List<Expense> _expenses = [];
+  /// Rows matching [ExpenseFilters] for the Expenses tab list only.
+  List<Expense> _expensesForList = [];
   List<Transfer> _transfers = [];
   bool _isLoading = false;
   String? _error;
+  ExpenseFilters _expenseListFilters = ExpenseFilters.none;
 
   // Getters
+  /// Full DB snapshot (home totals, edit/delete lookups).
   List<Expense> get expenses => _expenses;
+
+  /// Filtered view for [ExpenseListScreen].
+  List<Expense> get expensesForList => _expensesForList;
+
   List<Transfer> get transfers => _transfers;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  ExpenseFilters get expenseFilters => _expenseListFilters;
 
   /// Get recent expenses (last 10)
   List<Expense> get recentExpenses =>
@@ -49,42 +59,77 @@ class ExpenseProvider extends ChangeNotifier {
     return total;
   }
 
-  /// Load all expenses
-  Future<void> loadExpenses() async {
-    _isLoading = true;
-    _error = null;
+  /// Replace expense list filters and reload list query (home/report unaffected).
+  Future<void> setExpenseFilters(ExpenseFilters filters) async {
+    _expenseListFilters = filters;
+    try {
+      _expensesForList =
+          await _repository.getExpensesFiltered(_expenseListFilters);
+    } catch (e) {
+      _error = 'Failed to filter expenses: $e';
+    }
     notifyListeners();
+  }
+
+  /// Clear expense list filters.
+  Future<void> clearExpenseFilters() async {
+    await setExpenseFilters(ExpenseFilters.none);
+  }
+
+  Future<void> _reloadExpenseListQuery() async {
+    _expensesForList =
+        await _repository.getExpensesFiltered(_expenseListFilters);
+  }
+
+  /// Load all expenses
+  Future<void> loadExpenses({bool showLoading = true}) async {
+    if (showLoading) {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    } else {
+      _error = null;
+    }
 
     try {
       _expenses = await _repository.getAllExpenses();
+      await _reloadExpenseListQuery();
     } catch (e) {
       _error = 'Failed to load expenses: $e';
     } finally {
-      _isLoading = false;
+      if (showLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
 
   /// Load all transfers
-  Future<void> loadTransfers() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  Future<void> loadTransfers({bool showLoading = true}) async {
+    if (showLoading) {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    } else {
+      _error = null;
+    }
 
     try {
       _transfers = await _repository.getAllTransfers();
     } catch (e) {
       _error = 'Failed to load transfers: $e';
     } finally {
-      _isLoading = false;
+      if (showLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
 
   /// Load all data
-  Future<void> loadAll() async {
-    await loadExpenses();
-    await loadTransfers();
+  Future<void> loadAll({bool showLoading = true}) async {
+    await loadExpenses(showLoading: showLoading);
+    await loadTransfers(showLoading: showLoading);
   }
 
   /// Add new expense
@@ -103,8 +148,8 @@ class ExpenseProvider extends ChangeNotifier {
         date: date,
         note: note,
       );
-      await loadExpenses();
-      await _accountProvider.loadAccounts();
+      await loadExpenses(showLoading: false);
+      await _accountProvider.loadAccounts(showLoading: false);
       return true;
     } on InsufficientBalanceException catch (e) {
       _error = e.message;
@@ -125,8 +170,8 @@ class ExpenseProvider extends ChangeNotifier {
 
       await _repository.updateExpenseWithLedger(originalExpense, updatedExpense);
 
-      await loadExpenses();
-      await _accountProvider.loadAccounts();
+      await loadExpenses(showLoading: false);
+      await _accountProvider.loadAccounts(showLoading: false);
       return true;
     } on InsufficientBalanceException catch (e) {
       _error = e.message;
@@ -144,8 +189,8 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       final expense = _expenses.firstWhere((e) => e.id == id);
       await _repository.deleteExpenseWithLedger(expense);
-      await loadExpenses();
-      await _accountProvider.loadAccounts();
+      await loadExpenses(showLoading: false);
+      await _accountProvider.loadAccounts(showLoading: false);
       return true;
     } catch (e) {
       _error = 'Failed to delete expense: $e';
@@ -176,8 +221,8 @@ class ExpenseProvider extends ChangeNotifier {
         date: date,
         note: note,
       );
-      await loadTransfers();
-      await _accountProvider.loadAccounts();
+      await loadTransfers(showLoading: false);
+      await _accountProvider.loadAccounts(showLoading: false);
       return true;
     } on InsufficientBalanceException catch (e) {
       _error = e.message;

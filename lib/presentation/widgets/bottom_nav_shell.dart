@@ -11,11 +11,13 @@ class BottomNavShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: scheme.surface,
           boxShadow: [
             BoxShadow(
               color: AppColors.shadow,
@@ -37,6 +39,11 @@ class BottomNavShell extends StatelessWidget {
                   icon: Icons.home_rounded,
                   label: 'Home',
                   path: '/home',
+                ),
+                _NavItem(
+                  icon: Icons.trending_up_rounded,
+                  label: 'Income',
+                  path: '/income',
                 ),
                 _NavItem(
                   icon: Icons.receipt_long_rounded,
@@ -67,16 +74,16 @@ class _NavItem extends StatelessWidget {
   final String label;
   final String path;
 
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.path,
-  });
+  const _NavItem({required this.icon, required this.label, required this.path});
 
   @override
   Widget build(BuildContext context) {
-    final currentPath = GoRouterState.of(context).uri.toString();
+    // Use path only so query strings (e.g. future deep links) don’t break selection.
+    final currentPath = GoRouterState.of(context).uri.path;
     final isSelected = currentPath == path;
+    final scheme = Theme.of(context).colorScheme;
+    final active = scheme.primary;
+    final inactive = scheme.onSurfaceVariant;
 
     return InkWell(
       onTap: () => context.go(path),
@@ -91,7 +98,7 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : AppColors.textHint,
+              color: isSelected ? active : inactive,
               size: DesignConstants.iconSizeMd,
             ),
             const SizedBox(height: DesignConstants.spacingXxs),
@@ -100,7 +107,7 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? AppColors.primary : AppColors.textHint,
+                color: isSelected ? active : inactive,
               ),
             ),
           ],

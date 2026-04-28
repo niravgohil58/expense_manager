@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
+import '../../core/formatting/app_currency.dart';
 import '../../data/models/expense_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/settings_provider.dart';
 
 import '../providers/category_provider.dart';
 import '../../data/models/category_model.dart';
@@ -17,10 +19,7 @@ import '../../data/models/category_model.dart';
 class AddExpenseScreen extends StatefulWidget {
   final Expense? expense;
 
-  const AddExpenseScreen({
-    super.key,
-    this.expense,
-  });
+  const AddExpenseScreen({super.key, this.expense});
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -51,8 +50,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     // Default to cash account or existing expense account
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final accounts = context.read<AccountProvider>().accounts;
-      context.read<CategoryProvider>().loadCategories(); // Load categories
-      
+      context.read<CategoryProvider>().loadCategories(showLoading: false);
+
       if (widget.expense != null) {
         setState(() {
           _selectedAccountId = widget.expense!.accountId;
@@ -89,15 +88,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Future<void> _saveExpense() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAccountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an account')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select an account')));
       return;
     }
     if (_selectedCategory == null) {
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
       return;
     }
 
@@ -126,30 +125,33 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       );
     }
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (mounted) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_isEditing
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEditing
                 ? 'Expense updated successfully'
-                : 'Expense added successfully'),
-            backgroundColor: AppColors.success,
+                : 'Expense added successfully',
           ),
-        );
-        context.pop();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(provider.error ??
+          backgroundColor: AppColors.success,
+        ),
+      );
+      context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.error ??
                 (_isEditing
                     ? 'Failed to update expense'
-                    : 'Failed to add expense')),
-            backgroundColor: AppColors.error,
+                    : 'Failed to add expense'),
           ),
-        );
-      }
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -175,36 +177,41 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     if (confirmed == true && mounted) {
       setState(() => _isLoading = true);
-      final success =
-          await context.read<ExpenseProvider>().deleteExpense(widget.expense!.id);
+      final success = await context.read<ExpenseProvider>().deleteExpense(
+        widget.expense!.id,
+      );
+      if (!mounted) return;
       setState(() => _isLoading = false);
 
-      if (mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Expense deleted successfully'),
-              backgroundColor: AppColors.success,
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expense deleted successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        context.pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.read<ExpenseProvider>().error ??
+                  'Failed to delete expense',
             ),
-          );
-          context.pop();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.read<ExpenseProvider>().error ??
-                  'Failed to delete expense'),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final currencyCode = context.watch<SettingsProvider>().currencyCode;
+    final cf = AppCurrencyFormat(currencyCode);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text(_isEditing ? 'Edit Expense' : 'Add Expense'),
         backgroundColor: AppColors.primary,
@@ -230,13 +237,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _amountController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  prefixText: '${DesignConstants.currencySymbol} ',
+                  prefixText: cf.prefix,
                   hintText: '0.00',
                   filled: true,
                   fillColor: AppColors.surface,
@@ -283,13 +291,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
                   // Use enabled categories, or if editing and current category is disabled, include it
                   final categories = provider.enabledCategories;
-                  if (_isEditing && _selectedCategory != null && !categories.contains(_selectedCategory)) {
-                     // Ensure the currently selected category is visible even if disabled
-                     // Note: This check relies on object equality or ID equality.
-                     // Since we load fresh categories, the object instance might be different.
-                     // We should match by ID.
+                  if (_isEditing &&
+                      _selectedCategory != null &&
+                      !categories.contains(_selectedCategory)) {
+                    // Ensure the currently selected category is visible even if disabled
+                    // Note: This check relies on object equality or ID equality.
+                    // Since we load fresh categories, the object instance might be different.
+                    // We should match by ID.
                   }
-                  
+
                   // Helper to check if category is in list
                   bool containsCategory(List<Category> list, Category? c) {
                     if (c == null) return false;
@@ -297,17 +307,21 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   }
 
                   // Verify specific selected category is in the list
-                  if (_selectedCategory != null && !containsCategory(categories, _selectedCategory)) {
+                  if (_selectedCategory != null &&
+                      !containsCategory(categories, _selectedCategory)) {
                     // It's hidden/disabled or custom.
                     // We need to display it as selected.
                     // If the provider list doesn't have it, we might need to fetch all or manually add it to display list
                     // For now, let's just use the selected instance if it's not in the list.
-                     // Ideally we should use the one from the provider's full list if available
-                     final fullList = provider.categories;
-                     final found = fullList.firstWhere((e) => e.id == _selectedCategory!.id, orElse: () => _selectedCategory!);
-                      if (!containsCategory(categories, found)) {
-                        categories.add(found);
-                      }
+                    // Ideally we should use the one from the provider's full list if available
+                    final fullList = provider.categories;
+                    final found = fullList.firstWhere(
+                      (e) => e.id == _selectedCategory!.id,
+                      orElse: () => _selectedCategory!,
+                    );
+                    if (!containsCategory(categories, found)) {
+                      categories.add(found);
+                    }
                   }
 
                   return Wrap(
@@ -316,7 +330,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     children: categories.map((category) {
                       final isSelected = _selectedCategory?.id == category.id;
                       return InkWell(
-                        onTap: () => setState(() => _selectedCategory = category),
+                        onTap: () =>
+                            setState(() => _selectedCategory = category),
                         borderRadius: DesignConstants.borderRadiusMd,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -329,7 +344,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 : AppColors.surface,
                             borderRadius: DesignConstants.borderRadiusMd,
                             border: Border.all(
-                              color: isSelected ? category.color : AppColors.border,
+                              color: isSelected
+                                  ? category.color
+                                  : AppColors.border,
                               width: isSelected ? 2 : 1,
                             ),
                           ),

@@ -43,6 +43,23 @@ class CategoryRepository {
     await _dbHelper.update(_table, category.toMap(), category.id);
   }
 
+  /// Rows in [expenses] referencing this category id (blocks delete).
+  Future<int> countExpenseReferences(String categoryId) async {
+    final db = await _dbHelper.database;
+    final rows = await db.rawQuery(
+      'SELECT COUNT(*) AS n FROM expenses WHERE category = ?',
+      [categoryId],
+    );
+    final n = rows.first['n'];
+    if (n is int) return n;
+    if (n is num) return n.toInt();
+    return 0;
+  }
+
+  Future<void> deleteCategory(String id) async {
+    await _dbHelper.delete(_table, id);
+  }
+
   Future<Category?> getCategoryById(String id) async {
     final map = await _dbHelper.queryById(_table, id);
     return map != null ? Category.fromMap(map) : null;

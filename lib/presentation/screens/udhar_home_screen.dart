@@ -5,7 +5,10 @@ import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
+import '../../core/formatting/app_currency.dart';
 import '../../data/models/udhar_model.dart';
+import '../providers/account_provider.dart';
+import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
 
 /// Udhar home screen with summary and list
@@ -25,10 +28,17 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
     });
   }
 
+  Future<void> _refreshUdhar(BuildContext context) async {
+    final udhar = context.read<UdharProvider>();
+    final accounts = context.read<AccountProvider>();
+    await udhar.loadUdhar(showLoading: false);
+    await accounts.loadAccounts(showLoading: false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('Udhar'),
         backgroundColor: AppColors.primary,
@@ -37,79 +47,96 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
       ),
       body: Consumer<UdharProvider>(
         builder: (context, provider, _) {
-          if (provider.isLoading) {
+          if (provider.isLoading && provider.udharList.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return SingleChildScrollView(
-            padding: DesignConstants.screenPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Summary Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: _SummaryCard(
-                        title: 'Aapko Milna Hai',
-                        subtitle: 'Money to receive',
-                        amount: provider.totalPendingDena,
-                        color: AppColors.udharDena,
-                        icon: Icons.arrow_downward,
-                      ),
+          return RefreshIndicator(
+            onRefresh: () => _refreshUdhar(context),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: DesignConstants.screenPadding,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
                     ),
-                    const SizedBox(width: DesignConstants.spacingMd),
-                    Expanded(
-                      child: _SummaryCard(
-                        title: 'Aapko Dena Hai',
-                        subtitle: 'Money to pay',
-                        amount: provider.totalPendingLena,
-                        color: AppColors.udharLena,
-                        icon: Icons.arrow_upward,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: DesignConstants.spacingLg),
-
-                // Udhar List
-                if (provider.pendingUdhar.isEmpty)
-                  Center(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: DesignConstants.spacingXl),
-                        Icon(
-                          Icons.people_outline,
-                          size: 64,
-                          color: AppColors.textHint,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _SummaryCard(
+                                title: 'Aapko Milna Hai',
+                                subtitle: 'Money to receive',
+                                amount: provider.totalPendingDena,
+                                color: AppColors.udharDena,
+                                icon: Icons.arrow_downward,
+                              ),
+                            ),
+                            const SizedBox(width: DesignConstants.spacingMd),
+                            Expanded(
+                              child: _SummaryCard(
+                                title: 'Aapko Dena Hai',
+                                subtitle: 'Money to pay',
+                                amount: provider.totalPendingLena,
+                                color: AppColors.udharLena,
+                                icon: Icons.arrow_upward,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: DesignConstants.spacingMd),
-                        Text(
-                          'No pending udhar',
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.textSecondary,
+                        const SizedBox(height: DesignConstants.spacingLg),
+                        if (provider.pendingUdhar.isEmpty)
+                          Center(
+                            child: Column(
+                              children: [
+                                const SizedBox(
+                                  height: DesignConstants.spacingXl,
+                                ),
+                                Icon(
+                                  Icons.people_outline,
+                                  size: 64,
+                                  color: AppColors.textHint,
+                                ),
+                                const SizedBox(
+                                  height: DesignConstants.spacingMd,
+                                ),
+                                Text(
+                                  'No pending udhar',
+                                  style: AppTextStyles.bodyLarge.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Pending Udhar',
+                                style: AppTextStyles.heading4,
+                              ),
+                              const SizedBox(height: DesignConstants.spacingSm),
+                              ...provider.pendingUdhar.map((udhar) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: DesignConstants.spacingSm,
+                                  ),
+                                  child: _UdharCard(udhar: udhar),
+                                );
+                              }),
+                            ],
                           ),
-                        ),
                       ],
                     ),
-                  )
-                else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Pending Udhar', style: AppTextStyles.heading4),
-                      const SizedBox(height: DesignConstants.spacingSm),
-                      ...provider.pendingUdhar.map((udhar) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: DesignConstants.spacingSm,
-                          ),
-                          child: _UdharCard(udhar: udhar),
-                        );
-                      }),
-                    ],
                   ),
-              ],
+                );
+              },
             ),
           );
         },
@@ -141,11 +168,9 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: DesignConstants.currencySymbol,
-      decimalDigits: 0,
-    );
+    final currencyCode = context.watch<SettingsProvider>().currencyCode;
+    final formatter =
+        AppCurrencyFormat(currencyCode).formatter(decimalDigits: 0);
 
     return Container(
       padding: DesignConstants.paddingMd,
@@ -188,11 +213,9 @@ class _UdharCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: DesignConstants.currencySymbol,
-      decimalDigits: 0,
-    );
+    final currencyCode = context.watch<SettingsProvider>().currencyCode;
+    final formatter =
+        AppCurrencyFormat(currencyCode).formatter(decimalDigits: 0);
     final dateFormatter = DateFormat('dd MMM yyyy');
     final isDena = udhar.type == UdharType.dena;
     final color = isDena ? AppColors.udharDena : AppColors.udharLena;
@@ -218,7 +241,9 @@ class _UdharCard extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  udhar.personName.substring(0, 1).toUpperCase(),
+                  udhar.personName.isEmpty
+                      ? '?'
+                      : udhar.personName.substring(0, 1).toUpperCase(),
                   style: AppTextStyles.heading3.copyWith(color: color),
                 ),
               ),

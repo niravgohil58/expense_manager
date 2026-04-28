@@ -3,7 +3,11 @@ import 'package:go_router/go_router.dart';
 import '../../presentation/screens/screens.dart';
 import '../../presentation/screens/add_income_screen.dart';
 import '../../data/models/expense_model.dart';
+import '../../data/models/income_model.dart';
+import '../../data/models/category_model.dart';
 import '../../presentation/widgets/bottom_nav_shell.dart';
+import '../../presentation/screens/set_pin_screen.dart';
+import '../../presentation/screens/transfer_history_screen.dart';
 
 /// Application router configuration using go_router
 class AppRouter {
@@ -13,6 +17,17 @@ class AppRouter {
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'No route for ${state.uri}\nGo back from the system back gesture.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    ),
     routes: [
       // Shell route with bottom navigation
       ShellRoute(
@@ -24,6 +39,13 @@ class AppRouter {
             name: 'home',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: HomeScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/income',
+            name: 'income',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: IncomeListScreen(),
             ),
           ),
           GoRoute(
@@ -64,7 +86,11 @@ class AppRouter {
         path: '/add-income',
         name: 'add-income',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AddIncomeScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          final income = extra is Income ? extra : null;
+          return AddIncomeScreen(income: income);
+        },
       ),
       GoRoute(
         path: '/transfer',
@@ -104,6 +130,34 @@ class AppRouter {
         name: 'add-category',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const AddCategoryScreen(),
+      ),
+      GoRoute(
+        path: '/edit-category',
+        name: 'edit-category',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra;
+          final cat = extra is Category ? extra : null;
+          return AddCategoryScreen(category: cat);
+        },
+      ),
+      GoRoute(
+        path: '/transfer-history',
+        name: 'transfer-history',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TransferHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/set-pin',
+        name: 'set-pin',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SetPinScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

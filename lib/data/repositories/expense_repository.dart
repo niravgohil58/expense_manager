@@ -3,6 +3,7 @@ import '../../core/database/database_helper.dart';
 import '../models/expense_model.dart';
 import '../models/category_model.dart';
 import '../models/transfer_model.dart';
+import '../query/expense_filters.dart';
 import 'account_repository.dart';
 
 /// Repository for Expense and Transfer database operations
@@ -66,6 +67,73 @@ class ExpenseRepository {
       ORDER BY e.date DESC
     ''');
     
+    return results.map((map) => Expense.fromMap(map)).toList();
+  }
+
+  static String _orderByClause(ExpenseSort sort) {
+    switch (sort) {
+      case ExpenseSort.dateNewestFirst:
+        return 'e.date DESC';
+      case ExpenseSort.dateOldestFirst:
+        return 'e.date ASC';
+      case ExpenseSort.amountHighFirst:
+        return 'e.amount DESC, e.date DESC';
+      case ExpenseSort.amountLowFirst:
+        return 'e.amount ASC, e.date DESC';
+    }
+  }
+
+  /// Expenses matching [filters] (search, dates, category, account, sort).
+  Future<List<Expense>> getExpensesFiltered(ExpenseFilters filters) async {
+    final db = await _dbHelper.database;
+
+    final buffer = StringBuffer('''
+      SELECT 
+        e.*,
+        c.id as categoryId,
+        c.name as categoryName,
+        c.iconCode as categoryIconCode,
+        c.colorValue as categoryColorValue,
+        c.isEnabled as categoryIsEnabled,
+        c.isSystem as categoryIsSystem
+      FROM $_expenseTable e
+      LEFT JOIN categories c ON e.category = c.id OR (e.category = c.name COLLATE NOCASE)
+      WHERE 1 = 1
+    ''');
+
+    final args = <Object?>[];
+
+    if (filters.startDate != null) {
+      buffer.write(' AND e.date >= ?');
+      args.add(filters.startDate!.toIso8601String());
+    }
+    if (filters.endDate != null) {
+      buffer.write(' AND e.date <= ?');
+      args.add(filters.endDate!.toIso8601String());
+    }
+    if (filters.categoryId != null) {
+      buffer.write(' AND e.category = ?');
+      args.add(filters.categoryId);
+    }
+    if (filters.accountId != null) {
+      buffer.write(' AND e.accountId = ?');
+      args.add(filters.accountId);
+    }
+
+    final q = filters.searchQuery?.trim();
+    if (q != null && q.isNotEmpty) {
+      final pattern = '%$q%';
+      buffer.write(
+        ' AND (IFNULL(e.note, "") LIKE ? OR IFNULL(c.name, "") LIKE ? OR CAST(e.amount AS TEXT) LIKE ?)',
+      );
+      args.add(pattern);
+      args.add(pattern);
+      args.add(pattern);
+    }
+
+    buffer.write(' ORDER BY ${_orderByClause(filters.sort)}');
+
+    final results = await db.rawQuery(buffer.toString(), args);
     return results.map((map) => Expense.fromMap(map)).toList();
   }
 

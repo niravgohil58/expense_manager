@@ -2,34 +2,53 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'core/constants/app_colors.dart';
 import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
+import 'core/preferences/app_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'presentation/providers/account_provider.dart';
 import 'presentation/providers/expense_provider.dart';
 import 'presentation/providers/udhar_provider.dart';
 import 'presentation/providers/category_provider.dart';
 import 'presentation/providers/income_provider.dart';
+import 'presentation/providers/settings_provider.dart';
+import 'presentation/providers/backup_provider.dart';
+import 'presentation/providers/lock_provider.dart';
+import 'presentation/screens/app_lock_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
-  runApp(const MyApp());
+  final sharedPrefs = await SharedPreferences.getInstance();
+  final appPreferences = AppPreferences(sharedPrefs);
+  runApp(MyApp(appPreferences: appPreferences));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.appPreferences});
+
+  final AppPreferences appPreferences;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => SettingsProvider(appPreferences),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LockProvider(appPreferences),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => BackupProvider(),
+        ),
+        ChangeNotifierProvider(
           create: (_) => AccountProvider(),
         ),
-        ChangeNotifierProvider(create: (_) => CategoryProvider()), // Added this provider
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProxyProvider<AccountProvider, ExpenseProvider>(
           create: (context) => ExpenseProvider(
             accountProvider: context.read<AccountProvider>(),
@@ -52,44 +71,25 @@ class MyApp extends StatelessWidget {
               previous ?? IncomeProvider(accountProvider: accountProvider),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'Expense Manager',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            brightness: Brightness.light,
-          ),
-          scaffoldBackgroundColor: AppColors.background,
-          appBarTheme: const AppBarTheme(
-            centerTitle: true,
-            elevation: 0,
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.textOnPrimary,
-            ),
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-          ),
-        ),
-        routerConfig: AppRouter.router,
+      child: Consumer2<LockProvider, SettingsProvider>(
+        builder: (context, lock, settings, _) {
+          return Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: [
+              MaterialApp.router(
+                title: 'Expense Manager',
+                debugShowCheckedModeBanner: false,
+                themeMode: settings.themeMode,
+                theme: buildLightTheme(),
+                darkTheme: buildDarkTheme(),
+                routerConfig: AppRouter.router,
+              ),
+              if (lock.needsLockOverlay)
+                Positioned.fill(child: const AppLockScreen()),
+            ],
+          );
+        },
       ),
     );
   }

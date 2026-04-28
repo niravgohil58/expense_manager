@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -8,6 +9,20 @@ class DatabaseHelper {
   static Database? _database;
 
   DatabaseHelper._init();
+
+  /// Closes the cached connection and clears it; optionally deletes the DB file (tests).
+  @visibleForTesting
+  static Future<void> resetForTesting({bool deleteFile = false}) async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+    if (deleteFile) {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'expense_app.db');
+      await deleteDatabase(path);
+    }
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;
