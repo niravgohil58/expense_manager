@@ -28,6 +28,8 @@ class BackupService {
   static const List<String> _tablesOrderedForInsert = [
     'accounts',
     'categories',
+    'category_budgets',
+    'recurring_templates',
     'expenses',
     'transfers',
     'incomes',
@@ -42,6 +44,8 @@ class BackupService {
     'transfers',
     'expenses',
     'incomes',
+    'category_budgets',
+    'recurring_templates',
     'categories',
     'accounts',
   ];

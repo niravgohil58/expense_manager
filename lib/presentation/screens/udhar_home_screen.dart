@@ -10,6 +10,8 @@ import '../../data/models/udhar_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../widgets/drawer_host.dart';
 
 /// Udhar home screen with summary and list
 class UdharHomeScreen extends StatefulWidget {
@@ -40,6 +42,7 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
+        leading: DrawerHost.menuButton(context),
         title: const Text('Udhar'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
@@ -90,28 +93,44 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
                         ),
                         const SizedBox(height: DesignConstants.spacingLg),
                         if (provider.pendingUdhar.isEmpty)
-                          Center(
-                            child: Column(
-                              children: [
-                                const SizedBox(
-                                  height: DesignConstants.spacingXl,
+                          Builder(
+                            builder: (context) {
+                              final l10n = AppLocalizations.of(context)!;
+                              return Center(
+                                child: Column(
+                                  children: [
+                                    const SizedBox(
+                                      height: DesignConstants.spacingXl,
+                                    ),
+                                    Icon(
+                                      Icons.people_outline,
+                                      size: 64,
+                                      color: AppColors.textHint,
+                                    ),
+                                    const SizedBox(
+                                      height: DesignConstants.spacingMd,
+                                    ),
+                                    Text(
+                                      l10n.emptyUdharTitle,
+                                      style: AppTextStyles.bodyLarge.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: DesignConstants.spacingXs),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                                      child: Text(
+                                        l10n.emptyUdharSubtitle,
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color: AppColors.textHint,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Icon(
-                                  Icons.people_outline,
-                                  size: 64,
-                                  color: AppColors.textHint,
-                                ),
-                                const SizedBox(
-                                  height: DesignConstants.spacingMd,
-                                ),
-                                Text(
-                                  'No pending udhar',
-                                  style: AppTextStyles.bodyLarge.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              );
+                            },
                           )
                         else
                           Column(

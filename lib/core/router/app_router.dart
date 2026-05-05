@@ -1,164 +1,245 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../presentation/screens/screens.dart';
-import '../../presentation/screens/add_income_screen.dart';
+
+import '../../core/preferences/app_preferences.dart';
+import '../../data/models/category_model.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/models/income_model.dart';
-import '../../data/models/category_model.dart';
-import '../../presentation/widgets/bottom_nav_shell.dart';
+import '../../l10n/app_localizations.dart';
+import '../../presentation/screens/about_screen.dart';
+import '../../presentation/screens/add_category_screen.dart';
+import '../../presentation/screens/add_account_screen.dart';
+import '../../presentation/screens/add_expense_screen.dart';
+import '../../presentation/screens/add_income_screen.dart';
+import '../../presentation/screens/add_udhar_screen.dart';
+import '../../presentation/screens/budgets_screen.dart';
+import '../../presentation/screens/expense_list_screen.dart';
+import '../../presentation/screens/home_screen.dart';
+import '../../presentation/screens/income_list_screen.dart';
+import '../../presentation/screens/manage_categories_screen.dart';
+import '../../presentation/screens/onboarding_screen.dart';
+import '../../presentation/screens/recurring_template_form_screen.dart';
+import '../../presentation/screens/recurring_templates_screen.dart';
+import '../../presentation/screens/report_screen.dart';
 import '../../presentation/screens/set_pin_screen.dart';
+import '../../presentation/screens/settings_screen.dart';
 import '../../presentation/screens/transfer_history_screen.dart';
+import '../../presentation/screens/transfer_screen.dart';
+import '../../presentation/screens/udhar_detail_screen.dart';
+import '../../presentation/screens/udhar_home_screen.dart';
+import '../../presentation/widgets/bottom_nav_shell.dart';
 
-/// Application router configuration using go_router
+/// Application router; call [create] once at startup (e.g. from [MyApp]).
 class AppRouter {
-  static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final _shellNavigatorKey = GlobalKey<NavigatorState>();
+  AppRouter._();
 
-  static final router = GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'No route for ${state.uri}\nGo back from the system back gesture.',
-            textAlign: TextAlign.center,
+  static final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
+
+  static GoRouter? _router;
+
+  static GoRouter get router {
+    final r = _router;
+    assert(r != null, 'AppRouter.create was not called');
+    return r!;
+  }
+
+  static GoRouter create(AppPreferences prefs) {
+    _router = GoRouter(
+      navigatorKey: rootNavigatorKey,
+      initialLocation: '/home',
+      redirect: (context, state) {
+        final loc = state.matchedLocation;
+        if (!prefs.onboardingCompleted && loc != '/onboarding') {
+          return '/onboarding';
+        }
+        return null;
+      },
+      errorBuilder: (context, state) {
+        final l10n = AppLocalizations.of(context);
+        return Scaffold(
+          appBar: AppBar(title: const Text('Route')),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'No route for ${state.uri}',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: () => context.go('/home'),
+                    child: Text(l10n?.errorGoHome ?? 'Go home'),
+                  ),
+                ],
+              ),
+            ),
           ),
+        );
+      },
+      routes: [
+        GoRoute(
+          path: '/onboarding',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const OnboardingScreen(),
         ),
-      ),
-    ),
-    routes: [
-      // Shell route with bottom navigation
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => BottomNavShell(child: child),
-        routes: [
-          GoRoute(
-            path: '/home',
-            name: 'home',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: HomeScreen(),
+        ShellRoute(
+          navigatorKey: shellNavigatorKey,
+          builder: (context, state, child) => BottomNavShell(child: child),
+          routes: [
+            GoRoute(
+              path: '/home',
+              name: 'home',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: HomeScreen(),
+              ),
             ),
-          ),
-          GoRoute(
-            path: '/income',
-            name: 'income',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: IncomeListScreen(),
+            GoRoute(
+              path: '/income',
+              name: 'income',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: IncomeListScreen(),
+              ),
             ),
-          ),
-          GoRoute(
-            path: '/expenses',
-            name: 'expenses',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ExpenseListScreen(),
+            GoRoute(
+              path: '/expenses',
+              name: 'expenses',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: ExpenseListScreen(),
+              ),
             ),
-          ),
-          GoRoute(
-            path: '/udhar',
-            name: 'udhar',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: UdharHomeScreen(),
+            GoRoute(
+              path: '/udhar',
+              name: 'udhar',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: UdharHomeScreen(),
+              ),
             ),
-          ),
-          GoRoute(
-            path: '/reports',
-            name: 'reports',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ReportScreen(),
+            GoRoute(
+              path: '/reports',
+              name: 'reports',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: ReportScreen(),
+              ),
             ),
-          ),
-        ],
-      ),
-      // Routes outside shell (full screen)
-      GoRoute(
-        path: '/add-expense',
-        name: 'add-expense',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final extra = state.extra;
-          final expense = extra is Expense ? extra : null;
-          return AddExpenseScreen(expense: expense);
-        },
-      ),
-      GoRoute(
-        path: '/add-income',
-        name: 'add-income',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final extra = state.extra;
-          final income = extra is Income ? extra : null;
-          return AddIncomeScreen(income: income);
-        },
-      ),
-      GoRoute(
-        path: '/transfer',
-        name: 'transfer',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const TransferScreen(),
-      ),
-      GoRoute(
-        path: '/add-udhar',
-        name: 'add-udhar',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AddUdharScreen(),
-      ),
-      GoRoute(
-        path: '/udhar/:id',
-        name: 'udhar-detail',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return UdharDetailScreen(udharId: id);
-        },
-      ),
-      GoRoute(
-        path: '/add-account',
-        name: 'add-account',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AddAccountScreen(),
-      ),
-      GoRoute(
-        path: '/manage-categories',
-        name: 'manage-categories',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ManageCategoriesScreen(),
-      ),
-      GoRoute(
-        path: '/add-category',
-        name: 'add-category',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AddCategoryScreen(),
-      ),
-      GoRoute(
-        path: '/edit-category',
-        name: 'edit-category',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final extra = state.extra;
-          final cat = extra is Category ? extra : null;
-          return AddCategoryScreen(category: cat);
-        },
-      ),
-      GoRoute(
-        path: '/transfer-history',
-        name: 'transfer-history',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const TransferHistoryScreen(),
-      ),
-      GoRoute(
-        path: '/set-pin',
-        name: 'set-pin',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SetPinScreen(),
-      ),
-      GoRoute(
-        path: '/settings',
-        name: 'settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SettingsScreen(),
-      ),
-    ],
-  );
+          ],
+        ),
+        GoRoute(
+          path: '/add-expense',
+          name: 'add-expense',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra;
+            final expense = extra is Expense ? extra : null;
+            return AddExpenseScreen(expense: expense);
+          },
+        ),
+        GoRoute(
+          path: '/add-income',
+          name: 'add-income',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra;
+            final income = extra is Income ? extra : null;
+            return AddIncomeScreen(income: income);
+          },
+        ),
+        GoRoute(
+          path: '/transfer',
+          name: 'transfer',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const TransferScreen(),
+        ),
+        GoRoute(
+          path: '/add-udhar',
+          name: 'add-udhar',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const AddUdharScreen(),
+        ),
+        GoRoute(
+          path: '/udhar/:id',
+          name: 'udhar-detail',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return UdharDetailScreen(udharId: id);
+          },
+        ),
+        GoRoute(
+          path: '/add-account',
+          name: 'add-account',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const AddAccountScreen(),
+        ),
+        GoRoute(
+          path: '/manage-categories',
+          name: 'manage-categories',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const ManageCategoriesScreen(),
+        ),
+        GoRoute(
+          path: '/add-category',
+          name: 'add-category',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const AddCategoryScreen(),
+        ),
+        GoRoute(
+          path: '/edit-category',
+          name: 'edit-category',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final extra = state.extra;
+            final cat = extra is Category ? extra : null;
+            return AddCategoryScreen(category: cat);
+          },
+        ),
+        GoRoute(
+          path: '/transfer-history',
+          name: 'transfer-history',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const TransferHistoryScreen(),
+        ),
+        GoRoute(
+          path: '/set-pin',
+          name: 'set-pin',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const SetPinScreen(),
+        ),
+        GoRoute(
+          path: '/settings',
+          name: 'settings',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: '/budgets',
+          name: 'budgets',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const BudgetsScreen(),
+        ),
+        GoRoute(
+          path: '/recurring-templates',
+          name: 'recurring-templates',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const RecurringTemplatesScreen(),
+        ),
+        GoRoute(
+          path: '/recurring-templates/add',
+          name: 'recurring-templates-add',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const RecurringTemplateFormScreen(),
+        ),
+        GoRoute(
+          path: '/about',
+          name: 'about',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const AboutScreen(),
+        ),
+      ],
+    );
+    return _router!;
+  }
 }

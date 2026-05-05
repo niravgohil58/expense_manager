@@ -1,5 +1,8 @@
 // Screens barrel file
+export 'about_screen.dart';
+export 'budgets_screen.dart';
 export 'home_screen.dart';
+export 'onboarding_screen.dart';
 export 'income_list_screen.dart';
 export 'expense_list_screen.dart';
 export 'add_expense_screen.dart';
@@ -8,6 +11,8 @@ export 'udhar_home_screen.dart';
 export 'add_udhar_screen.dart';
 export 'udhar_detail_screen.dart';
 export 'add_account_screen.dart';
+export 'recurring_template_form_screen.dart';
+export 'recurring_templates_screen.dart';
 export 'report_screen.dart';
 export 'manage_categories_screen.dart';
 export 'add_category_screen.dart';

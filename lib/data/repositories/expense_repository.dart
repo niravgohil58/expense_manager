@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:uuid/uuid.dart';
 import '../../core/database/database_helper.dart';
 import '../models/expense_model.dart';
@@ -24,6 +26,14 @@ class ExpenseRepository {
   static const String _expenseTable = 'expenses';
   static const String _transferTable = 'transfers';
 
+  Future<void> _deleteReceiptIfExists(String? path) async {
+    if (path == null || path.isEmpty) return;
+    try {
+      final f = File(path);
+      if (await f.exists()) await f.delete();
+    } catch (_) {}
+  }
+
   // ============ EXPENSE OPERATIONS ============
 
   /// Add new expense and deduct from account in one transaction.
@@ -33,6 +43,7 @@ class ExpenseRepository {
     required String accountId,
     required DateTime date,
     String? note,
+    String? attachmentPath,
   }) async {
     final expense = Expense(
       id: _uuid.v4(),
@@ -42,6 +53,7 @@ class ExpenseRepository {
       date: date,
       note: note,
       createdAt: DateTime.now(),
+      attachmentPath: attachmentPath,
     );
     await _dbHelper.transaction((txn) async {
       await txn.insert(_expenseTable, expense.toMap());
@@ -245,6 +257,9 @@ class ExpenseRepository {
         whereArgs: [updated.id],
       );
     });
+    if (original.attachmentPath != updated.attachmentPath) {
+      await _deleteReceiptIfExists(original.attachmentPath);
+    }
   }
 
   /// Delete expense row and credit balance back in one transaction.
@@ -253,6 +268,7 @@ class ExpenseRepository {
       await txn.delete(_expenseTable, where: 'id = ?', whereArgs: [expense.id]);
       await _accountRepository.applyBalanceDeltaTxn(txn, expense.accountId, expense.amount);
     });
+    await _deleteReceiptIfExists(expense.attachmentPath);
   }
 
   // ============ TRANSFER OPERATIONS ============

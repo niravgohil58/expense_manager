@@ -10,6 +10,19 @@ class AppPreferences {
   static const String keyThemeMode = 'app_theme_mode';
   static const String keyCurrencyCode = 'app_currency_code';
   static const String keyAppLockEnabled = 'app_lock_enabled';
+  static const String keyOnboardingCompleted = 'onboarding_completed';
+  static const String keyPrefsSchema = 'prefs_schema_v4';
+
+  /// Run once after [SharedPreferences.getInstance] before constructing [AppPreferences].
+  static Future<void> migrateInstallPrefs(SharedPreferences p) async {
+    if (p.getBool(keyPrefsSchema) == true) return;
+    final upgradingUser = p.containsKey(keyThemeMode) ||
+        p.containsKey(keyCurrencyCode);
+    if (upgradingUser) {
+      await p.setBool(keyOnboardingCompleted, true);
+    }
+    await p.setBool(keyPrefsSchema, true);
+  }
 
   static const String themeSystem = 'system';
   static const String themeLight = 'light';
@@ -48,5 +61,12 @@ class AppPreferences {
 
   Future<void> setAppLockEnabled(bool enabled) async {
     await _prefs.setBool(keyAppLockEnabled, enabled);
+  }
+
+  bool get onboardingCompleted =>
+      _prefs.getBool(keyOnboardingCompleted) ?? false;
+
+  Future<void> setOnboardingCompleted(bool value) async {
+    await _prefs.setBool(keyOnboardingCompleted, value);
   }
 }

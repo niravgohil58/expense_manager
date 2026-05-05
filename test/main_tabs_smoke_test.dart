@@ -17,7 +17,9 @@ void main() {
   });
 
   testWidgets('shell routes resolve via GoRouter', (WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      AppPreferences.keyOnboardingCompleted: true,
+    });
     final appPrefs = AppPreferences(await SharedPreferences.getInstance());
 
     await tester.pumpWidget(MyApp(appPreferences: appPrefs));

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
+import '../widgets/drawer_host.dart';
 import '../../core/constants/text_styles.dart';
 import '../../data/models/income_model.dart';
 import '../../data/query/income_filters.dart';
@@ -476,6 +477,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
+        leading: DrawerHost.menuButton(context),
         title: const Text('Income'),
         backgroundColor: AppColors.success,
         foregroundColor: Colors.white,

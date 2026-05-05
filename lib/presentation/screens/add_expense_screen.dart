@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
@@ -34,6 +40,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String? _selectedAccountId;
   late DateTime _selectedDate;
   bool _isLoading = false;
+  String? _receiptPath;
 
   bool get _isEditing => widget.expense != null;
 
@@ -46,6 +53,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     _noteController = TextEditingController(text: widget.expense?.note);
     _selectedCategory = widget.expense?.category;
     _selectedDate = widget.expense?.date ?? DateTime.now();
+    _receiptPath = widget.expense?.attachmentPath;
 
     // Default to cash account or existing expense account
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -69,6 +77,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickReceipt() async {
+    final picker = ImagePicker();
+    final x = await picker.pickImage(source: ImageSource.gallery);
+    if (x == null || !mounted) return;
+    try {
+      final docs = await getApplicationDocumentsDirectory();
+      final dir = Directory('${docs.path}/receipts');
+      await dir.create(recursive: true);
+      final ext = p.extension(x.path);
+      final dest = File(p.join(dir.path, '${const Uuid().v4()}$ext'));
+      await File(x.path).copy(dest.path);
+      setState(() => _receiptPath = dest.path);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not attach image: $e')),
+      );
+    }
   }
 
   Future<void> _selectDate() async {
@@ -113,6 +141,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           accountId: _selectedAccountId!,
           date: _selectedDate,
           note: _noteController.text.isNotEmpty ? _noteController.text : null,
+          attachmentPath: _receiptPath,
+          clearAttachmentPath: _receiptPath == null &&
+              widget.expense!.attachmentPath != null,
         ),
       );
     } else {
@@ -122,6 +153,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         accountId: _selectedAccountId!,
         date: _selectedDate,
         note: _noteController.text.isNotEmpty ? _noteController.text : null,
+        attachmentPath: _receiptPath,
       );
     }
 
@@ -269,6 +301,32 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   return null;
                 },
               ),
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _pickReceipt,
+                    icon: const Icon(Icons.photo_camera_outlined),
+                    label: const Text('Attach receipt'),
+                  ),
+                  if (_receiptPath != null)
+                    TextButton(
+                      onPressed: () => setState(() => _receiptPath = null),
+                      child: const Text('Remove'),
+                    ),
+                ],
+              ),
+              if (_receiptPath != null) ...[
+                const SizedBox(height: DesignConstants.spacingSm),
+                ClipRRect(
+                  borderRadius: DesignConstants.borderRadiusMd,
+                  child: Image.file(
+                    File(_receiptPath!),
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Category Selection

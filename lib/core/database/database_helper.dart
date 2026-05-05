@@ -36,7 +36,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -102,6 +102,33 @@ class DatabaseHelper {
         });
       }
     }
+
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE expenses ADD COLUMN attachmentPath TEXT');
+      await db.execute('''
+        CREATE TABLE category_budgets (
+          categoryId TEXT NOT NULL,
+          year INTEGER NOT NULL,
+          month INTEGER NOT NULL,
+          limitAmount REAL NOT NULL,
+          PRIMARY KEY (categoryId, year, month),
+          FOREIGN KEY (categoryId) REFERENCES categories (id)
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE recurring_templates (
+          id TEXT PRIMARY KEY,
+          kind TEXT NOT NULL,
+          amount REAL NOT NULL,
+          categoryRef TEXT NOT NULL,
+          accountId TEXT NOT NULL,
+          note TEXT,
+          frequency TEXT NOT NULL,
+          createdAt TEXT NOT NULL,
+          FOREIGN KEY (accountId) REFERENCES accounts (id)
+        )
+      ''');
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -158,6 +185,7 @@ class DatabaseHelper {
         date TEXT NOT NULL,
         note TEXT,
         createdAt TEXT NOT NULL,
+        attachmentPath TEXT,
         FOREIGN KEY (accountId) REFERENCES accounts (id),
         FOREIGN KEY (category) REFERENCES categories (id)
       )
@@ -220,6 +248,31 @@ class DatabaseHelper {
         accountId TEXT NOT NULL,
         date TEXT NOT NULL,
         note TEXT,
+        createdAt TEXT NOT NULL,
+        FOREIGN KEY (accountId) REFERENCES accounts (id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE category_budgets (
+        categoryId TEXT NOT NULL,
+        year INTEGER NOT NULL,
+        month INTEGER NOT NULL,
+        limitAmount REAL NOT NULL,
+        PRIMARY KEY (categoryId, year, month),
+        FOREIGN KEY (categoryId) REFERENCES categories (id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE recurring_templates (
+        id TEXT PRIMARY KEY,
+        kind TEXT NOT NULL,
+        amount REAL NOT NULL,
+        categoryRef TEXT NOT NULL,
+        accountId TEXT NOT NULL,
+        note TEXT,
+        frequency TEXT NOT NULL,
         createdAt TEXT NOT NULL,
         FOREIGN KEY (accountId) REFERENCES accounts (id)
       )

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
+import '../widgets/drawer_host.dart';
 import '../../core/constants/text_styles.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/query/expense_filters.dart';
@@ -477,6 +478,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
+        leading: DrawerHost.menuButton(context),
         title: const Text('Expenses'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,

@@ -11,6 +11,8 @@ class Expense {
   final DateTime date;
   final String? note;
   final DateTime createdAt;
+  /// Optional local file path for a receipt image (see path_provider).
+  final String? attachmentPath;
 
   const Expense({
     required this.id,
@@ -20,6 +22,7 @@ class Expense {
     required this.date,
     this.note,
     required this.createdAt,
+    this.attachmentPath,
   });
 
   /// Create Expense from database map
@@ -40,6 +43,7 @@ class Expense {
       date: DateTime.parse(map['date'] as String),
       note: map['note'] as String?,
       createdAt: DateTime.parse(map['createdAt'] as String),
+      attachmentPath: map['attachmentPath'] as String?,
     );
   }
 
@@ -53,6 +57,7 @@ class Expense {
       'date': date.toIso8601String(),
       'note': note,
       'createdAt': createdAt.toIso8601String(),
+      'attachmentPath': attachmentPath,
     };
   }
 
@@ -65,6 +70,8 @@ class Expense {
     DateTime? date,
     String? note,
     DateTime? createdAt,
+    String? attachmentPath,
+    bool clearAttachmentPath = false,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -74,6 +81,8 @@ class Expense {
       date: date ?? this.date,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
+      attachmentPath:
+          clearAttachmentPath ? null : (attachmentPath ?? this.attachmentPath),
     );
   }
 

@@ -139,6 +139,7 @@ class ExpenseProvider extends ChangeNotifier {
     required String accountId,
     required DateTime date,
     String? note,
+    String? attachmentPath,
   }) async {
     try {
       await _repository.addExpense(
@@ -147,6 +148,7 @@ class ExpenseProvider extends ChangeNotifier {
         accountId: accountId,
         date: date,
         note: note,
+        attachmentPath: attachmentPath,
       );
       await loadExpenses(showLoading: false);
       await _accountProvider.loadAccounts(showLoading: false);
@@ -259,6 +261,21 @@ class ExpenseProvider extends ChangeNotifier {
     DateTime end,
   ) async {
     return await _repository.getExpensesByCategories(start, end);
+  }
+
+  /// Sum loaded expenses for [categoryId] in inclusive [start]–[end] range.
+  double totalExpenseForCategoryInRange(
+    String categoryId,
+    DateTime start,
+    DateTime end,
+  ) {
+    double sum = 0;
+    for (final e in _expenses) {
+      if (e.category.id != categoryId) continue;
+      final d = e.date;
+      if (!d.isBefore(start) && !d.isAfter(end)) sum += e.amount;
+    }
+    return sum;
   }
 
   /// Clear error

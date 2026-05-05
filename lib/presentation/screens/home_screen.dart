@@ -11,6 +11,7 @@ import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/settings_provider.dart';
+import '../widgets/drawer_host.dart';
 
 /// Home screen with account balances and quick actions
 class HomeScreen extends StatefulWidget {
@@ -46,17 +47,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
+        leading: DrawerHost.menuButton(context),
         title: const Text('Expense Manager'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
-        actions: [
-          IconButton(
-            tooltip: 'Settings',
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => _loadData(silentReload: true),

@@ -7,10 +7,12 @@ import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
 import '../../data/models/category_model.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/settings_provider.dart';
+import '../widgets/drawer_host.dart';
 import '../providers/udhar_provider.dart';
 
 /// Report screen with charts
@@ -98,6 +100,7 @@ class _ReportScreenState extends State<ReportScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
+        leading: DrawerHost.menuButton(context),
         title: const Text('Reports'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
@@ -305,6 +308,43 @@ class _ReportScreenState extends State<ReportScreen> {
                           ],
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: DesignConstants.spacingLg),
+
+                  Text(
+                    AppLocalizations.of(context)!.reportNetMonthlyTitle,
+                    style: AppTextStyles.heading4,
+                  ),
+                  const SizedBox(height: DesignConstants.spacingSm),
+                  Container(
+                    padding: DesignConstants.paddingMd,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: DesignConstants.borderRadiusMd,
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: List.generate(12, (i) {
+                        final net =
+                            _monthlyIncomeData[i] - _monthlyExpenseData[i];
+                        final mo = DateFormat.MMM()
+                            .format(DateTime(_selectedYear, i + 1));
+                        return ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          title: Text(mo),
+                          trailing: Text(
+                            '${net >= 0 ? '+' : ''}${formatter.format(net)}',
+                            style: AppTextStyles.labelMedium.copyWith(
+                              color: net >= 0
+                                  ? AppColors.income
+                                  : AppColors.expense,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
