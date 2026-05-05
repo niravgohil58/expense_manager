@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/category_picker_icons.dart';
+
 class Category {
   final String id;
   final String name;
@@ -19,7 +21,7 @@ class Category {
     required this.createdAt,
   });
 
-  IconData get icon => IconData(iconCode, fontFamily: 'MaterialIcons');
+  IconData get icon => categoryIconForCodePoint(iconCode);
   Color get color => Color(colorValue);
 
   Map<String, dynamic> toMap() {

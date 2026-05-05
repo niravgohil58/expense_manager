@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/category_picker_icons.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
 import '../../data/models/category_model.dart';
@@ -20,28 +21,6 @@ class AddCategoryScreen extends StatefulWidget {
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-
-  // Predefined icons
-  final List<IconData> _icons = [
-    Icons.restaurant,
-    Icons.directions_car,
-    Icons.home,
-    Icons.shopping_bag,
-    Icons.more_horiz,
-    Icons.fitness_center,
-    Icons.local_hospital,
-    Icons.school,
-    Icons.work,
-    Icons.flight,
-    Icons.pets,
-    Icons.local_cafe,
-    Icons.movie,
-    Icons.music_note,
-    Icons.sports_esports,
-    Icons.phone_android,
-    Icons.wifi,
-    Icons.paid,
-  ];
 
   // Predefined colors
   final List<Color> _colors = [
@@ -72,7 +51,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       _selectedIcon = c.icon;
       _selectedColor = c.color;
     } else {
-      _selectedIcon = _icons.first;
+      _selectedIcon = kCategoryPickerIcons.first;
       _selectedColor = _colors.first;
     }
   }
@@ -188,9 +167,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   crossAxisSpacing: DesignConstants.spacingSm,
                   mainAxisSpacing: DesignConstants.spacingSm,
                 ),
-                itemCount: _icons.length,
+                itemCount: kCategoryPickerIcons.length,
                 itemBuilder: (context, index) {
-                  final icon = _icons[index];
+                  final icon = kCategoryPickerIcons[index];
                   final isSelected = _selectedIcon == icon;
                   return InkWell(
                     onTap: () => setState(() => _selectedIcon = icon),
