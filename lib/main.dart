@@ -102,9 +102,17 @@ class _MyAppState extends State<MyApp> {
                 themeMode: settings.themeMode,
                 theme: buildLightTheme(),
                 darkTheme: buildDarkTheme(),
-                locale: const Locale('en'),
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
+                localeResolutionCallback: (locale, supportedLocales) {
+                  if (locale == null) return supportedLocales.first;
+                  for (final supported in supportedLocales) {
+                    if (supported.languageCode == locale.languageCode) {
+                      return supported;
+                    }
+                  }
+                  return supportedLocales.first;
+                },
                 routerConfig: _router,
               ),
               if (lock.needsLockOverlay)

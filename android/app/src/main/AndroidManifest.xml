@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Gallery receipts (API 33+); scoped storage / photo picker on newer versions. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
     <application
-        android:label="expense_app"
+        android:label="Expense Manager"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
