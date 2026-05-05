@@ -13,6 +13,16 @@ class AppPreferences {
   static const String keyOnboardingCompleted = 'onboarding_completed';
   static const String keyPrefsSchema = 'prefs_schema_v4';
 
+  /// Local weekly reminders (flutter_local_notifications).
+  static const String keyRecurringReminderEnabled = 'reminder_recurring_enabled';
+  static const String keyRecurringReminderWeekday = 'reminder_recurring_weekday';
+  static const String keyRecurringReminderHour = 'reminder_recurring_hour';
+  static const String keyRecurringReminderMinute = 'reminder_recurring_minute';
+  static const String keyBackupReminderEnabled = 'reminder_backup_enabled';
+  static const String keyBackupReminderWeekday = 'reminder_backup_weekday';
+  static const String keyBackupReminderHour = 'reminder_backup_hour';
+  static const String keyBackupReminderMinute = 'reminder_backup_minute';
+
   /// Run once after [SharedPreferences.getInstance] before constructing [AppPreferences].
   static Future<void> migrateInstallPrefs(SharedPreferences p) async {
     if (p.getBool(keyPrefsSchema) == true) return;
@@ -68,5 +78,62 @@ class AppPreferences {
 
   Future<void> setOnboardingCompleted(bool value) async {
     await _prefs.setBool(keyOnboardingCompleted, value);
+  }
+
+  /// [weekday] matches [DateTime.weekday] (Monday = 1 … Sunday = 7).
+  bool get recurringReminderEnabled =>
+      _prefs.getBool(keyRecurringReminderEnabled) ?? false;
+
+  Future<void> setRecurringReminderEnabled(bool value) async {
+    await _prefs.setBool(keyRecurringReminderEnabled, value);
+  }
+
+  int get recurringReminderWeekday =>
+      _prefs.getInt(keyRecurringReminderWeekday) ?? DateTime.sunday;
+
+  Future<void> setRecurringReminderWeekday(int weekday) async {
+    await _prefs.setInt(keyRecurringReminderWeekday, weekday);
+  }
+
+  int get recurringReminderHour =>
+      _prefs.getInt(keyRecurringReminderHour) ?? 10;
+
+  Future<void> setRecurringReminderHour(int hour) async {
+    await _prefs.setInt(keyRecurringReminderHour, hour);
+  }
+
+  int get recurringReminderMinute =>
+      _prefs.getInt(keyRecurringReminderMinute) ?? 0;
+
+  Future<void> setRecurringReminderMinute(int minute) async {
+    await _prefs.setInt(keyRecurringReminderMinute, minute);
+  }
+
+  bool get backupReminderEnabled =>
+      _prefs.getBool(keyBackupReminderEnabled) ?? false;
+
+  Future<void> setBackupReminderEnabled(bool value) async {
+    await _prefs.setBool(keyBackupReminderEnabled, value);
+  }
+
+  int get backupReminderWeekday =>
+      _prefs.getInt(keyBackupReminderWeekday) ?? DateTime.saturday;
+
+  Future<void> setBackupReminderWeekday(int weekday) async {
+    await _prefs.setInt(keyBackupReminderWeekday, weekday);
+  }
+
+  int get backupReminderHour =>
+      _prefs.getInt(keyBackupReminderHour) ?? 18;
+
+  Future<void> setBackupReminderHour(int hour) async {
+    await _prefs.setInt(keyBackupReminderHour, hour);
+  }
+
+  int get backupReminderMinute =>
+      _prefs.getInt(keyBackupReminderMinute) ?? 0;
+
+  Future<void> setBackupReminderMinute(int minute) async {
+    await _prefs.setInt(keyBackupReminderMinute, minute);
   }
 }

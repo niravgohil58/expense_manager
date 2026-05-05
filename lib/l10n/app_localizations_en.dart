@@ -107,7 +107,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurringSubtitle =>
-      'Save common entries and post them when due (no automatic reminders yet).';
+      'Save common entries and post them when due. Enable weekly reminders in Settings.';
+
+  @override
+  String get settingsRemindersTitle => 'Reminders';
+
+  @override
+  String get settingsRemindersUnavailable =>
+      'Local reminders are available on Android and iOS devices.';
+
+  @override
+  String get settingsRecurringReminderTitle => 'Weekly recurring reminder';
+
+  @override
+  String get settingsRecurringReminderSubtitle =>
+      'Nudge to review recurring templates and post when due.';
+
+  @override
+  String get settingsBackupReminderTitle => 'Weekly backup reminder';
+
+  @override
+  String get settingsBackupReminderSubtitle =>
+      'Reminder to export a backup from Settings.';
+
+  @override
+  String get settingsReminderPickWeekday => 'Day';
+
+  @override
+  String get settingsReminderPermissionDenied =>
+      'Notification permission is required for reminders.';
 
   @override
   String get recurringPostNow => 'Post now';

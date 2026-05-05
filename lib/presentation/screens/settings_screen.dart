@@ -23,6 +23,7 @@ import '../providers/lock_provider.dart';
 
 import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
+import '../widgets/reminders_settings_section.dart';
 
 /// Hub for app preferences and backup / restore.
 class SettingsScreen extends StatelessWidget {
@@ -274,6 +275,8 @@ class SettingsScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  const SizedBox(height: DesignConstants.spacingLg),
+                  const RemindersSettingsSection(),
                   const SizedBox(height: DesignConstants.spacingLg),
                   Text('Region & security', style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),

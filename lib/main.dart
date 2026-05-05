@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'core/notifications/local_notification_service.dart';
 import 'core/preferences/app_preferences.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -31,6 +32,10 @@ Future<void> main() async {
   final sharedPrefs = await SharedPreferences.getInstance();
   await AppPreferences.migrateInstallPrefs(sharedPrefs);
   final appPreferences = AppPreferences(sharedPrefs);
+  if (Platform.isAndroid || Platform.isIOS) {
+    await LocalNotificationService.instance.initialize();
+    await LocalNotificationService.instance.rescheduleFromPrefs(appPreferences);
+  }
   runApp(MyApp(appPreferences: appPreferences));
 }
 

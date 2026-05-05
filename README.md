@@ -53,7 +53,8 @@ To add a language: create `app_<locale>.arb`, run `flutter gen-l10n`, and extend
 ## Platform notes
 
 - **Receipt images**: The app picks images from the **gallery** only. Android and iOS declare usage strings/permissions where required (see manifests).
-- **Store submission**: Provide a privacy policy if you publish (local data, optional backups, receipt photos).
+- **Local reminders** (Android / iOS): Weekly notifications for recurring templates and for backups can be enabled under **Settings → Reminders**. Grant notification permission when prompted.
+- **Store submission**: Provide a privacy policy if you publish (local data, optional backups, receipt photos, reminders).
 
 ## Store readiness checklist
 

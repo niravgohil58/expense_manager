@@ -283,8 +283,56 @@ abstract class AppLocalizations {
   /// No description provided for @recurringSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Save common entries and post them when due (no automatic reminders yet).'**
+  /// **'Save common entries and post them when due. Enable weekly reminders in Settings.'**
   String get recurringSubtitle;
+
+  /// No description provided for @settingsRemindersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get settingsRemindersTitle;
+
+  /// No description provided for @settingsRemindersUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Local reminders are available on Android and iOS devices.'**
+  String get settingsRemindersUnavailable;
+
+  /// No description provided for @settingsRecurringReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly recurring reminder'**
+  String get settingsRecurringReminderTitle;
+
+  /// No description provided for @settingsRecurringReminderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nudge to review recurring templates and post when due.'**
+  String get settingsRecurringReminderSubtitle;
+
+  /// No description provided for @settingsBackupReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly backup reminder'**
+  String get settingsBackupReminderTitle;
+
+  /// No description provided for @settingsBackupReminderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder to export a backup from Settings.'**
+  String get settingsBackupReminderSubtitle;
+
+  /// No description provided for @settingsReminderPickWeekday.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get settingsReminderPickWeekday;
+
+  /// No description provided for @settingsReminderPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission is required for reminders.'**
+  String get settingsReminderPermissionDenied;
 
   /// No description provided for @recurringPostNow.
   ///
