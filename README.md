@@ -4,6 +4,8 @@ Offline-first expense and income tracker with accounts, transfers, udhar (lendin
 
 The Dart package name is **`expense_app`** (see `pubspec.yaml`); this repo folder may be named `expense_manager`.
 
+**Store identifiers:** Android `applicationId` and iOS `PRODUCT_BUNDLE_IDENTIFIER` are **`com.expensemanager.app`**. Replace with **your own** reverse-DNS IDs before publishing if you need a unique namespace (changing IDs later breaks updates for existing installs).
+
 ## Requirements
 
 - [Flutter](https://docs.flutter.dev/get-started/install) (stable channel)
@@ -31,7 +33,16 @@ After cloning, always run **`flutter pub get`** so `.dart_tool/` and plugin regi
 
 - **PIN**: Used for app lock; secrets stored via platform secure storage where supported.
 - **Database & backups**: Stored on device storage; backups are files you control—treat them like sensitive data.
-- **Release signing (Android)**: Use a local keystore and `key.properties`; **never** commit keystores or passwords. Add `key.properties` and `*.jks` to `.gitignore` if you introduce them.
+- **Android release signing**
+  1. Copy `android/key.properties.example` to `android/key.properties` (gitignored).
+  2. Create an upload keystore with `keytool` (see comments in the example file).
+  3. Place the `.jks` file under `android/` (or use an absolute path in `storeFile`).
+  4. Fill `storePassword`, `keyPassword`, `keyAlias`, `storeFile` in `key.properties`.
+  5. Build: `flutter build appbundle` (Play Store) or `flutter build apk --release`.
+
+  Without `key.properties`, **release** builds fall back to **debug signing** (fine for local QA only; **not** for Play upload).
+
+- **iOS**: Configure signing & capabilities in Xcode for your Apple Developer team; `ITSAppUsesNonExemptEncryption` is set to **false** for standard app encryption only—adjust if your legal/compliance review requires otherwise.
 
 ## Internationalization
 
@@ -43,6 +54,13 @@ To add a language: create `app_<locale>.arb`, run `flutter gen-l10n`, and extend
 
 - **Receipt images**: The app picks images from the **gallery** only. Android and iOS declare usage strings/permissions where required (see manifests).
 - **Store submission**: Provide a privacy policy if you publish (local data, optional backups, receipt photos).
+
+## Store readiness checklist
+
+- [ ] Own **Android application ID** / **iOS bundle ID** registered in Play Console / App Store Connect (replace defaults if needed **before** first public release).
+- [ ] Android **`key.properties`** + upload keystore; **`flutter build appbundle`**.
+- [ ] Play Console: privacy policy URL, Data safety, content rating, screenshots.
+- [ ] Physical device QA on Android + iOS (especially receipts, backup, PIN).
 
 ## Contributing
 

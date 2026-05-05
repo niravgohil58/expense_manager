@@ -26,3 +26,8 @@ If Git still tracks a path after we ignored it, run `git rm -r --cached <path>` 
 
 - Describe behavior changes and any schema / backup format bumps.
 - For UI changes, note platforms tested (Android / iOS / desktop).
+
+## Release builds
+
+- **Android**: See root `README.md` → Security → Android release signing (`android/key.properties.example`).
+- **iOS**: Open `ios/Runner.xcworkspace`, set your Team and bundle identifier if you replace the default `com.expensemanager.app`.
