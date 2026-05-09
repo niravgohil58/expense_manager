@@ -16,6 +16,7 @@ import '../../presentation/screens/budgets_screen.dart';
 import '../../presentation/screens/expense_list_screen.dart';
 import '../../presentation/screens/home_screen.dart';
 import '../../presentation/screens/income_list_screen.dart';
+import '../../presentation/screens/legal_document_screen.dart';
 import '../../presentation/screens/manage_categories_screen.dart';
 import '../../presentation/screens/onboarding_screen.dart';
 import '../../presentation/screens/recurring_template_form_screen.dart';
@@ -50,7 +51,10 @@ class AppRouter {
       initialLocation: '/home',
       redirect: (context, state) {
         final loc = state.matchedLocation;
-        if (!prefs.onboardingCompleted && loc != '/onboarding') {
+        if (!prefs.onboardingCompleted &&
+            loc != '/onboarding' &&
+            loc != '/terms' &&
+            loc != '/privacy') {
           return '/onboarding';
         }
         return null;
@@ -85,6 +89,30 @@ class AppRouter {
           path: '/onboarding',
           parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => const OnboardingScreen(),
+        ),
+        GoRoute(
+          path: '/terms',
+          name: 'terms',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final l10n = AppLocalizations.of(context)!;
+            return LegalDocumentScreen(
+              title: l10n.drawerTermsConditions,
+              assetPath: 'assets/legal/terms_en.md',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/privacy',
+          name: 'privacy',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final l10n = AppLocalizations.of(context)!;
+            return LegalDocumentScreen(
+              title: l10n.drawerPrivacyPolicy,
+              assetPath: 'assets/legal/privacy_en.md',
+            );
+          },
         ),
         ShellRoute(
           navigatorKey: shellNavigatorKey,

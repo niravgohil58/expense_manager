@@ -195,6 +195,16 @@ class AppDrawer extends StatelessWidget {
                   onTap: () => push('/onboarding'),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.description_outlined),
+                  title: Text(l10n.drawerTermsConditions),
+                  onTap: () => push('/terms'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.privacy_tip_outlined),
+                  title: Text(l10n.drawerPrivacyPolicy),
+                  onTap: () => push('/privacy'),
+                ),
+                ListTile(
                   leading: const Icon(Icons.info_outline_rounded),
                   title: Text(l10n.drawerAbout),
                   onTap: () => push('/about'),

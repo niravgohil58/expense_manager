@@ -51,6 +51,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawerAbout => 'About';
 
   @override
+  String get drawerTermsConditions => 'Terms & Conditions';
+
+  @override
+  String get drawerPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get legalAcceptSnackbar =>
+      'Please accept the Terms & Conditions and Privacy Policy to continue.';
+
+  @override
+  String get onboardingLegalPrefix => 'I have read and agree to the ';
+
+  @override
+  String get onboardingLegalMiddle => ' and ';
+
+  @override
+  String get onboardingLegalSuffix => '.';
+
+  @override
   String get drawerHeaderTitle => 'Expense Manager';
 
   @override

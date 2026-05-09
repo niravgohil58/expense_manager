@@ -31,6 +31,7 @@ Future<void> main() async {
   }
   final sharedPrefs = await SharedPreferences.getInstance();
   await AppPreferences.migrateInstallPrefs(sharedPrefs);
+  await AppPreferences.migrateLegalTermsGrandfather(sharedPrefs);
   final appPreferences = AppPreferences(sharedPrefs);
   if (Platform.isAndroid || Platform.isIOS) {
     await LocalNotificationService.instance.initialize();

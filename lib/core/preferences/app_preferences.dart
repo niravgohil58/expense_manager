@@ -26,6 +26,13 @@ class AppPreferences {
   /// IOUs home screen intro panel (user can hide once understood).
   static const String keyIouScreenTipsVisible = 'iou_screen_tips_visible';
 
+  /// User accepted Terms & Privacy (required to finish onboarding).
+  static const String keyLegalTermsAccepted = 'legal_terms_accepted_v1';
+
+  /// One-time: existing installs already past onboarding before legal consent existed.
+  static const String keyLegalTermsGrandfatherDone =
+      'legal_terms_grandfather_v1';
+
   /// Run once after [SharedPreferences.getInstance] before constructing [AppPreferences].
   static Future<void> migrateInstallPrefs(SharedPreferences p) async {
     if (p.getBool(keyPrefsSchema) == true) return;
@@ -35,6 +42,17 @@ class AppPreferences {
       await p.setBool(keyOnboardingCompleted, true);
     }
     await p.setBool(keyPrefsSchema, true);
+  }
+
+  /// Call on every cold start after [migrateInstallPrefs].
+  static Future<void> migrateLegalTermsGrandfather(SharedPreferences p) async {
+    if (p.getBool(keyLegalTermsGrandfatherDone) == true) return;
+    final onboardDone = p.getBool(keyOnboardingCompleted) ?? false;
+    final hasLegalKey = p.containsKey(keyLegalTermsAccepted);
+    if (onboardDone && !hasLegalKey) {
+      await p.setBool(keyLegalTermsAccepted, true);
+    }
+    await p.setBool(keyLegalTermsGrandfatherDone, true);
   }
 
   static const String themeSystem = 'system';
@@ -145,5 +163,12 @@ class AppPreferences {
 
   Future<void> setIouScreenTipsVisible(bool visible) async {
     await _prefs.setBool(keyIouScreenTipsVisible, visible);
+  }
+
+  bool get legalTermsAccepted =>
+      _prefs.getBool(keyLegalTermsAccepted) ?? false;
+
+  Future<void> setLegalTermsAccepted(bool value) async {
+    await _prefs.setBool(keyLegalTermsAccepted, value);
   }
 }

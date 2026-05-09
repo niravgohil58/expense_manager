@@ -178,6 +178,42 @@ abstract class AppLocalizations {
   /// **'About'**
   String get drawerAbout;
 
+  /// No description provided for @drawerTermsConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions'**
+  String get drawerTermsConditions;
+
+  /// No description provided for @drawerPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get drawerPrivacyPolicy;
+
+  /// No description provided for @legalAcceptSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the Terms & Conditions and Privacy Policy to continue.'**
+  String get legalAcceptSnackbar;
+
+  /// No description provided for @onboardingLegalPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and agree to the '**
+  String get onboardingLegalPrefix;
+
+  /// No description provided for @onboardingLegalMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get onboardingLegalMiddle;
+
+  /// No description provided for @onboardingLegalSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'.'**
+  String get onboardingLegalSuffix;
+
   /// No description provided for @drawerHeaderTitle.
   ///
   /// In en, this message translates to:

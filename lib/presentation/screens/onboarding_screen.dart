@@ -17,6 +17,18 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _page = 0;
+  bool _termsAccepted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prefs = context.read<AppPreferences>();
+      if (prefs.legalTermsAccepted && mounted) {
+        setState(() => _termsAccepted = true);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -24,8 +36,53 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  Future<void> _finish(BuildContext context) async {
-    await context.read<AppPreferences>().setOnboardingCompleted(true);
+  Future<void> _finish(BuildContext context, int lastIndex) async {
+    final prefs = context.read<AppPreferences>();
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    if (!prefs.legalTermsAccepted && !_termsAccepted) {
+      await _controller.animateToPage(
+        lastIndex,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+      if (!context.mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.legalAcceptSnackbar)));
+      return;
+    }
+
+    if (_termsAccepted && !prefs.legalTermsAccepted) {
+      await prefs.setLegalTermsAccepted(true);
+    }
+
+    await prefs.setOnboardingCompleted(true);
+    if (!context.mounted) return;
+    context.go('/home');
+  }
+
+  Future<void> _advance(BuildContext context, int lastIndex) async {
+    if (_page < lastIndex) {
+      await _controller.nextPage(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      return;
+    }
+
+    final prefs = context.read<AppPreferences>();
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    if (!prefs.legalTermsAccepted && !_termsAccepted) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.legalAcceptSnackbar)));
+      return;
+    }
+
+    if (!prefs.legalTermsAccepted) {
+      await prefs.setLegalTermsAccepted(true);
+    }
+    await prefs.setOnboardingCompleted(true);
     if (!context.mounted) return;
     context.go('/home');
   }
@@ -35,17 +92,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       duration: const Duration(milliseconds: 320),
       curve: Curves.easeOutCubic,
     );
-  }
-
-  void _advance(BuildContext context, int lastIndex) {
-    if (_page < lastIndex) {
-      _controller.nextPage(
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-      );
-    } else {
-      _finish(context);
-    }
   }
 
   @override
@@ -102,7 +148,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => _finish(context),
+                  onPressed: () => _finish(context, lastIndex),
                   child: Text(l10n.commonSkip),
                 ),
               ),
@@ -163,6 +209,70 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
             ),
+            if (_page == lastIndex)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  DesignConstants.spacingLg,
+                  0,
+                  DesignConstants.spacingLg,
+                  DesignConstants.spacingSm,
+                ),
+                child: CheckboxListTile(
+                  value: _termsAccepted,
+                  onChanged: (v) =>
+                      setState(() => _termsAccepted = v ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  title: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 2,
+                    runSpacing: 4,
+                    children: [
+                      Text(
+                        l10n.onboardingLegalPrefix,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.35,
+                              color: scheme.onSurface,
+                            ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          foregroundColor: scheme.primary,
+                        ),
+                        onPressed: () => context.push('/terms'),
+                        child: Text(l10n.drawerTermsConditions),
+                      ),
+                      Text(
+                        l10n.onboardingLegalMiddle,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.35,
+                              color: scheme.onSurface,
+                            ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          foregroundColor: scheme.primary,
+                        ),
+                        onPressed: () => context.push('/privacy'),
+                        child: Text(l10n.drawerPrivacyPolicy),
+                      ),
+                      Text(
+                        l10n.onboardingLegalSuffix,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.35,
+                              color: scheme.onSurface,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 DesignConstants.spacingLg,

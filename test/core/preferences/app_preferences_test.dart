@@ -41,6 +41,21 @@ void main() {
       expect(prefs.iouScreenTipsVisible, true);
     });
 
+    test('grandfather grants legal acceptance when onboarding already completed',
+        () async {
+      SharedPreferences.setMockInitialValues({
+        AppPreferences.keyOnboardingCompleted: true,
+      });
+      final raw = await SharedPreferences.getInstance();
+      await AppPreferences.migrateLegalTermsGrandfather(raw);
+
+      final prefs = AppPreferences(raw);
+      expect(prefs.legalTermsAccepted, true);
+
+      await AppPreferences.migrateLegalTermsGrandfather(raw);
+      expect(prefs.legalTermsAccepted, true);
+    });
+
     test('app lock defaults to false', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = AppPreferences(await SharedPreferences.getInstance());
