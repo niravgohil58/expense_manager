@@ -5,6 +5,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:expense_app/core/preferences/app_preferences.dart';
 import 'package:expense_app/main.dart';
+import 'package:expense_app/presentation/providers/auth_provider.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +23,13 @@ void main() {
     final appPrefs = AppPreferences(prefs);
     expect(appPrefs.onboardingCompleted, isFalse);
 
-    await tester.pumpWidget(MyApp(appPreferences: appPrefs));
+    await tester.pumpWidget(MyApp(
+      appPreferences: appPrefs,
+      authProvider: AuthProvider(
+        prefs: appPrefs,
+        firebaseAuthEnabled: false,
+      ),
+    ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 

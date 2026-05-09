@@ -57,19 +57,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawerPrivacyPolicy => 'Privacy Policy';
 
   @override
-  String get legalAcceptSnackbar =>
-      'Please accept the Terms & Conditions and Privacy Policy to continue.';
-
-  @override
-  String get onboardingLegalPrefix => 'I have read and agree to the ';
-
-  @override
-  String get onboardingLegalMiddle => ' and ';
-
-  @override
-  String get onboardingLegalSuffix => '.';
-
-  @override
   String get drawerHeaderTitle => 'Expense Manager';
 
   @override
@@ -246,4 +233,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get iouTipsShowTooltip => 'Show tips';
+
+  @override
+  String get loginTitle => 'Sign in';
+
+  @override
+  String get loginRegisterTitle => 'Create account';
+
+  @override
+  String get loginSubtitle =>
+      'Sign in to sync your profile securely with Firebase.';
+
+  @override
+  String get loginEmailLabel => 'Email';
+
+  @override
+  String get loginPasswordLabel => 'Password';
+
+  @override
+  String get loginEmailInvalid => 'Enter a valid email.';
+
+  @override
+  String get loginPasswordTooShort => 'Password must be at least 6 characters.';
+
+  @override
+  String get loginPrimarySignIn => 'Sign in';
+
+  @override
+  String get loginPrimaryRegister => 'Create account';
+
+  @override
+  String get loginToggleToRegister => 'Need an account? Register';
+
+  @override
+  String get loginToggleToSignIn => 'Already have an account? Sign in';
+
+  @override
+  String get loginGoogle => 'Continue with Google';
+
+  @override
+  String get loginErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileNotSignedIn => 'Not signed in.';
+
+  @override
+  String get profileNoDisplayName => 'User';
+
+  @override
+  String get profileUserIdLabel => 'User ID';
+
+  @override
+  String get profileSignOut => 'Sign out';
+
+  @override
+  String get drawerProfile => 'Profile';
 }

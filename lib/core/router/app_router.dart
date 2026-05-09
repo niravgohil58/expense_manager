@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +7,7 @@ import '../../data/models/category_model.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/models/income_model.dart';
 import '../../l10n/app_localizations.dart';
+import '../../presentation/providers/auth_provider.dart';
 import '../../presentation/screens/about_screen.dart';
 import '../../presentation/screens/add_category_screen.dart';
 import '../../presentation/screens/add_account_screen.dart';
@@ -17,8 +19,10 @@ import '../../presentation/screens/expense_list_screen.dart';
 import '../../presentation/screens/home_screen.dart';
 import '../../presentation/screens/income_list_screen.dart';
 import '../../presentation/screens/legal_document_screen.dart';
+import '../../presentation/screens/login_screen.dart';
 import '../../presentation/screens/manage_categories_screen.dart';
 import '../../presentation/screens/onboarding_screen.dart';
+import '../../presentation/screens/profile_screen.dart';
 import '../../presentation/screens/recurring_template_form_screen.dart';
 import '../../presentation/screens/recurring_templates_screen.dart';
 import '../../presentation/screens/report_screen.dart';
@@ -45,18 +49,43 @@ class AppRouter {
     return r!;
   }
 
-  static GoRouter create(AppPreferences prefs) {
+  static GoRouter create(AppPreferences prefs, AuthProvider authProvider) {
     _router = GoRouter(
       navigatorKey: rootNavigatorKey,
       initialLocation: '/home',
+      refreshListenable: authProvider,
       redirect: (context, state) {
         final loc = state.matchedLocation;
+
+        if (!authProvider.firebaseAuthEnabled) {
+          if (!prefs.onboardingCompleted &&
+              loc != '/onboarding' &&
+              loc != '/terms' &&
+              loc != '/privacy') {
+            return '/onboarding';
+          }
+          return null;
+        }
+
+        final loggedIn = FirebaseAuth.instance.currentUser != null;
+        const publicWhenLoggedOut = {'/login', '/terms', '/privacy'};
+
+        if (!loggedIn) {
+          if (publicWhenLoggedOut.contains(loc)) return null;
+          return '/login';
+        }
+
+        if (loggedIn && loc == '/login') {
+          return prefs.onboardingCompleted ? '/home' : '/onboarding';
+        }
+
         if (!prefs.onboardingCompleted &&
             loc != '/onboarding' &&
             loc != '/terms' &&
             loc != '/privacy') {
           return '/onboarding';
         }
+
         return null;
       },
       errorBuilder: (context, state) {
@@ -85,6 +114,17 @@ class AppRouter {
         );
       },
       routes: [
+        GoRoute(
+          path: '/login',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/profile',
+          name: 'profile',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const ProfileScreen(),
+        ),
         GoRoute(
           path: '/onboarding',
           parentNavigatorKey: rootNavigatorKey,

@@ -1,17 +1,21 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'core/config/firebase_auth_platform.dart';
 import 'core/notifications/local_notification_service.dart';
 import 'core/preferences/app_preferences.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 import 'presentation/providers/account_provider.dart';
+import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/backup_provider.dart';
 import 'presentation/providers/budget_provider.dart';
 import 'presentation/providers/category_provider.dart';
@@ -33,30 +37,59 @@ Future<void> main() async {
   await AppPreferences.migrateInstallPrefs(sharedPrefs);
   await AppPreferences.migrateLegalTermsGrandfather(sharedPrefs);
   final appPreferences = AppPreferences(sharedPrefs);
+
+  if (firebaseAuthSupportedPlatform) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } on FirebaseException catch (e) {
+      // Native Android often registers [DEFAULT] via google-services before Dart runs;
+      // Dart's Firebase.apps can still look empty, so initializeApp throws duplicate-app.
+      final code = e.code.toLowerCase();
+      if (!code.contains('duplicate')) rethrow;
+    }
+  }
+
+  final authProvider = AuthProvider(
+    prefs: appPreferences,
+    firebaseAuthEnabled: firebaseAuthSupportedPlatform,
+  );
+
   if (Platform.isAndroid || Platform.isIOS) {
     await LocalNotificationService.instance.initialize();
     await LocalNotificationService.instance.rescheduleFromPrefs(appPreferences);
   }
-  runApp(MyApp(appPreferences: appPreferences));
+  runApp(MyApp(
+    appPreferences: appPreferences,
+    authProvider: authProvider,
+  ));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key, required this.appPreferences});
+  const MyApp({
+    super.key,
+    required this.appPreferences,
+    required this.authProvider,
+  });
 
   final AppPreferences appPreferences;
+  final AuthProvider authProvider;
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  late final GoRouter _router = AppRouter.create(widget.appPreferences);
+  late final GoRouter _router =
+      AppRouter.create(widget.appPreferences, widget.authProvider);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         Provider<AppPreferences>.value(value: widget.appPreferences),
+        ChangeNotifierProvider.value(value: widget.authProvider),
         ChangeNotifierProvider(
           create: (_) => SettingsProvider(widget.appPreferences),
         ),

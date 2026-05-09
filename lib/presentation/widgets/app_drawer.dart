@@ -7,6 +7,7 @@ import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/account_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 
 /// Navigation drawer for shell routes (opened via [DrawerHost]).
@@ -93,6 +94,27 @@ class AppDrawer extends StatelessWidget {
                           height: 1.15,
                         ),
                   ),
+                  Consumer<AuthProvider>(
+                    builder: (context, auth, _) {
+                      if (!auth.firebaseAuthEnabled) {
+                        return const SizedBox.shrink();
+                      }
+                      final email = auth.firebaseUser?.email;
+                      if (email == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          email,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -103,6 +125,12 @@ class AppDrawer extends StatelessWidget {
                 vertical: DesignConstants.spacingSm,
               ),
               children: [
+                ListTile(
+                  leading: const Icon(Icons.person_outline_rounded),
+                  title: Text(l10n.drawerProfile),
+                  onTap: () => push('/profile'),
+                ),
+                const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                   child: Text(

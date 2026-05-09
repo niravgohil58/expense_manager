@@ -1,5 +1,6 @@
 // Providers barrel file
 export 'account_provider.dart';
+export 'auth_provider.dart';
 export 'budget_provider.dart';
 export 'backup_provider.dart';
 export 'category_provider.dart';

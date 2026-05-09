@@ -33,6 +33,10 @@ class AppPreferences {
   static const String keyLegalTermsGrandfatherDone =
       'legal_terms_grandfather_v1';
 
+  /// Firebase UID whose offline SQLite data is currently stored on this device.
+  static const String keyBoundLocalDataFirebaseUid =
+      'bound_local_data_firebase_uid';
+
   /// Run once after [SharedPreferences.getInstance] before constructing [AppPreferences].
   static Future<void> migrateInstallPrefs(SharedPreferences p) async {
     if (p.getBool(keyPrefsSchema) == true) return;
@@ -170,5 +174,13 @@ class AppPreferences {
 
   Future<void> setLegalTermsAccepted(bool value) async {
     await _prefs.setBool(keyLegalTermsAccepted, value);
+  }
+
+  /// Last Firebase account whose ledger rows live in local SQLite (used when switching accounts).
+  String? get boundLocalDataFirebaseUid =>
+      _prefs.getString(keyBoundLocalDataFirebaseUid);
+
+  Future<void> setBoundLocalDataFirebaseUid(String uid) async {
+    await _prefs.setString(keyBoundLocalDataFirebaseUid, uid);
   }
 }

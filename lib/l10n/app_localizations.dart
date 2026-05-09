@@ -190,30 +190,6 @@ abstract class AppLocalizations {
   /// **'Privacy Policy'**
   String get drawerPrivacyPolicy;
 
-  /// No description provided for @legalAcceptSnackbar.
-  ///
-  /// In en, this message translates to:
-  /// **'Please accept the Terms & Conditions and Privacy Policy to continue.'**
-  String get legalAcceptSnackbar;
-
-  /// No description provided for @onboardingLegalPrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'I have read and agree to the '**
-  String get onboardingLegalPrefix;
-
-  /// No description provided for @onboardingLegalMiddle.
-  ///
-  /// In en, this message translates to:
-  /// **' and '**
-  String get onboardingLegalMiddle;
-
-  /// No description provided for @onboardingLegalSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **'.'**
-  String get onboardingLegalSuffix;
-
   /// No description provided for @drawerHeaderTitle.
   ///
   /// In en, this message translates to:
@@ -525,6 +501,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show tips'**
   String get iouTipsShowTooltip;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get loginTitle;
+
+  /// No description provided for @loginRegisterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get loginRegisterTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to sync your profile securely with Firebase.'**
+  String get loginSubtitle;
+
+  /// No description provided for @loginEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get loginEmailLabel;
+
+  /// No description provided for @loginPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get loginPasswordLabel;
+
+  /// No description provided for @loginEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email.'**
+  String get loginEmailInvalid;
+
+  /// No description provided for @loginPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters.'**
+  String get loginPasswordTooShort;
+
+  /// No description provided for @loginPrimarySignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get loginPrimarySignIn;
+
+  /// No description provided for @loginPrimaryRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get loginPrimaryRegister;
+
+  /// No description provided for @loginToggleToRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Need an account? Register'**
+  String get loginToggleToRegister;
+
+  /// No description provided for @loginToggleToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get loginToggleToSignIn;
+
+  /// No description provided for @loginGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get loginGoogle;
+
+  /// No description provided for @loginErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again.'**
+  String get loginErrorGeneric;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in.'**
+  String get profileNotSignedIn;
+
+  /// No description provided for @profileNoDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get profileNoDisplayName;
+
+  /// No description provided for @profileUserIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get profileUserIdLabel;
+
+  /// No description provided for @profileSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get profileSignOut;
+
+  /// No description provided for @drawerProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get drawerProfile;
 }
 
 class _AppLocalizationsDelegate

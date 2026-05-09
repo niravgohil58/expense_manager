@@ -24,6 +24,17 @@ class DatabaseHelper {
     }
   }
 
+  /// Deletes local SQLite file after closing the handle (different Firebase account).
+  Future<void> wipeLocalDatabase() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'expense_app.db');
+    await deleteDatabase(path);
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('expense_app.db');
