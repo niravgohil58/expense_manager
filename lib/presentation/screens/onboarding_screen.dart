@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/design_constants.dart';
 import '../../core/preferences/app_preferences.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -29,77 +30,156 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     context.go('/home');
   }
 
+  void _previousPage() {
+    _controller.previousPage(
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _advance(BuildContext context, int lastIndex) {
+    if (_page < lastIndex) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _finish(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
 
-    final pages = <Widget>[
-      _OnboardPage(
+    final slides = <_OnboardSlideData>[
+      _OnboardSlideData(
         icon: Icons.account_balance_wallet_rounded,
         title: l10n.onboardingTitle,
-        body: l10n.onboardingSubtitle,
+        lead: l10n.onboardingSubtitle,
+        bullets: [
+          l10n.onboardingSlide1Bullet1,
+          l10n.onboardingSlide1Bullet2,
+          l10n.onboardingSlide1Bullet3,
+          l10n.onboardingSlide1Bullet4,
+        ],
       ),
-      _OnboardPage(
+      _OnboardSlideData(
         icon: Icons.dashboard_customize_rounded,
         title: l10n.onboardingSlide2Title,
-        body: l10n.onboardingSlide2Body,
+        lead: l10n.onboardingSlide2Body,
+        bullets: [
+          l10n.onboardingSlide2Bullet1,
+          l10n.onboardingSlide2Bullet2,
+          l10n.onboardingSlide2Bullet3,
+          l10n.onboardingSlide2Bullet4,
+        ],
       ),
-      _OnboardPage(
-        icon: Icons.cloud_off_rounded,
+      _OnboardSlideData(
+        icon: Icons.verified_user_rounded,
         title: l10n.onboardingSlide3Title,
-        body: l10n.onboardingSlide3Body,
+        lead: l10n.onboardingSlide3Body,
+        bullets: [
+          l10n.onboardingSlide3Bullet1,
+          l10n.onboardingSlide3Bullet2,
+          l10n.onboardingSlide3Bullet3,
+          l10n.onboardingSlide3Bullet4,
+        ],
       ),
     ];
+
+    final lastIndex = slides.length - 1;
 
     return Scaffold(
       backgroundColor: scheme.surface,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => _finish(context),
-                child: Text(AppLocalizations.of(context)!.commonSkip),
-              ),
-            ),
-            Expanded(
-              child: PageView(
-                controller: _controller,
-                onPageChanged: (i) => setState(() => _page = i),
-                children: pages,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                pages.length,
-                (i) => Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: CircleAvatar(
-                    radius: 4,
-                    backgroundColor:
-                        i == _page ? scheme.primary : scheme.outlineVariant,
-                  ),
+            Padding(
+              padding: DesignConstants.screenPaddingHorizontal,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => _finish(context),
+                  child: Text(l10n.commonSkip),
                 ),
               ),
             ),
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: slides.length,
+                onPageChanged: (i) => setState(() => _page = i),
+                itemBuilder: (context, i) => _OnboardSlidePage(data: slides[i]),
+              ),
+            ),
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.fromLTRB(
+                DesignConstants.spacingMd,
+                DesignConstants.spacingSm,
+                DesignConstants.spacingMd,
+                DesignConstants.spacingXs,
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: _page > 0
+                        ? IconButton(
+                            onPressed: _previousPage,
+                            tooltip: l10n.onboardingBack,
+                            icon:
+                                const Icon(Icons.arrow_back_ios_new_rounded),
+                          )
+                        : null,
+                  ),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        slides.length,
+                        (i) => AnimatedContainer(
+                          duration: const Duration(milliseconds: 240),
+                          curve: Curves.easeOutCubic,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          height: 8,
+                          width: i == _page ? 28 : 8,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(DesignConstants.radiusFull),
+                            color: i == _page
+                                ? scheme.primary
+                                : scheme.outlineVariant
+                                    .withValues(alpha: 0.55),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                DesignConstants.spacingLg,
+                DesignConstants.spacingSm,
+                DesignConstants.spacingLg,
+                DesignConstants.spacingLg,
+              ),
               child: FilledButton(
-                onPressed: () {
-                  if (_page < pages.length - 1) {
-                    _controller.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    );
-                  } else {
-                    _finish(context);
-                  }
-                },
+                onPressed: () => _advance(context, lastIndex),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: DesignConstants.borderRadiusMd,
+                  ),
+                ),
                 child: Text(
-                  _page < pages.length - 1
+                  _page < lastIndex
                       ? l10n.onboardingNext
                       : l10n.onboardingStart,
                 ),
@@ -112,44 +192,118 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class _OnboardPage extends StatelessWidget {
-  const _OnboardPage({
+class _OnboardSlideData {
+  const _OnboardSlideData({
     required this.icon,
     required this.title,
-    required this.body,
+    required this.lead,
+    required this.bullets,
   });
 
   final IconData icon;
   final String title;
-  final String body;
+  final String lead;
+  final List<String> bullets;
+}
+
+class _OnboardSlidePage extends StatelessWidget {
+  const _OnboardSlidePage({required this.data});
+
+  final _OnboardSlideData data;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 88, color: scheme.primary),
-          const SizedBox(height: 24),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+    final theme = Theme.of(context).textTheme;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignConstants.spacingLg,
+            vertical: DesignConstants.spacingMd,
           ),
-          const SizedBox(height: 16),
-          Text(
-            body,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: scheme.onSurfaceVariant,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: DesignConstants.spacingSm),
+                Center(child: _OnboardHeroIcon(icon: data.icon)),
+                const SizedBox(height: DesignConstants.spacingXl),
+                Text(
+                  data.title,
+                  textAlign: TextAlign.center,
+                  style: theme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.5,
+                    color: scheme.onSurface,
+                  ),
                 ),
+                const SizedBox(height: DesignConstants.spacingMd),
+                Text(
+                  data.lead,
+                  textAlign: TextAlign.center,
+                  style: theme.titleSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.38,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: DesignConstants.spacingLg),
+                ...data.bullets.map(
+                  (line) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: DesignConstants.spacingMd,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            size: 22,
+                            color: scheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: DesignConstants.spacingMd),
+                        Expanded(
+                          child: Text(
+                            line,
+                            style: theme.bodyLarge?.copyWith(
+                              color: scheme.onSurface,
+                              height: 1.42,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: DesignConstants.spacingSm),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+}
+
+class _OnboardHeroIcon extends StatelessWidget {
+  const _OnboardHeroIcon({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Icon(
+      icon,
+      size: 84,
+      color: scheme.primary,
     );
   }
 }

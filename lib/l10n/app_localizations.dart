@@ -211,7 +211,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Track expenses, income, accounts, and informal IOUs — all offline.'**
+  /// **'Everything runs on your phone — no account or sign-in. Stay on top of money without handing data to a server.'**
   String get onboardingSubtitle;
 
   /// No description provided for @onboardingNext.
@@ -226,29 +226,107 @@ abstract class AppLocalizations {
   /// **'Get started'**
   String get onboardingStart;
 
+  /// No description provided for @onboardingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboardingBack;
+
+  /// No description provided for @onboardingSlide1Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Log expenses and income across multiple accounts.'**
+  String get onboardingSlide1Bullet1;
+
+  /// No description provided for @onboardingSlide1Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Use categories and charts to see where money goes.'**
+  String get onboardingSlide1Bullet2;
+
+  /// No description provided for @onboardingSlide1Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Track informal IOUs — who lent whom and what\'s still pending.'**
+  String get onboardingSlide1Bullet3;
+
+  /// No description provided for @onboardingSlide1Bullet4.
+  ///
+  /// In en, this message translates to:
+  /// **'Works fully offline after install.'**
+  String get onboardingSlide1Bullet4;
+
   /// No description provided for @onboardingSlide2Title.
   ///
   /// In en, this message translates to:
-  /// **'Stay organized'**
+  /// **'Everything in one place'**
   String get onboardingSlide2Title;
 
   /// No description provided for @onboardingSlide2Body.
   ///
   /// In en, this message translates to:
-  /// **'Accounts, transfers, IOUs, and categories stay in one place.'**
+  /// **'Shape the app around how you actually manage cash, cards, and informal debts.'**
   String get onboardingSlide2Body;
+
+  /// No description provided for @onboardingSlide2Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Move balances between accounts with transfers.'**
+  String get onboardingSlide2Bullet1;
+
+  /// No description provided for @onboardingSlide2Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional budgets per category and recurring templates for repeats.'**
+  String get onboardingSlide2Bullet2;
+
+  /// No description provided for @onboardingSlide2Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach receipt photos to expenses when you need proof.'**
+  String get onboardingSlide2Bullet3;
+
+  /// No description provided for @onboardingSlide2Bullet4.
+  ///
+  /// In en, this message translates to:
+  /// **'Record IOUs and settlements tied to an account.'**
+  String get onboardingSlide2Bullet4;
 
   /// No description provided for @onboardingSlide3Title.
   ///
   /// In en, this message translates to:
-  /// **'Own your data'**
+  /// **'Your data stays yours'**
   String get onboardingSlide3Title;
 
   /// No description provided for @onboardingSlide3Body.
   ///
   /// In en, this message translates to:
-  /// **'Records stay on this device unless you backup or export.'**
+  /// **'Privacy-first by design — export when you want a backup or spreadsheet.'**
   String get onboardingSlide3Body;
+
+  /// No description provided for @onboardingSlide3Bullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Records stay on this device unless you export.'**
+  String get onboardingSlide3Bullet1;
+
+  /// No description provided for @onboardingSlide3Bullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted backup from Settings when you\'re ready.'**
+  String get onboardingSlide3Bullet2;
+
+  /// No description provided for @onboardingSlide3Bullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional app PIN so only you open the app.'**
+  String get onboardingSlide3Bullet3;
+
+  /// No description provided for @onboardingSlide3Bullet4.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV export when you want to analyse elsewhere.'**
+  String get onboardingSlide3Bullet4;
 
   /// No description provided for @commonSkip.
   ///

@@ -68,7 +68,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSubtitle =>
-      'Track expenses, income, accounts, and informal IOUs — all offline.';
+      'Everything runs on your phone — no account or sign-in. Stay on top of money without handing data to a server.';
 
   @override
   String get onboardingNext => 'Next';
@@ -77,18 +77,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingStart => 'Get started';
 
   @override
-  String get onboardingSlide2Title => 'Stay organized';
+  String get onboardingBack => 'Back';
+
+  @override
+  String get onboardingSlide1Bullet1 =>
+      'Log expenses and income across multiple accounts.';
+
+  @override
+  String get onboardingSlide1Bullet2 =>
+      'Use categories and charts to see where money goes.';
+
+  @override
+  String get onboardingSlide1Bullet3 =>
+      'Track informal IOUs — who lent whom and what\'s still pending.';
+
+  @override
+  String get onboardingSlide1Bullet4 => 'Works fully offline after install.';
+
+  @override
+  String get onboardingSlide2Title => 'Everything in one place';
 
   @override
   String get onboardingSlide2Body =>
-      'Accounts, transfers, IOUs, and categories stay in one place.';
+      'Shape the app around how you actually manage cash, cards, and informal debts.';
 
   @override
-  String get onboardingSlide3Title => 'Own your data';
+  String get onboardingSlide2Bullet1 =>
+      'Move balances between accounts with transfers.';
+
+  @override
+  String get onboardingSlide2Bullet2 =>
+      'Optional budgets per category and recurring templates for repeats.';
+
+  @override
+  String get onboardingSlide2Bullet3 =>
+      'Attach receipt photos to expenses when you need proof.';
+
+  @override
+  String get onboardingSlide2Bullet4 =>
+      'Record IOUs and settlements tied to an account.';
+
+  @override
+  String get onboardingSlide3Title => 'Your data stays yours';
 
   @override
   String get onboardingSlide3Body =>
-      'Records stay on this device unless you backup or export.';
+      'Privacy-first by design — export when you want a backup or spreadsheet.';
+
+  @override
+  String get onboardingSlide3Bullet1 =>
+      'Records stay on this device unless you export.';
+
+  @override
+  String get onboardingSlide3Bullet2 =>
+      'Encrypted backup from Settings when you\'re ready.';
+
+  @override
+  String get onboardingSlide3Bullet3 =>
+      'Optional app PIN so only you open the app.';
+
+  @override
+  String get onboardingSlide3Bullet4 =>
+      'CSV export when you want to analyse elsewhere.';
 
   @override
   String get commonSkip => 'Skip';
