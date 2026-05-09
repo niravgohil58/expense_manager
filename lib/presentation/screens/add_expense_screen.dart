@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/ads/ads_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
@@ -171,6 +172,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           backgroundColor: AppColors.success,
         ),
       );
+      await context.read<AdsController>().presentInterstitialIfEligible();
+      if (!mounted) return;
       context.pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

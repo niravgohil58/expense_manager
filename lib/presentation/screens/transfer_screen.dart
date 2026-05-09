@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../core/ads/ads_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
@@ -97,6 +98,8 @@ class _TransferScreenState extends State<TransferScreen> {
           backgroundColor: AppColors.success,
         ),
       );
+      await context.read<AdsController>().presentInterstitialIfEligible();
+      if (!mounted) return;
       context.pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

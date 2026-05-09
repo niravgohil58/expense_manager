@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'core/ads/ads_controller.dart';
 import 'core/config/firebase_auth_platform.dart';
 import 'core/notifications/local_notification_service.dart';
 import 'core/preferences/app_preferences.dart';
@@ -25,6 +26,7 @@ import 'presentation/providers/lock_provider.dart';
 import 'presentation/providers/recurring_provider.dart';
 import 'presentation/providers/settings_provider.dart';
 import 'presentation/providers/udhar_provider.dart';
+import 'presentation/widgets/ads/ads_lifecycle_wrapper.dart';
 import 'presentation/screens/app_lock_screen.dart';
 
 Future<void> main() async {
@@ -56,13 +58,30 @@ Future<void> main() async {
     firebaseAuthEnabled: firebaseAuthSupportedPlatform,
   );
 
+  final adsController = (Platform.isAndroid || Platform.isIOS)
+      ? AdsController.mobile()
+      : AdsController.disabled();
+
+  final runAdsBootstrap =
+      adsController.isSupported && firebaseAuthSupportedPlatform;
+  debugPrint(
+    '[ExpenseAds] main: runAdsBootstrap=$runAdsBootstrap '
+    '(mobile=${adsController.isSupported}, firebasePlatform=$firebaseAuthSupportedPlatform)',
+  );
+  if (runAdsBootstrap) {
+    await adsController.bootstrap();
+  }
+  debugPrint('[ExpenseAds] main: after ads bootstrap');
+
   if (Platform.isAndroid || Platform.isIOS) {
     await LocalNotificationService.instance.initialize();
     await LocalNotificationService.instance.rescheduleFromPrefs(appPreferences);
   }
+
   runApp(MyApp(
     appPreferences: appPreferences,
     authProvider: authProvider,
+    adsController: adsController,
   ));
 }
 
@@ -71,10 +90,12 @@ class MyApp extends StatefulWidget {
     super.key,
     required this.appPreferences,
     required this.authProvider,
+    required this.adsController,
   });
 
   final AppPreferences appPreferences;
   final AuthProvider authProvider;
+  final AdsController adsController;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -89,6 +110,7 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         Provider<AppPreferences>.value(value: widget.appPreferences),
+        ChangeNotifierProvider.value(value: widget.adsController),
         ChangeNotifierProvider.value(value: widget.authProvider),
         ChangeNotifierProvider(
           create: (_) => SettingsProvider(widget.appPreferences),
@@ -135,24 +157,27 @@ class _MyAppState extends State<MyApp> {
             fit: StackFit.expand,
             alignment: Alignment.center,
             children: [
-              MaterialApp.router(
-                title: 'Expense Manager',
-                debugShowCheckedModeBanner: false,
-                themeMode: settings.themeMode,
-                theme: buildLightTheme(),
-                darkTheme: buildDarkTheme(),
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                localeResolutionCallback: (locale, supportedLocales) {
-                  if (locale == null) return supportedLocales.first;
-                  for (final supported in supportedLocales) {
-                    if (supported.languageCode == locale.languageCode) {
-                      return supported;
+              AdsLifecycleWrapper(
+                router: _router,
+                child: MaterialApp.router(
+                  title: 'Expense Manager',
+                  debugShowCheckedModeBanner: false,
+                  themeMode: settings.themeMode,
+                  theme: buildLightTheme(),
+                  darkTheme: buildDarkTheme(),
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localeResolutionCallback: (locale, supportedLocales) {
+                    if (locale == null) return supportedLocales.first;
+                    for (final supported in supportedLocales) {
+                      if (supported.languageCode == locale.languageCode) {
+                        return supported;
+                      }
                     }
-                  }
-                  return supportedLocales.first;
-                },
-                routerConfig: _router,
+                    return supportedLocales.first;
+                  },
+                  routerConfig: _router,
+                ),
               ),
               if (lock.needsLockOverlay)
                 const Positioned.fill(child: AppLockScreen()),

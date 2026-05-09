@@ -216,6 +216,42 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Single-line currency in narrow columns; scales down instead of breaking mid-number.
+  Widget _monthSummaryMoneyLine(String text, TextStyle style) {
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.clip,
+          style: style,
+        ),
+      ),
+    );
+  }
+
+  Widget _monthSummaryMoneyLineTrailing(String text, TextStyle style) {
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerRight,
+        child: Text(
+          text,
+          maxLines: 1,
+          textAlign: TextAlign.right,
+          softWrap: false,
+          overflow: TextOverflow.clip,
+          style: style,
+        ),
+      ),
+    );
+  }
+
   Widget _buildMonthSummary() {
     return Consumer3<ExpenseProvider, IncomeProvider, SettingsProvider>(
       builder: (context, expense, income, settings, _) {
@@ -272,9 +308,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     'Spent',
                                     style: AppTextStyles.labelSmall,
                                   ),
-                                  Text(
+                                  _monthSummaryMoneyLine(
                                     formatter.format(spent),
-                                    style: AppTextStyles.amountMedium.copyWith(
+                                    AppTextStyles.amountMedium.copyWith(
                                       color: AppColors.expense,
                                     ),
                                   ),
@@ -324,9 +360,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     'Earned',
                                     style: AppTextStyles.labelSmall,
                                   ),
-                                  Text(
+                                  _monthSummaryMoneyLine(
                                     formatter.format(earned),
-                                    style: AppTextStyles.amountMedium.copyWith(
+                                    AppTextStyles.amountMedium.copyWith(
                                       color: AppColors.income,
                                     ),
                                   ),
@@ -344,19 +380,26 @@ class _HomeScreenState extends State<HomeScreen> {
               Divider(height: 1, color: AppColors.border),
               const SizedBox(height: DesignConstants.spacingXs),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    'Net this month',
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
+                  Expanded(
+                    child: Text(
+                      'Net this month',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
-                  Text(
-                    '${net >= 0 ? '+' : ''}${formatter.format(net)}',
-                    style: AppTextStyles.amountSmall.copyWith(
-                      color: net >= 0 ? AppColors.income : AppColors.expense,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: _monthSummaryMoneyLineTrailing(
+                      '${net >= 0 ? '+' : ''}${formatter.format(net)}',
+                      AppTextStyles.amountSmall.copyWith(
+                        color:
+                            net >= 0 ? AppColors.income : AppColors.expense,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],

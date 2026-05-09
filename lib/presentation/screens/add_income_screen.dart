@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/ads/ads_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
@@ -144,7 +145,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
             ok ? AppColors.success : AppColors.error,
       ),
     );
-    if (ok) context.pop();
+    if (ok) {
+      await context.read<AdsController>().presentInterstitialIfEligible();
+      if (!mounted) return;
+      context.pop();
+    }
   }
 
   Future<void> _deleteIncome() async {

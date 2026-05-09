@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'package:expense_app/core/ads/ads_controller.dart';
 import 'package:expense_app/core/preferences/app_preferences.dart';
 import 'package:expense_app/core/router/app_router.dart';
 import 'package:expense_app/main.dart';
@@ -29,6 +30,7 @@ void main() {
         prefs: appPrefs,
         firebaseAuthEnabled: false,
       ),
+      adsController: AdsController.disabled(),
     ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));

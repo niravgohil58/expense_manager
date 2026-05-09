@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import 'app_drawer.dart';
 import 'drawer_host.dart';
+import 'ads/shell_banner_slot.dart';
 
 /// Bottom navigation shell for main app screens (owns [Drawer]).
 class BottomNavShell extends StatefulWidget {
@@ -30,7 +31,13 @@ class _BottomNavShellState extends State<BottomNavShell> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: const AppDrawer(),
-        body: widget.child,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: widget.child),
+            const ShellBannerSlot(),
+          ],
+        ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: scheme.surface,

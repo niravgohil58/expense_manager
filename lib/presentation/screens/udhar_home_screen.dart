@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -294,7 +295,7 @@ class _SummaryCard extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
@@ -309,9 +310,24 @@ class _SummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: DesignConstants.spacingXs),
-          Text(
-            formatter.format(amount),
-            style: AppTextStyles.amountMedium.copyWith(color: color),
+          SizedBox(
+            width: double.infinity,
+            child: AutoSizeText(
+              formatter.format(amount),
+              style: AppTextStyles.amountMedium.copyWith(
+                color: color,
+                fontFamily: AppTextStyles.fontFamily,
+                inherit: false,
+              ),
+              textAlign: TextAlign.left,
+              maxLines: 1,
+              softWrap: false,
+              wrapWords: false,
+              minFontSize: 8,
+              maxFontSize: AppTextStyles.amountMedium.fontSize ?? 24,
+              stepGranularity: 1,
+              overflow: TextOverflow.clip,
+            ),
           ),
           Text(subtitle, style: AppTextStyles.caption),
         ],

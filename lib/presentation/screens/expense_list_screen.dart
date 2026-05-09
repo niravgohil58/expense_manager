@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/ads/ads_controller.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
+import '../widgets/ads/native_ad_list_tile.dart';
 import '../widgets/drawer_host.dart';
 import '../../core/constants/text_styles.dart';
 import '../../data/models/expense_model.dart';
@@ -491,14 +493,20 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           ),
         ],
       ),
-      body: Consumer<ExpenseProvider>(
-        builder: (context, provider, _) {
+      body: Consumer2<ExpenseProvider, AdsController>(
+        builder: (context, provider, ads, _) {
           if (provider.isLoading && provider.expenses.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
           final list = provider.expensesForList;
           final hasFilters = provider.expenseFilters.hasActiveFilters;
+
+          final insertAfter = ads.nativeInsertAfterItems;
+          final insertNative =
+              ads.snapshot.showNative && list.length > insertAfter;
+          final nativeSlotIndex = insertNative ? insertAfter : -1;
+          final extraItems = insertNative ? 1 : 0;
 
           return Column(
             children: [
@@ -597,9 +605,16 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           padding: DesignConstants.screenPadding.copyWith(
                             top: 0,
                           ),
-                          itemCount: list.length,
+                          itemCount: list.length + extraItems,
                           itemBuilder: (context, index) {
-                            final expense = list[index];
+                            if (insertNative && index == nativeSlotIndex) {
+                              return const NativeAdListTile();
+                            }
+                            final dataIndex =
+                                insertNative && index > nativeSlotIndex
+                                    ? index - 1
+                                    : index;
+                            final expense = list[dataIndex];
                             return Dismissible(
                               key: ValueKey<String>('exp_${expense.id}'),
                               direction: DismissDirection.endToStart,

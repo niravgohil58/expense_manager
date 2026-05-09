@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -89,6 +90,68 @@ class _ReportScreenState extends State<ReportScreen> {
         _isLoading = false;
       }
     });
+  }
+
+  /// Single-line amounts use [AutoSizeText] so scaling matches layout (avoids
+  /// TextPainter vs RenderParagraph drift that clipped the last digits).
+  Widget _reportYearMoneyLine(String text, TextStyle style) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return _reportScaledSingleLineAmount(
+          text: text,
+          style: style,
+          maxWidth: constraints.maxWidth,
+          alignment: Alignment.centerLeft,
+          textAlign: TextAlign.left,
+        );
+      },
+    );
+  }
+
+  Widget _reportYearMoneyLineTrailing(String text, TextStyle style) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return _reportScaledSingleLineAmount(
+          text: text,
+          style: style,
+          maxWidth: constraints.maxWidth,
+          alignment: Alignment.centerRight,
+          textAlign: TextAlign.right,
+        );
+      },
+    );
+  }
+
+  Widget _reportScaledSingleLineAmount({
+    required String text,
+    required TextStyle style,
+    required double maxWidth,
+    required Alignment alignment,
+    required TextAlign textAlign,
+  }) {
+    if (!maxWidth.isFinite || maxWidth <= 0) {
+      return const SizedBox.shrink();
+    }
+    const minFontSize = 8.0;
+    final maxFontSize = style.fontSize ?? minFontSize;
+
+    return SizedBox(
+      width: maxWidth,
+      child: Align(
+        alignment: alignment,
+        child: AutoSizeText(
+          text,
+          style: style,
+          textAlign: textAlign,
+          maxLines: 1,
+          softWrap: false,
+          minFontSize: minFontSize,
+          maxFontSize: maxFontSize,
+          stepGranularity: 0.5,
+          overflow: TextOverflow.visible,
+        ),
+      ),
+    );
   }
 
   @override
@@ -194,16 +257,15 @@ class _ReportScreenState extends State<ReportScreen> {
                                     ),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
                                           'Total spent',
                                           style: AppTextStyles.labelSmall,
                                         ),
-                                        Text(
+                                        _reportYearMoneyLine(
                                           formatter.format(yearExpense),
-                                          style: AppTextStyles.amountLarge
-                                              .copyWith(
+                                          AppTextStyles.amountLarge.copyWith(
                                             color: AppColors.expense,
                                           ),
                                         ),
@@ -224,16 +286,15 @@ class _ReportScreenState extends State<ReportScreen> {
                                     ),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
                                           'Total earned',
                                           style: AppTextStyles.labelSmall,
                                         ),
-                                        Text(
+                                        _reportYearMoneyLine(
                                           formatter.format(yearIncome),
-                                          style: AppTextStyles.amountLarge
-                                              .copyWith(
+                                          AppTextStyles.amountLarge.copyWith(
                                             color: AppColors.income,
                                           ),
                                         ),
@@ -247,20 +308,28 @@ class _ReportScreenState extends State<ReportScreen> {
                             Divider(height: 1, color: AppColors.border),
                             const SizedBox(height: DesignConstants.spacingSm),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  'Net for $_selectedYear',
-                                  style: AppTextStyles.labelMedium.copyWith(
-                                    color: AppColors.textSecondary,
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'Net for $_selectedYear',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyles.labelMedium.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
                                 ),
-                                Text(
-                                  '${yearNet >= 0 ? '+' : ''}${formatter.format(yearNet)}',
-                                  style: AppTextStyles.amountMedium.copyWith(
-                                    color: yearNet >= 0
-                                        ? AppColors.income
-                                        : AppColors.expense,
+                                Expanded(
+                                  flex: 3,
+                                  child: _reportYearMoneyLineTrailing(
+                                    '${yearNet >= 0 ? '+' : ''}${formatter.format(yearNet)}',
+                                    AppTextStyles.amountMedium.copyWith(
+                                      color: yearNet >= 0
+                                          ? AppColors.income
+                                          : AppColors.expense,
+                                    ),
                                   ),
                                 ),
                               ],

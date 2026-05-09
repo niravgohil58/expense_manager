@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/ads/ads_controller.dart';
 import '../../core/constants/supported_currencies.dart';
 import '../../core/database/database_helper.dart';
 import '../../data/export/csv_export_service.dart';
@@ -78,6 +79,9 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       );
+      if (context.mounted) {
+        await context.read<AdsController>().presentInterstitialIfEligible();
+      }
     } catch (e) {
       if (context.mounted) {
         messenger.showSnackBar(
@@ -215,6 +219,9 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       );
+      if (context.mounted) {
+        await context.read<AdsController>().presentInterstitialIfEligible();
+      }
     } catch (e) {
       if (context.mounted) {
         messenger.showSnackBar(SnackBar(content: Text('CSV export failed: $e')));
