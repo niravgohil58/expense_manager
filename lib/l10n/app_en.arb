@@ -19,11 +19,11 @@
   "aboutTitle": "About",
   "aboutBody": "Expense Manager keeps your spending offline on this device. Backup regularly from Settings.",
   "onboardingTitle": "Welcome",
-  "onboardingSubtitle": "Track expenses, income, accounts, and udhar — all offline.",
+  "onboardingSubtitle": "Track expenses, income, accounts, and informal IOUs — all offline.",
   "onboardingNext": "Next",
   "onboardingStart": "Get started",
   "onboardingSlide2Title": "Stay organized",
-  "onboardingSlide2Body": "Accounts, transfers, udhar, and categories stay in one place.",
+  "onboardingSlide2Body": "Accounts, transfers, IOUs, and categories stay in one place.",
   "onboardingSlide3Title": "Own your data",
   "onboardingSlide3Body": "Records stay on this device unless you backup or export.",
   "commonSkip": "Skip",
@@ -46,7 +46,11 @@
   "recurringKindIncome": "Income",
   "errorGoHome": "Go home",
   "reportNetMonthlyTitle": "Net cash flow (income − expense)",
-  "emptyUdharTitle": "No udhar yet",
+  "emptyUdharTitle": "No IOUs yet",
   "emptyUdharSubtitle": "Tap + to record money you lent or borrowed.",
-  "commonGotIt": "Got it"
+  "commonGotIt": "Got it",
+  "iouTipsTitle": "About IOUs",
+  "iouTipsBody": "• Track lends (they owe you) and borrows (you owe).\n• Totals above show pending amounts from open IOUs.\n• Tap a row for history and settlements.\n• Adding or settling updates the linked account balance.",
+  "iouTipsHide": "Hide",
+  "iouTipsShowTooltip": "Show tips"
 }

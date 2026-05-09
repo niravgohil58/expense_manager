@@ -94,7 +94,7 @@ class SettingsScreen extends StatelessWidget {
         title: const Text('Restore backup?'),
         content: const Text(
           'This will replace ALL data on this device with the backup file. '
-          'Current expenses, accounts, udhar, and incomes will be overwritten. '
+          'Current expenses, accounts, IOUs, and incomes will be overwritten. '
           'This cannot be undone.',
         ),
         actions: [
@@ -395,7 +395,7 @@ class SettingsScreen extends StatelessWidget {
                   Text('Data', style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Text(
-                    'Backup contains accounts, categories, expenses, transfers, incomes, udhar, and settlements. Restore replaces everything locally.',
+                    'Backup contains accounts, categories, expenses, transfers, incomes, IOUs, and settlements. Restore replaces everything locally.',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),

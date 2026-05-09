@@ -6,18 +6,18 @@ enum UdharType {
   String get displayName {
     switch (this) {
       case UdharType.dena:
-        return 'Dena (Given)';
+        return 'Lent (they owe you)';
       case UdharType.lena:
-        return 'Lena (Taken)';
+        return 'Borrowed (you owe)';
     }
   }
 
   String get shortName {
     switch (this) {
       case UdharType.dena:
-        return 'Milna Hai';
+        return 'Receivable';
       case UdharType.lena:
-        return 'Dena Hai';
+        return 'Payable';
     }
   }
 
@@ -54,7 +54,7 @@ enum UdharStatus {
   }
 }
 
-/// Udhar model representing debt (money given or taken)
+/// Informal IOU (money lent or borrowed with someone).
 class Udhar {
   final String id;
   final String personName;

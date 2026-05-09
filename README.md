@@ -1,6 +1,6 @@
 # Expense Manager (Flutter)
 
-Offline-first expense and income tracker with accounts, transfers, udhar (lending), categories, budgets, recurring templates, receipt attachments, CSV export, and encrypted backup.
+Offline-first expense and income tracker with accounts, transfers, informal IOUs (lending/borrowing), categories, budgets, recurring templates, receipt attachments, CSV export, and encrypted backup.
 
 The Dart package name is **`expense_app`** (see `pubspec.yaml`); this repo folder may be named `expense_manager`.
 
@@ -25,7 +25,7 @@ After cloning, always run **`flutter pub get`** so `.dart_tool/` and plugin regi
 
 ## Features (summary)
 
-- SQLite database with migrations (accounts, expenses, income, udhar, budgets, recurring templates, receipts)
+- SQLite database with migrations (accounts, expenses, income, IOUs, budgets, recurring templates, receipts)
 - Material 3 UI, drawer navigation, onboarding, app PIN (`flutter_secure_storage`)
 - Backup/restore and CSV export (paths documented in-app under Settings)
 

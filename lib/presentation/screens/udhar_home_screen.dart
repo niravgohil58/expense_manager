@@ -43,10 +43,25 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: DrawerHost.menuButton(context),
-        title: const Text('Udhar'),
+        title: const Text('IOUs'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
+        actions: [
+          Consumer<SettingsProvider>(
+            builder: (context, settings, _) {
+              if (settings.iouScreenTipsVisible) {
+                return const SizedBox.shrink();
+              }
+              final l10n = AppLocalizations.of(context)!;
+              return IconButton(
+                icon: const Icon(Icons.help_outline_rounded),
+                tooltip: l10n.iouTipsShowTooltip,
+                onPressed: () => settings.setIouScreenTipsVisible(true),
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<UdharProvider>(
         builder: (context, provider, _) {
@@ -68,12 +83,23 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Consumer<SettingsProvider>(
+                          builder: (context, settings, _) {
+                            if (!settings.iouScreenTipsVisible) {
+                              return const SizedBox.shrink();
+                            }
+                            return _IouTipsCard(
+                              onHide: () =>
+                                  settings.setIouScreenTipsVisible(false),
+                            );
+                          },
+                        ),
                         Row(
                           children: [
                             Expanded(
                               child: _SummaryCard(
-                                title: 'Aapko Milna Hai',
-                                subtitle: 'Money to receive',
+                                title: 'To receive',
+                                subtitle: 'Money owed to you',
                                 amount: provider.totalPendingDena,
                                 color: AppColors.udharDena,
                                 icon: Icons.arrow_downward,
@@ -82,8 +108,8 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
                             const SizedBox(width: DesignConstants.spacingMd),
                             Expanded(
                               child: _SummaryCard(
-                                title: 'Aapko Dena Hai',
-                                subtitle: 'Money to pay',
+                                title: 'To pay',
+                                subtitle: 'Money you owe',
                                 amount: provider.totalPendingLena,
                                 color: AppColors.udharLena,
                                 icon: Icons.arrow_upward,
@@ -137,7 +163,7 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Pending Udhar',
+                                'Open IOUs',
                                 style: AppTextStyles.heading4,
                               ),
                               const SizedBox(height: DesignConstants.spacingSm),
@@ -165,6 +191,75 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _IouTipsCard extends StatelessWidget {
+  const _IouTipsCard({required this.onHide});
+
+  final VoidCallback onHide;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: DesignConstants.spacingMd),
+      child: Material(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.9),
+        borderRadius: DesignConstants.borderRadiusMd,
+        child: Padding(
+          padding: DesignConstants.paddingMd,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: DesignConstants.iconSizeSm,
+                    color: scheme.primary,
+                  ),
+                  const SizedBox(width: DesignConstants.spacingSm),
+                  Expanded(
+                    child: Text(
+                      l10n.iouTipsTitle,
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: scheme.primary,
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: DesignConstants.spacingSm,
+                      ),
+                    ),
+                    onPressed: onHide,
+                    child: Text(l10n.iouTipsHide),
+                  ),
+                ],
+              ),
+              const SizedBox(height: DesignConstants.spacingXs),
+              Padding(
+                padding: const EdgeInsets.only(left: 28),
+                child: Text(
+                  l10n.iouTipsBody,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -274,7 +369,7 @@ class _UdharCard extends StatelessWidget {
                 children: [
                   Text(udhar.personName, style: AppTextStyles.labelMedium),
                   Text(
-                    '${isDena ? 'Gave' : 'Took'} on ${dateFormatter.format(udhar.date)}',
+                    '${isDena ? 'Lent' : 'Borrowed'} on ${dateFormatter.format(udhar.date)}',
                     style: AppTextStyles.caption,
                   ),
                   if (udhar.paidAmount > 0)

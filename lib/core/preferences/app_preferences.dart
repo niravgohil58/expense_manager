@@ -23,6 +23,9 @@ class AppPreferences {
   static const String keyBackupReminderHour = 'reminder_backup_hour';
   static const String keyBackupReminderMinute = 'reminder_backup_minute';
 
+  /// IOUs home screen intro panel (user can hide once understood).
+  static const String keyIouScreenTipsVisible = 'iou_screen_tips_visible';
+
   /// Run once after [SharedPreferences.getInstance] before constructing [AppPreferences].
   static Future<void> migrateInstallPrefs(SharedPreferences p) async {
     if (p.getBool(keyPrefsSchema) == true) return;
@@ -135,5 +138,12 @@ class AppPreferences {
 
   Future<void> setBackupReminderMinute(int minute) async {
     await _prefs.setInt(keyBackupReminderMinute, minute);
+  }
+
+  bool get iouScreenTipsVisible =>
+      _prefs.getBool(keyIouScreenTipsVisible) ?? true;
+
+  Future<void> setIouScreenTipsVisible(bool visible) async {
+    await _prefs.setBool(keyIouScreenTipsVisible, visible);
   }
 }

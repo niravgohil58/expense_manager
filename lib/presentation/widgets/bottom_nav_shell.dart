@@ -68,7 +68,7 @@ class _BottomNavShellState extends State<BottomNavShell> {
                   ),
                   _NavItem(
                     icon: Icons.people_rounded,
-                    label: 'Udhar',
+                    label: 'IOUs',
                     path: '/udhar',
                   ),
                   _NavItem(

@@ -211,7 +211,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Track expenses, income, accounts, and udhar — all offline.'**
+  /// **'Track expenses, income, accounts, and informal IOUs — all offline.'**
   String get onboardingSubtitle;
 
   /// No description provided for @onboardingNext.
@@ -235,7 +235,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingSlide2Body.
   ///
   /// In en, this message translates to:
-  /// **'Accounts, transfers, udhar, and categories stay in one place.'**
+  /// **'Accounts, transfers, IOUs, and categories stay in one place.'**
   String get onboardingSlide2Body;
 
   /// No description provided for @onboardingSlide3Title.
@@ -373,7 +373,7 @@ abstract class AppLocalizations {
   /// No description provided for @emptyUdharTitle.
   ///
   /// In en, this message translates to:
-  /// **'No udhar yet'**
+  /// **'No IOUs yet'**
   String get emptyUdharTitle;
 
   /// No description provided for @emptyUdharSubtitle.
@@ -387,6 +387,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Got it'**
   String get commonGotIt;
+
+  /// No description provided for @iouTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About IOUs'**
+  String get iouTipsTitle;
+
+  /// No description provided for @iouTipsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'• Track lends (they owe you) and borrows (you owe).\n• Totals above show pending amounts from open IOUs.\n• Tap a row for history and settlements.\n• Adding or settling updates the linked account balance.'**
+  String get iouTipsBody;
+
+  /// No description provided for @iouTipsHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get iouTipsHide;
+
+  /// No description provided for @iouTipsShowTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Show tips'**
+  String get iouTipsShowTooltip;
 }
 
 class _AppLocalizationsDelegate

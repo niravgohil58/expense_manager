@@ -68,7 +68,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSubtitle =>
-      'Track expenses, income, accounts, and udhar — all offline.';
+      'Track expenses, income, accounts, and informal IOUs — all offline.';
 
   @override
   String get onboardingNext => 'Next';
@@ -81,7 +81,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSlide2Body =>
-      'Accounts, transfers, udhar, and categories stay in one place.';
+      'Accounts, transfers, IOUs, and categories stay in one place.';
 
   @override
   String get onboardingSlide3Title => 'Own your data';
@@ -156,7 +156,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportNetMonthlyTitle => 'Net cash flow (income − expense)';
 
   @override
-  String get emptyUdharTitle => 'No udhar yet';
+  String get emptyUdharTitle => 'No IOUs yet';
 
   @override
   String get emptyUdharSubtitle =>
@@ -164,4 +164,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonGotIt => 'Got it';
+
+  @override
+  String get iouTipsTitle => 'About IOUs';
+
+  @override
+  String get iouTipsBody =>
+      '• Track lends (they owe you) and borrows (you owe).\n• Totals above show pending amounts from open IOUs.\n• Tap a row for history and settlements.\n• Adding or settling updates the linked account balance.';
+
+  @override
+  String get iouTipsHide => 'Hide';
+
+  @override
+  String get iouTipsShowTooltip => 'Show tips';
 }

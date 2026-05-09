@@ -31,6 +31,16 @@ void main() {
       expect(prefs.currencyCode, AppPreferences.defaultCurrencyCode);
     });
 
+    test('iou screen tips visible defaults true and persists', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = AppPreferences(await SharedPreferences.getInstance());
+      expect(prefs.iouScreenTipsVisible, true);
+      await prefs.setIouScreenTipsVisible(false);
+      expect(prefs.iouScreenTipsVisible, false);
+      await prefs.setIouScreenTipsVisible(true);
+      expect(prefs.iouScreenTipsVisible, true);
+    });
+
     test('app lock defaults to false', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = AppPreferences(await SharedPreferences.getInstance());

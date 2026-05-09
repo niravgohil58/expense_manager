@@ -74,7 +74,7 @@ class UdharProvider extends ChangeNotifier {
     try {
       _udharList = await _repository.getAllUdhar();
     } catch (e) {
-      _error = 'Failed to load udhar: $e';
+      _error = 'Failed to load IOUs: $e';
     } finally {
       if (showLoading) {
         _isLoading = false;
@@ -122,7 +122,7 @@ class UdharProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      _error = 'Failed to add udhar: $e';
+      _error = 'Failed to add IOU: $e';
       notifyListeners();
       return false;
     }
@@ -180,7 +180,7 @@ class UdharProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      _error = 'Failed to delete udhar: $e';
+      _error = 'Failed to delete IOU: $e';
       notifyListeners();
       return false;
     }

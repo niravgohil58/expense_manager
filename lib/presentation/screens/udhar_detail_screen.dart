@@ -145,7 +145,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Udhar Details'),
+        title: const Text('IOU details'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -163,7 +163,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                     padding: EdgeInsets.only(
                       top: MediaQuery.sizeOf(context).height * 0.25,
                     ),
-                    child: const Center(child: Text('Udhar not found')),
+                    child: const Center(child: Text('IOU not found')),
                   ),
                 ],
               );

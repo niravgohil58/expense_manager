@@ -379,8 +379,8 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
 
-                  // Udhar Summary
-                  Text('Udhar Summary', style: AppTextStyles.heading4),
+                  // IOU summary
+                  Text('IOU summary', style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Consumer<UdharProvider>(
                     builder: (context, provider, _) {
@@ -397,7 +397,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                 children: [
                                   Icon(Icons.arrow_downward,
                                       color: AppColors.udharDena),
-                                  Text('Milna Hai', style: AppTextStyles.labelSmall),
+                                  Text('To receive', style: AppTextStyles.labelSmall),
                                   Text(
                                     formatter.format(provider.totalPendingDena),
                                     style: AppTextStyles.amountSmall.copyWith(
@@ -420,7 +420,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                 children: [
                                   Icon(Icons.arrow_upward,
                                       color: AppColors.udharLena),
-                                  Text('Dena Hai', style: AppTextStyles.labelSmall),
+                                  Text('To pay', style: AppTextStyles.labelSmall),
                                   Text(
                                     formatter.format(provider.totalPendingLena),
                                     style: AppTextStyles.amountSmall.copyWith(

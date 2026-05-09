@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: _QuickActionButton(
             icon: Icons.people,
-            label: 'Udhar',
+            label: 'IOUs',
             color: AppColors.udharDena,
             onTap: () => context.push('/add-udhar'),
           ),

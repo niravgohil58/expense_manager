@@ -88,7 +88,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Udhar added successfully'),
+          content: Text('IOU saved'),
           backgroundColor: AppColors.success,
         ),
       );
@@ -111,7 +111,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Add Udhar'),
+        title: const Text('Add IOU'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -124,13 +124,13 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Type Selection
-              Text('Udhar Type', style: AppTextStyles.labelMedium),
+              Text('Type', style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               Row(
                 children: [
                   Expanded(
                     child: _TypeButton(
-                      label: 'Dena (Gave)',
+                      label: 'Lent',
                       subtitle: 'Money you gave',
                       isSelected: _selectedType == UdharType.dena,
                       color: AppColors.udharDena,
@@ -141,7 +141,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                   const SizedBox(width: DesignConstants.spacingSm),
                   Expanded(
                     child: _TypeButton(
-                      label: 'Lena (Took)',
+                      label: 'Borrowed',
                       subtitle: 'Money you took',
                       isSelected: _selectedType == UdharType.lena,
                       color: AppColors.udharLena,
@@ -320,7 +320,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                             color: AppColors.textOnPrimary,
                           ),
                         )
-                      : Text('Save Udhar', style: AppTextStyles.button),
+                      : Text('Save IOU', style: AppTextStyles.button),
                 ),
               ),
             ],

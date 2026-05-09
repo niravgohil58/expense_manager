@@ -24,6 +24,8 @@ class SettingsProvider extends ChangeNotifier {
   late int _backupReminderHour;
   late int _backupReminderMinute;
 
+  late bool _iouScreenTipsVisible;
+
   ThemeMode get themeMode => _themeMode;
   String get currencyCode => _currencyCode;
   bool get appLockEnabled => _appLockEnabled;
@@ -38,6 +40,8 @@ class SettingsProvider extends ChangeNotifier {
   int get backupReminderHour => _backupReminderHour;
   int get backupReminderMinute => _backupReminderMinute;
 
+  bool get iouScreenTipsVisible => _iouScreenTipsVisible;
+
   void _syncFromPrefs() {
     _themeMode = _prefs.themeMode;
     _currencyCode = _prefs.currencyCode;
@@ -50,6 +54,7 @@ class SettingsProvider extends ChangeNotifier {
     _backupReminderWeekday = _prefs.backupReminderWeekday;
     _backupReminderHour = _prefs.backupReminderHour;
     _backupReminderMinute = _prefs.backupReminderMinute;
+    _iouScreenTipsVisible = _prefs.iouScreenTipsVisible;
   }
 
   Future<void> _rescheduleNotifications() async {
@@ -124,5 +129,11 @@ class SettingsProvider extends ChangeNotifier {
     _syncFromPrefs();
     notifyListeners();
     await _rescheduleNotifications();
+  }
+
+  Future<void> setIouScreenTipsVisible(bool visible) async {
+    await _prefs.setIouScreenTipsVisible(visible);
+    _iouScreenTipsVisible = visible;
+    notifyListeners();
   }
 }
