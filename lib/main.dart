@@ -85,6 +85,32 @@ Future<void> main() async {
   ));
 }
 
+ThemeData _themeForLockOverlay(ThemeMode mode) {
+  switch (mode) {
+    case ThemeMode.dark:
+      return buildDarkTheme();
+    case ThemeMode.light:
+      return buildLightTheme();
+    case ThemeMode.system:
+      final brightness =
+          WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      return brightness == Brightness.dark
+          ? buildDarkTheme()
+          : buildLightTheme();
+  }
+}
+
+Locale _localeForLockOverlay() {
+  const supported = AppLocalizations.supportedLocales;
+  final platform = WidgetsBinding.instance.platformDispatcher.locale;
+  for (final locale in supported) {
+    if (locale.languageCode == platform.languageCode) {
+      return locale;
+    }
+  }
+  return supported.first;
+}
+
 class MyApp extends StatefulWidget {
   const MyApp({
     super.key,
@@ -180,7 +206,19 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
               if (lock.needsLockOverlay)
-                const Positioned.fill(child: AppLockScreen()),
+                Positioned.fill(
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Localizations(
+                      locale: _localeForLockOverlay(),
+                      delegates: AppLocalizations.localizationsDelegates,
+                      child: Theme(
+                        data: _themeForLockOverlay(settings.themeMode),
+                        child: const AppLockScreen(),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },
