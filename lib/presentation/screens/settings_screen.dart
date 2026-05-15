@@ -21,6 +21,7 @@ import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/lock_provider.dart';
+import '../providers/purchase_provider.dart';
 
 import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
@@ -436,6 +437,39 @@ class SettingsScreen extends StatelessWidget {
                       'Choose your backup file (JSON). Replaces local data',
                     ),
                     onTap: backup.isBusy ? null : () => _import(context),
+                  ),
+                  const SizedBox(height: DesignConstants.spacingLg),
+                  Text('Purchases', style: AppTextStyles.heading4),
+                  const SizedBox(height: DesignConstants.spacingSm),
+                  Consumer<PurchaseProvider>(
+                    builder: (context, purchase, _) {
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.restore, color: scheme.primary),
+                        title: const Text('Restore purchases'),
+                        subtitle: Text(
+                          purchase.adsRemoved
+                              ? 'Ads already removed'
+                              : 'Recover your ad-free purchase',
+                        ),
+                        onTap: purchase.adsRemoved
+                            ? null
+                            : () async {
+                                await purchase.restorePurchases();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        purchase.adsRemoved
+                                            ? 'Purchase restored!'
+                                            : 'No previous purchase found.',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                      );
+                    },
                   ),
                 ],
               ),

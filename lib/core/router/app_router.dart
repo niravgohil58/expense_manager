@@ -26,6 +26,7 @@ import '../../presentation/screens/profile_screen.dart';
 import '../../presentation/screens/recurring_template_form_screen.dart';
 import '../../presentation/screens/recurring_templates_screen.dart';
 import '../../presentation/screens/report_screen.dart';
+import '../../presentation/screens/remove_ads_screen.dart';
 import '../../presentation/screens/set_pin_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
 import '../../presentation/screens/transfer_history_screen.dart';
@@ -305,6 +306,12 @@ class AppRouter {
           name: 'about',
           parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => const AboutScreen(),
+        ),
+        GoRoute(
+          path: '/remove-ads',
+          name: 'remove-ads',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const RemoveAdsScreen(),
         ),
       ],
     );

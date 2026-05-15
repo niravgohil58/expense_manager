@@ -25,6 +25,7 @@ class AdsController extends ChangeNotifier {
   }
 
   final bool _supported;
+  bool _adsRemoved = false;
 
   AdsRemoteSnapshot _snapshot = AdsRemoteSnapshot.disabled();
   InterstitialAd? _interstitial;
@@ -40,12 +41,25 @@ class AdsController extends ChangeNotifier {
 
   bool get isSupported => _supported;
 
+  /// Whether the user has purchased "Remove Ads".
+  bool get adsRemoved => _adsRemoved;
+
+  /// Called by [PurchaseProvider] when the user buys "Remove Ads".
+  void disableAllAds() {
+    _adsRemoved = true;
+    _interstitial?.dispose();
+    _interstitial = null;
+    _appOpen?.dispose();
+    _appOpen = null;
+    notifyListeners();
+  }
+
   /// Adaptive banner slot reads this.
   String? get bannerUnitIdOrNull =>
-      _snapshot.showBanner ? _snapshot.bannerUnitId : null;
+      (_adsRemoved || !_snapshot.showBanner) ? null : _snapshot.bannerUnitId;
 
   String? get nativeUnitIdOrNull =>
-      _snapshot.showNative ? _snapshot.nativeUnitId : null;
+      (_adsRemoved || !_snapshot.showNative) ? null : _snapshot.nativeUnitId;
 
   int get nativeInsertAfterItems => _snapshot.nativeListInsertAfterItems;
 
@@ -176,7 +190,7 @@ class AdsController extends ChangeNotifier {
 
   /// Call after successful user actions (save expense, export, etc.).
   Future<void> presentInterstitialIfEligible() async {
-    if (!_supported || !_snapshot.showInterstitial) return;
+    if (!_supported || _adsRemoved || !_snapshot.showInterstitial) return;
 
     final last = _lastInterstitialShownAt;
     final minSec = _snapshot.interstitialMinIntervalSeconds;
@@ -252,7 +266,7 @@ class AdsController extends ChangeNotifier {
     required String routePath,
     required bool lockBlocking,
   }) async {
-    if (!_supported || !_snapshot.showAppOpen || lockBlocking) return;
+    if (!_supported || _adsRemoved || !_snapshot.showAppOpen || lockBlocking) return;
     if (shouldDeferAppOpenForRoute(routePath)) return;
 
     final last = _lastAppOpenShownAt;

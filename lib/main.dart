@@ -11,6 +11,7 @@ import 'core/ads/ads_controller.dart';
 import 'core/config/firebase_auth_platform.dart';
 import 'core/notifications/local_notification_service.dart';
 import 'core/preferences/app_preferences.dart';
+import 'core/purchase/purchase_service.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
@@ -23,6 +24,7 @@ import 'presentation/providers/category_provider.dart';
 import 'presentation/providers/expense_provider.dart';
 import 'presentation/providers/income_provider.dart';
 import 'presentation/providers/lock_provider.dart';
+import 'presentation/providers/purchase_provider.dart';
 import 'presentation/providers/recurring_provider.dart';
 import 'presentation/providers/settings_provider.dart';
 import 'presentation/providers/udhar_provider.dart';
@@ -78,10 +80,20 @@ Future<void> main() async {
     await LocalNotificationService.instance.rescheduleFromPrefs(appPreferences);
   }
 
+  // In-app purchases
+  final purchaseService = PurchaseService(appPreferences: appPreferences);
+  await purchaseService.init();
+
+  // If user already purchased "Remove Ads", suppress ads immediately.
+  if (appPreferences.adsRemoved) {
+    adsController.disableAllAds();
+  }
+
   runApp(MyApp(
     appPreferences: appPreferences,
     authProvider: authProvider,
     adsController: adsController,
+    purchaseService: purchaseService,
   ));
 }
 
@@ -117,11 +129,13 @@ class MyApp extends StatefulWidget {
     required this.appPreferences,
     required this.authProvider,
     required this.adsController,
+    required this.purchaseService,
   });
 
   final AppPreferences appPreferences;
   final AuthProvider authProvider;
   final AdsController adsController;
+  final PurchaseService purchaseService;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -155,6 +169,13 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => RecurringProvider()),
+        ChangeNotifierProvider(
+          create: (_) => PurchaseProvider(
+            service: widget.purchaseService,
+            prefs: widget.appPreferences,
+            adsController: widget.adsController,
+          ),
+        ),
         ChangeNotifierProxyProvider<AccountProvider, ExpenseProvider>(
           create: (context) => ExpenseProvider(
             accountProvider: context.read<AccountProvider>(),

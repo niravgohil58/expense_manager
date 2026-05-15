@@ -5,6 +5,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:expense_app/core/ads/ads_controller.dart';
 import 'package:expense_app/core/preferences/app_preferences.dart';
+import 'package:expense_app/core/purchase/purchase_service.dart';
 import 'package:expense_app/main.dart';
 import 'package:expense_app/presentation/providers/auth_provider.dart';
 
@@ -31,6 +32,7 @@ void main() {
         firebaseAuthEnabled: false,
       ),
       adsController: AdsController.disabled(),
+      purchaseService: PurchaseService(appPreferences: appPrefs),
     ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));

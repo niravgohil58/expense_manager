@@ -37,6 +37,9 @@ class AppPreferences {
   static const String keyBoundLocalDataFirebaseUid =
       'bound_local_data_firebase_uid';
 
+  /// User purchased "Remove Ads" in-app product.
+  static const String keyAdsRemoved = 'ads_removed';
+
   /// Run once after [SharedPreferences.getInstance] before constructing [AppPreferences].
   static Future<void> migrateInstallPrefs(SharedPreferences p) async {
     if (p.getBool(keyPrefsSchema) == true) return;
@@ -182,5 +185,12 @@ class AppPreferences {
 
   Future<void> setBoundLocalDataFirebaseUid(String uid) async {
     await _prefs.setString(keyBoundLocalDataFirebaseUid, uid);
+  }
+
+  /// Whether the user has purchased "Remove Ads".
+  bool get adsRemoved => _prefs.getBool(keyAdsRemoved) ?? false;
+
+  Future<void> setAdsRemoved(bool value) async {
+    await _prefs.setBool(keyAdsRemoved, value);
   }
 }

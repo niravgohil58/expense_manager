@@ -8,6 +8,7 @@ import '../../core/formatting/app_currency.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../providers/settings_provider.dart';
 
 /// Navigation drawer for shell routes (opened via [DrawerHost]).
@@ -186,6 +187,17 @@ class AppDrawer extends StatelessWidget {
                   leading: const Icon(Icons.settings_outlined),
                   title: Text(l10n.drawerSettings),
                   onTap: () => push('/settings'),
+                ),
+                Consumer<PurchaseProvider>(
+                  builder: (context, purchase, _) {
+                    if (purchase.adsRemoved) return const SizedBox.shrink();
+                    return ListTile(
+                      leading: Icon(Icons.block_rounded, color: AppColors.accent),
+                      title: const Text('Remove Ads'),
+                      subtitle: const Text('One-time purchase'),
+                      onTap: () => push('/remove-ads'),
+                    );
+                  },
                 ),
                 const Divider(),
                 Padding(
