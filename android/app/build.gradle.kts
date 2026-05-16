@@ -17,7 +17,7 @@ if (releaseSigningConfigured) {
 }
 
 android {
-    namespace = "com.expensemanager.app"
+    namespace = "com.expenseincome.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.expensemanager.app"
+        applicationId = "com.expenseincome.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

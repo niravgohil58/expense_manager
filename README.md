@@ -4,7 +4,7 @@ Offline-first expense and income tracker with accounts, transfers, informal IOUs
 
 The Dart package name is **`expense_app`** (see `pubspec.yaml`); this repo folder may be named `expense_manager`.
 
-**Store identifiers:** Android `applicationId` and iOS `PRODUCT_BUNDLE_IDENTIFIER` are **`com.expensemanager.app`**. Replace with **your own** reverse-DNS IDs before publishing if you need a unique namespace (changing IDs later breaks updates for existing installs).
+**Store identifiers:** Android `applicationId` and iOS `PRODUCT_BUNDLE_IDENTIFIER` are **`com.expenseincome.app`**. Replace with **your own** reverse-DNS IDs before publishing if you need a unique namespace (changing IDs later breaks updates for existing installs).
 
 ## Requirements
 

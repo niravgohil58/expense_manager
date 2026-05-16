@@ -7,18 +7,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:426735393366:android:95351b7a0f7abf5f95f9f7",
+        "mobilesdk_app_id": "1:426735393366:android:98381896ea850d6295f9f7",
         "android_client_info": {
-          "package_name": "com.expensemanager.app"
+          "package_name": "com.expenseincome.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "426735393366-sbkrknth4fiifig37cj4teq6kjpcg2oi.apps.googleusercontent.com",
+          "client_id": "426735393366-rlh68ooioe2bgaqq5r43njh74inng02f.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.expensemanager.app",
-            "certificate_hash": "6626f65ed471f1b78a35fb812f02fbb1b2251bd1"
+            "package_name": "com.expenseincome.app",
+            "certificate_hash": "1b1b621deb6fc3a2d7cc36b2fdf7104c6cf76bdb"
           }
         },
         {

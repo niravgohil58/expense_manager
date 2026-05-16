@@ -40,6 +40,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: 'REPLACE_ME_SENDER_ID',
     projectId: 'REPLACE_ME_PROJECT_ID',
     storageBucket: 'REPLACE_ME_PROJECT_ID.appspot.com',
-    iosBundleId: 'com.expensemanager.app',
+    iosBundleId: 'com.expenseincome.app',
   );
 }
