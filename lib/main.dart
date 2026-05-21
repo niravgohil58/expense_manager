@@ -77,7 +77,7 @@ Future<void> main() async {
 
   if (Platform.isAndroid || Platform.isIOS) {
     await LocalNotificationService.instance.initialize();
-    await LocalNotificationService.instance.rescheduleFromPrefs(appPreferences);
+    await LocalNotificationService.instance.rescheduleAllFromPrefs(appPreferences);
   }
 
   // In-app purchases
@@ -179,9 +179,13 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProxyProvider<AccountProvider, ExpenseProvider>(
           create: (context) => ExpenseProvider(
             accountProvider: context.read<AccountProvider>(),
+            appPreferences: widget.appPreferences,
           ),
           update: (context, accountProvider, previous) =>
-              previous ?? ExpenseProvider(accountProvider: accountProvider),
+              previous ?? ExpenseProvider(
+                accountProvider: accountProvider,
+                appPreferences: widget.appPreferences,
+              ),
         ),
         ChangeNotifierProxyProvider<AccountProvider, UdharProvider>(
           create: (context) => UdharProvider(

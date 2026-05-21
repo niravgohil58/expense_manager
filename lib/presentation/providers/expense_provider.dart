@@ -1,9 +1,13 @@
 import 'package:flutter/foundation.dart' hide Category;
 import '../../core/errors/app_exceptions.dart';
+import '../../core/formatting/app_currency.dart';
+import '../../core/notifications/local_notification_service.dart';
+import '../../core/preferences/app_preferences.dart';
 import '../../data/models/expense_model.dart';
 import '../../data/models/category_model.dart';
 import '../../data/models/transfer_model.dart';
 import '../../data/query/expense_filters.dart';
+import '../../data/repositories/budget_repository.dart';
 import '../../data/repositories/expense_repository.dart';
 import 'account_provider.dart';
 
@@ -15,8 +19,11 @@ class ExpenseProvider extends ChangeNotifier {
   ExpenseProvider({
     ExpenseRepository? repository,
     required AccountProvider accountProvider,
+    this.appPreferences,
   })  : _repository = repository ?? ExpenseRepository(),
         _accountProvider = accountProvider;
+
+  final AppPreferences? appPreferences;
 
   List<Expense> _expenses = [];
   /// Rows matching [ExpenseFilters] for the Expenses tab list only.
@@ -152,6 +159,13 @@ class ExpenseProvider extends ChangeNotifier {
       );
       await loadExpenses(showLoading: false);
       await _accountProvider.loadAccounts(showLoading: false);
+
+      // Budget exceeded check.
+      await _checkBudgetExceeded(category, date);
+
+      // Reset inactivity reminder (user is active).
+      _resetInactivityReminder();
+
       return true;
     } on InsufficientBalanceException catch (e) {
       _error = e.message;
@@ -282,5 +296,46 @@ class ExpenseProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  // ── Smart notification helpers ──────────────────────────────────────
+
+  /// Check if the expense's category exceeds its budget limit for the month
+  /// and fire a one-time local notification if so.
+  Future<void> _checkBudgetExceeded(Category category, DateTime date) async {
+    final prefs = appPreferences;
+    if (prefs == null || !prefs.budgetAlertEnabled) return;
+
+    try {
+      final budgetRepo = BudgetRepository();
+      final limits = await budgetRepo.limitsForMonth(date.year, date.month);
+      final limit = limits[category.id];
+      if (limit == null || limit <= 0) return;
+
+      final start = DateTime(date.year, date.month, 1);
+      final end = DateTime(date.year, date.month + 1, 0, 23, 59, 59);
+      final spent = totalExpenseForCategoryInRange(category.id, start, end);
+
+      if (spent > limit) {
+        final prefix = AppCurrencyFormat(prefs.currencyCode).prefix;
+        await LocalNotificationService.instance.showBudgetExceededAlert(
+          categoryName: category.name,
+          spent: spent,
+          limit: limit,
+          currencyPrefix: prefix,
+        );
+      }
+    } catch (e) {
+      debugPrint('[ExpenseProvider] budget check failed: $e');
+    }
+  }
+
+  /// Reschedule the inactivity reminder so it doesn't fire while user is active.
+  void _resetInactivityReminder() {
+    final prefs = appPreferences;
+    if (prefs == null || !prefs.inactivityReminderEnabled) return;
+
+    // Re-scheduling all from prefs resets the daily inactivity notification.
+    LocalNotificationService.instance.rescheduleAllFromPrefs(prefs);
   }
 }

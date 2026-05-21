@@ -58,7 +58,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   Future<void> _rescheduleNotifications() async {
-    await LocalNotificationService.instance.rescheduleFromPrefs(_prefs);
+    await LocalNotificationService.instance.rescheduleAllFromPrefs(_prefs);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

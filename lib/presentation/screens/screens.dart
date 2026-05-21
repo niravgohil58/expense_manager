@@ -17,3 +17,4 @@ export 'report_screen.dart';
 export 'manage_categories_screen.dart';
 export 'add_category_screen.dart';
 export 'settings_screen.dart';
+export 'notification_settings_screen.dart';

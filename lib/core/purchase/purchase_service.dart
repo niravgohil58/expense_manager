@@ -7,6 +7,9 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import '../preferences/app_preferences.dart';
 import 'purchase_constants.dart';
 
+/// Events emitted by [PurchaseService] after a purchase attempt.
+enum PurchaseEvent { success, cancelled, error }
+
 /// Low-level wrapper around [InAppPurchase].
 ///
 /// Manages store connection, product queries, purchasing, restoring,
@@ -23,10 +26,11 @@ class PurchaseService {
   /// Resolved product from the store (null until [init] completes).
   ProductDetails? removeAdsProduct;
 
-  /// Broadcast stream that fires `true` whenever ads are successfully removed.
-  final StreamController<bool> _purchaseResultController =
-      StreamController<bool>.broadcast();
-  Stream<bool> get purchaseResultStream => _purchaseResultController.stream;
+  /// Broadcast stream that fires a [PurchaseEvent] after each purchase attempt.
+  final StreamController<PurchaseEvent> _purchaseResultController =
+      StreamController<PurchaseEvent>.broadcast();
+  Stream<PurchaseEvent> get purchaseResultStream =>
+      _purchaseResultController.stream;
 
   /// Whether the store is available on this platform.
   bool _storeAvailable = false;
@@ -65,9 +69,12 @@ class PurchaseService {
       );
     }
     if (response.productDetails.isNotEmpty) {
-      removeAdsProduct = response.productDetails.firstWhere(
+      // Cast to List<ProductDetails> so that `firstWhere`'s orElse closure
+      // has the correct type (avoids GooglePlayProductDetails subtype error).
+      final products = response.productDetails.cast<ProductDetails>();
+      removeAdsProduct = products.firstWhere(
         (p) => p.id == PurchaseConstants.removeAdsProductId,
-        orElse: () => response.productDetails.first,
+        orElse: () => products.first,
       );
       debugPrint(
         '[PurchaseService] product found: '
@@ -105,22 +112,22 @@ class PurchaseService {
     for (final purchase in purchaseDetailsList) {
       debugPrint(
         '[PurchaseService] update: '
-        'product=${purchase.productID} status=${purchase.status}',
+        'product="${purchase.productID}" status=${purchase.status}',
       );
-
-      if (purchase.productID != PurchaseConstants.removeAdsProductId) {
-        continue;
-      }
 
       switch (purchase.status) {
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
-          _handleSuccessfulPurchase(purchase);
+          // Only handle success for our specific product.
+          if (purchase.productID == PurchaseConstants.removeAdsProductId) {
+            _handleSuccessfulPurchase(purchase);
+          }
           break;
         case PurchaseStatus.error:
           debugPrint(
             '[PurchaseService] purchase error: ${purchase.error?.message}',
           );
+          _purchaseResultController.add(PurchaseEvent.error);
           if (purchase.pendingCompletePurchase) {
             _iap.completePurchase(purchase);
           }
@@ -130,6 +137,7 @@ class PurchaseService {
           break;
         case PurchaseStatus.canceled:
           debugPrint('[PurchaseService] purchase cancelled.');
+          _purchaseResultController.add(PurchaseEvent.cancelled);
           break;
       }
     }
@@ -138,7 +146,7 @@ class PurchaseService {
   Future<void> _handleSuccessfulPurchase(PurchaseDetails purchase) async {
     // Persist the ad-free state.
     await _prefs.setAdsRemoved(true);
-    _purchaseResultController.add(true);
+    _purchaseResultController.add(PurchaseEvent.success);
     debugPrint('[PurchaseService] ads removed — persisted.');
 
     // Complete the purchase with the store.

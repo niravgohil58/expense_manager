@@ -24,20 +24,29 @@ class PurchaseProvider extends ChangeNotifier {
     _purchaseState = _adsRemoved ? PurchaseState.purchased : PurchaseState.idle;
 
     // Listen for purchase results from the service.
-    _sub = _service.purchaseResultStream.listen((success) {
-      if (success) {
-        _adsRemoved = true;
-        _purchaseState = PurchaseState.purchased;
-        _adsController.disableAllAds();
-        notifyListeners();
+    _sub = _service.purchaseResultStream.listen((event) {
+      switch (event) {
+        case PurchaseEvent.success:
+          _adsRemoved = true;
+          _purchaseState = PurchaseState.purchased;
+          _adsController.disableAllAds();
+          break;
+        case PurchaseEvent.cancelled:
+          _purchaseState = PurchaseState.idle;
+          break;
+        case PurchaseEvent.error:
+          _purchaseState = PurchaseState.error;
+          _errorMessage = 'Purchase failed. Please try again.';
+          break;
       }
+      notifyListeners();
     });
   }
 
   final PurchaseService _service;
   final AppPreferences _prefs;
   final AdsController _adsController;
-  StreamSubscription<bool>? _sub;
+  StreamSubscription<PurchaseEvent>? _sub;
 
   bool _adsRemoved = false;
   PurchaseState _purchaseState = PurchaseState.idle;
@@ -73,9 +82,19 @@ class PurchaseProvider extends ChangeNotifier {
       _errorMessage = 'Could not start the purchase. '
           'Please check that the product is available in the store.';
       notifyListeners();
+      return;
     }
-    // If started successfully, the result arrives via purchaseResultStream
-    // which we handle in the constructor listener.
+
+    // Safety timeout: if the store never delivers a result (e.g. user
+    // dismisses the overlay without the plugin firing an event), reset
+    // after 60 seconds so the UI isn't stuck forever.
+    Future.delayed(const Duration(seconds: 60), () {
+      if (_purchaseState == PurchaseState.loading) {
+        debugPrint('[PurchaseProvider] purchase timeout — resetting to idle.');
+        _purchaseState = PurchaseState.idle;
+        notifyListeners();
+      }
+    });
   }
 
   /// Restore past purchases (e.g. after reinstall).

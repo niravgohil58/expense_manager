@@ -27,6 +27,7 @@ import '../../presentation/screens/recurring_template_form_screen.dart';
 import '../../presentation/screens/recurring_templates_screen.dart';
 import '../../presentation/screens/report_screen.dart';
 import '../../presentation/screens/remove_ads_screen.dart';
+import '../../presentation/screens/notification_settings_screen.dart';
 import '../../presentation/screens/set_pin_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
 import '../../presentation/screens/transfer_history_screen.dart';
@@ -282,6 +283,12 @@ class AppRouter {
           name: 'settings',
           parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: '/notification-settings',
+          name: 'notification-settings',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const NotificationSettingsScreen(),
         ),
         GoRoute(
           path: '/budgets',

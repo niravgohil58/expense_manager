@@ -23,6 +23,45 @@ class AppPreferences {
   static const String keyBackupReminderHour = 'reminder_backup_hour';
   static const String keyBackupReminderMinute = 'reminder_backup_minute';
 
+  /// Morning expense reminder.
+  static const String keyMorningReminderEnabled = 'reminder_morning_enabled';
+  static const String keyMorningReminderHour = 'reminder_morning_hour';
+  static const String keyMorningReminderMinute = 'reminder_morning_minute';
+
+  /// Night expense reminder.
+  static const String keyNightReminderEnabled = 'reminder_night_enabled';
+  static const String keyNightReminderHour = 'reminder_night_hour';
+  static const String keyNightReminderMinute = 'reminder_night_minute';
+
+  /// Monthly income reminder (1st of every month).
+  static const String keyMonthlyIncomeReminderEnabled = 'reminder_monthly_income_enabled';
+  static const String keyMonthlyIncomeReminderHour = 'reminder_monthly_income_hour';
+  static const String keyMonthlyIncomeReminderMinute = 'reminder_monthly_income_minute';
+
+  /// Monthly report reminder.
+  static const String keyMonthlyReportReminderEnabled = 'reminder_monthly_report_enabled';
+  static const String keyMonthlyReportReminderDay = 'reminder_monthly_report_day';
+  static const String keyMonthlyReportReminderHour = 'reminder_monthly_report_hour';
+  static const String keyMonthlyReportReminderMinute = 'reminder_monthly_report_minute';
+
+  /// Weekly summary reminder.
+  static const String keyWeeklySummaryReminderEnabled = 'reminder_weekly_summary_enabled';
+  static const String keyWeeklySummaryReminderWeekday = 'reminder_weekly_summary_weekday';
+  static const String keyWeeklySummaryReminderHour = 'reminder_weekly_summary_hour';
+  static const String keyWeeklySummaryReminderMinute = 'reminder_weekly_summary_minute';
+
+  /// IOU pending reminder.
+  static const String keyIouReminderEnabled = 'reminder_iou_enabled';
+  static const String keyIouReminderWeekday = 'reminder_iou_weekday';
+  static const String keyIouReminderHour = 'reminder_iou_hour';
+  static const String keyIouReminderMinute = 'reminder_iou_minute';
+
+  /// Budget exceeded alert.
+  static const String keyBudgetAlertEnabled = 'reminder_budget_alert_enabled';
+
+  /// Inactivity reminder.
+  static const String keyInactivityReminderEnabled = 'reminder_inactivity_enabled';
+
   /// IOUs home screen intro panel (user can hide once understood).
   static const String keyIouScreenTipsVisible = 'iou_screen_tips_visible';
 
@@ -163,6 +202,183 @@ class AppPreferences {
 
   Future<void> setBackupReminderMinute(int minute) async {
     await _prefs.setInt(keyBackupReminderMinute, minute);
+  }
+
+  // ── Morning reminder ────────────────────────────────────────────────
+
+  bool get morningReminderEnabled =>
+      _prefs.getBool(keyMorningReminderEnabled) ?? true;
+
+  Future<void> setMorningReminderEnabled(bool value) async {
+    await _prefs.setBool(keyMorningReminderEnabled, value);
+  }
+
+  int get morningReminderHour =>
+      _prefs.getInt(keyMorningReminderHour) ?? 9;
+
+  int get morningReminderMinute =>
+      _prefs.getInt(keyMorningReminderMinute) ?? 0;
+
+  Future<void> setMorningReminderHour(int hour) async {
+    await _prefs.setInt(keyMorningReminderHour, hour);
+  }
+
+  Future<void> setMorningReminderMinute(int minute) async {
+    await _prefs.setInt(keyMorningReminderMinute, minute);
+  }
+
+  // ── Night reminder ──────────────────────────────────────────────────
+
+  bool get nightReminderEnabled =>
+      _prefs.getBool(keyNightReminderEnabled) ?? true;
+
+  Future<void> setNightReminderEnabled(bool value) async {
+    await _prefs.setBool(keyNightReminderEnabled, value);
+  }
+
+  int get nightReminderHour =>
+      _prefs.getInt(keyNightReminderHour) ?? 21;
+
+  int get nightReminderMinute =>
+      _prefs.getInt(keyNightReminderMinute) ?? 0;
+
+  Future<void> setNightReminderHour(int hour) async {
+    await _prefs.setInt(keyNightReminderHour, hour);
+  }
+
+  Future<void> setNightReminderMinute(int minute) async {
+    await _prefs.setInt(keyNightReminderMinute, minute);
+  }
+
+  // ── Monthly income reminder ─────────────────────────────────────────
+
+  bool get monthlyIncomeReminderEnabled =>
+      _prefs.getBool(keyMonthlyIncomeReminderEnabled) ?? true;
+
+  Future<void> setMonthlyIncomeReminderEnabled(bool value) async {
+    await _prefs.setBool(keyMonthlyIncomeReminderEnabled, value);
+  }
+
+  int get monthlyIncomeReminderHour =>
+      _prefs.getInt(keyMonthlyIncomeReminderHour) ?? 10;
+
+  int get monthlyIncomeReminderMinute =>
+      _prefs.getInt(keyMonthlyIncomeReminderMinute) ?? 0;
+
+  Future<void> setMonthlyIncomeReminderHour(int hour) async {
+    await _prefs.setInt(keyMonthlyIncomeReminderHour, hour);
+  }
+
+  Future<void> setMonthlyIncomeReminderMinute(int minute) async {
+    await _prefs.setInt(keyMonthlyIncomeReminderMinute, minute);
+  }
+
+  // ── Monthly report reminder ─────────────────────────────────────────
+
+  bool get monthlyReportReminderEnabled =>
+      _prefs.getBool(keyMonthlyReportReminderEnabled) ?? false;
+
+  Future<void> setMonthlyReportReminderEnabled(bool value) async {
+    await _prefs.setBool(keyMonthlyReportReminderEnabled, value);
+  }
+
+  int get monthlyReportReminderDay =>
+      _prefs.getInt(keyMonthlyReportReminderDay) ?? 28;
+
+  Future<void> setMonthlyReportReminderDay(int day) async {
+    await _prefs.setInt(keyMonthlyReportReminderDay, day);
+  }
+
+  int get monthlyReportReminderHour =>
+      _prefs.getInt(keyMonthlyReportReminderHour) ?? 18;
+
+  int get monthlyReportReminderMinute =>
+      _prefs.getInt(keyMonthlyReportReminderMinute) ?? 0;
+
+  Future<void> setMonthlyReportReminderHour(int hour) async {
+    await _prefs.setInt(keyMonthlyReportReminderHour, hour);
+  }
+
+  Future<void> setMonthlyReportReminderMinute(int minute) async {
+    await _prefs.setInt(keyMonthlyReportReminderMinute, minute);
+  }
+
+  // ── Weekly summary reminder ─────────────────────────────────────────
+
+  bool get weeklySummaryReminderEnabled =>
+      _prefs.getBool(keyWeeklySummaryReminderEnabled) ?? false;
+
+  Future<void> setWeeklySummaryReminderEnabled(bool value) async {
+    await _prefs.setBool(keyWeeklySummaryReminderEnabled, value);
+  }
+
+  int get weeklySummaryReminderWeekday =>
+      _prefs.getInt(keyWeeklySummaryReminderWeekday) ?? DateTime.sunday;
+
+  Future<void> setWeeklySummaryReminderWeekday(int weekday) async {
+    await _prefs.setInt(keyWeeklySummaryReminderWeekday, weekday);
+  }
+
+  int get weeklySummaryReminderHour =>
+      _prefs.getInt(keyWeeklySummaryReminderHour) ?? 19;
+
+  int get weeklySummaryReminderMinute =>
+      _prefs.getInt(keyWeeklySummaryReminderMinute) ?? 0;
+
+  Future<void> setWeeklySummaryReminderHour(int hour) async {
+    await _prefs.setInt(keyWeeklySummaryReminderHour, hour);
+  }
+
+  Future<void> setWeeklySummaryReminderMinute(int minute) async {
+    await _prefs.setInt(keyWeeklySummaryReminderMinute, minute);
+  }
+
+  // ── IOU pending reminder ────────────────────────────────────────────
+
+  bool get iouReminderEnabled =>
+      _prefs.getBool(keyIouReminderEnabled) ?? false;
+
+  Future<void> setIouReminderEnabled(bool value) async {
+    await _prefs.setBool(keyIouReminderEnabled, value);
+  }
+
+  int get iouReminderWeekday =>
+      _prefs.getInt(keyIouReminderWeekday) ?? DateTime.saturday;
+
+  Future<void> setIouReminderWeekday(int weekday) async {
+    await _prefs.setInt(keyIouReminderWeekday, weekday);
+  }
+
+  int get iouReminderHour =>
+      _prefs.getInt(keyIouReminderHour) ?? 11;
+
+  int get iouReminderMinute =>
+      _prefs.getInt(keyIouReminderMinute) ?? 0;
+
+  Future<void> setIouReminderHour(int hour) async {
+    await _prefs.setInt(keyIouReminderHour, hour);
+  }
+
+  Future<void> setIouReminderMinute(int minute) async {
+    await _prefs.setInt(keyIouReminderMinute, minute);
+  }
+
+  // ── Budget exceeded alert ───────────────────────────────────────────
+
+  bool get budgetAlertEnabled =>
+      _prefs.getBool(keyBudgetAlertEnabled) ?? true;
+
+  Future<void> setBudgetAlertEnabled(bool value) async {
+    await _prefs.setBool(keyBudgetAlertEnabled, value);
+  }
+
+  // ── Inactivity reminder ─────────────────────────────────────────────
+
+  bool get inactivityReminderEnabled =>
+      _prefs.getBool(keyInactivityReminderEnabled) ?? false;
+
+  Future<void> setInactivityReminderEnabled(bool value) async {
+    await _prefs.setBool(keyInactivityReminderEnabled, value);
   }
 
   bool get iouScreenTipsVisible =>
