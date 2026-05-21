@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -141,9 +142,49 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late final GoRouter _router =
       AppRouter.create(widget.appPreferences, widget.authProvider);
+
+  bool _wasPermissionGranted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkInitialPermission();
+  }
+
+  Future<void> _checkInitialPermission() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      _wasPermissionGranted = await Permission.notification.isGranted;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _onAppResumed();
+    }
+  }
+
+  Future<void> _onAppResumed() async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+    
+    final isGranted = await Permission.notification.isGranted;
+    // If it changed from not granted -> granted (e.g. user toggled in settings)
+    if (isGranted && !_wasPermissionGranted) {
+      debugPrint('[MyApp] Notification permission newly granted on resume. Rescheduling...');
+      await LocalNotificationService.instance.rescheduleAllFromPrefs(widget.appPreferences);
+    }
+    _wasPermissionGranted = isGranted;
+  }
 
   @override
   Widget build(BuildContext context) {

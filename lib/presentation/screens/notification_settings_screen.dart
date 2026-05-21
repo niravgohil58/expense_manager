@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -31,17 +32,32 @@ class _NotificationSettingsScreenState
   }
 
   Future<bool> _ensurePermission() async {
-    final ok = await LocalNotificationService.instance
-        .requestPermissionsIfNeeded();
-    if (!ok && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Notification permission denied. '
-              'Please enable it in system settings.'),
+    final isGranted = await Permission.notification.isGranted;
+    if (isGranted) return true;
+
+    if (!mounted) return false;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Permission Required'),
+        content: const Text(
+          'Please give the permission from setting for notification and then on this.',
         ),
-      );
-    }
-    return ok;
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+    
+    return false;
   }
 
   Future<void> _pickTime({

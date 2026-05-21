@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../core/formatting/app_currency.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
+import '../../core/constants/text_styles.dart';
+import '../../core/formatting/app_currency.dart';
+import '../../core/notifications/local_notification_service.dart';
+import '../../core/preferences/app_preferences.dart';
 import '../../data/models/account_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
@@ -27,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData(silentReload: false);
+      _checkNotificationPermission();
     });
   }
 
@@ -40,6 +44,47 @@ class _HomeScreenState extends State<HomeScreen> {
     await accountProvider.loadAccounts(showLoading: showLoading);
     await expenseProvider.loadExpenses(showLoading: showLoading);
     await incomeProvider.loadIncomes(showLoading: showLoading);
+  }
+
+  Future<void> _checkNotificationPermission() async {
+    final prefs = context.read<AppPreferences>();
+    if (!LocalNotificationService.instance.isSupportedMobile) return;
+
+    final isGranted = await Permission.notification.isGranted;
+    if (isGranted) return;
+
+    if (prefs.hasRequestedNotificationPermission) return;
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: const Text('Enable Notifications'),
+        content: const Text(
+          'Expense Manager requires notification permission to send you daily expense reminders, budget warnings, and pending IOU alerts. This helps you stay on top of your finances.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await prefs.setHasRequestedNotificationPermission(true);
+              
+              final result = await Permission.notification.request();
+              if (result.isDenied || result.isPermanentlyDenied) {
+                // Fallback to turn off all reminders if they denied
+                await prefs.disableAllReminders();
+              } else if (result.isGranted) {
+                // If they accept, schedule them
+                await LocalNotificationService.instance.rescheduleAllFromPrefs(prefs);
+              }
+            },
+            child: const Text('Allow'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

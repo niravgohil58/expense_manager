@@ -62,6 +62,9 @@ class AppPreferences {
   /// Inactivity reminder.
   static const String keyInactivityReminderEnabled = 'reminder_inactivity_enabled';
 
+  /// Flag to track if we've shown the home screen permission dialog.
+  static const String keyHasRequestedNotificationPermission = 'has_requested_notification_permission';
+
   /// IOUs home screen intro panel (user can hide once understood).
   static const String keyIouScreenTipsVisible = 'iou_screen_tips_visible';
 
@@ -149,7 +152,7 @@ class AppPreferences {
 
   /// [weekday] matches [DateTime.weekday] (Monday = 1 … Sunday = 7).
   bool get recurringReminderEnabled =>
-      _prefs.getBool(keyRecurringReminderEnabled) ?? false;
+      _prefs.getBool(keyRecurringReminderEnabled) ?? true;
 
   Future<void> setRecurringReminderEnabled(bool value) async {
     await _prefs.setBool(keyRecurringReminderEnabled, value);
@@ -177,7 +180,7 @@ class AppPreferences {
   }
 
   bool get backupReminderEnabled =>
-      _prefs.getBool(keyBackupReminderEnabled) ?? false;
+      _prefs.getBool(keyBackupReminderEnabled) ?? true;
 
   Future<void> setBackupReminderEnabled(bool value) async {
     await _prefs.setBool(keyBackupReminderEnabled, value);
@@ -202,6 +205,15 @@ class AppPreferences {
 
   Future<void> setBackupReminderMinute(int minute) async {
     await _prefs.setInt(keyBackupReminderMinute, minute);
+  }
+
+  // ── Reminders (Notifications) ───────────────────────────────────────
+
+  bool get hasRequestedNotificationPermission =>
+      _prefs.getBool(keyHasRequestedNotificationPermission) ?? false;
+
+  Future<void> setHasRequestedNotificationPermission(bool value) async {
+    await _prefs.setBool(keyHasRequestedNotificationPermission, value);
   }
 
   // ── Morning reminder ────────────────────────────────────────────────
@@ -276,7 +288,7 @@ class AppPreferences {
   // ── Monthly report reminder ─────────────────────────────────────────
 
   bool get monthlyReportReminderEnabled =>
-      _prefs.getBool(keyMonthlyReportReminderEnabled) ?? false;
+      _prefs.getBool(keyMonthlyReportReminderEnabled) ?? true;
 
   Future<void> setMonthlyReportReminderEnabled(bool value) async {
     await _prefs.setBool(keyMonthlyReportReminderEnabled, value);
@@ -306,7 +318,7 @@ class AppPreferences {
   // ── Weekly summary reminder ─────────────────────────────────────────
 
   bool get weeklySummaryReminderEnabled =>
-      _prefs.getBool(keyWeeklySummaryReminderEnabled) ?? false;
+      _prefs.getBool(keyWeeklySummaryReminderEnabled) ?? true;
 
   Future<void> setWeeklySummaryReminderEnabled(bool value) async {
     await _prefs.setBool(keyWeeklySummaryReminderEnabled, value);
@@ -336,7 +348,7 @@ class AppPreferences {
   // ── IOU pending reminder ────────────────────────────────────────────
 
   bool get iouReminderEnabled =>
-      _prefs.getBool(keyIouReminderEnabled) ?? false;
+      _prefs.getBool(keyIouReminderEnabled) ?? true;
 
   Future<void> setIouReminderEnabled(bool value) async {
     await _prefs.setBool(keyIouReminderEnabled, value);
@@ -375,10 +387,24 @@ class AppPreferences {
   // ── Inactivity reminder ─────────────────────────────────────────────
 
   bool get inactivityReminderEnabled =>
-      _prefs.getBool(keyInactivityReminderEnabled) ?? false;
+      _prefs.getBool(keyInactivityReminderEnabled) ?? true;
 
   Future<void> setInactivityReminderEnabled(bool value) async {
     await _prefs.setBool(keyInactivityReminderEnabled, value);
+  }
+
+  /// Emergency fallback when permission is denied or revoked.
+  Future<void> disableAllReminders() async {
+    await setMorningReminderEnabled(false);
+    await setNightReminderEnabled(false);
+    await setMonthlyIncomeReminderEnabled(false);
+    await setMonthlyReportReminderEnabled(false);
+    await setWeeklySummaryReminderEnabled(false);
+    await setRecurringReminderEnabled(false);
+    await setBackupReminderEnabled(false);
+    await setIouReminderEnabled(false);
+    await setBudgetAlertEnabled(false);
+    await setInactivityReminderEnabled(false);
   }
 
   bool get iouScreenTipsVisible =>

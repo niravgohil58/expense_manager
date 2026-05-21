@@ -44,13 +44,14 @@ class LocalNotificationService {
       requestSoundPermission: false,
     );
 
-    await _plugin.initialize(
+    final initResult = await _plugin.initialize(
       settings: InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
       ),
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
+    debugPrint('[LocalNotifications] initialize result=$initResult');
 
     // Create all Android notification channels.
     final android = _plugin.resolvePlatformSpecificImplementation<
@@ -61,7 +62,7 @@ class LocalNotificationService {
           NotificationConstants.dailyChannelId,
           NotificationConstants.dailyChannelName,
           description: NotificationConstants.dailyChannelDesc,
-          importance: Importance.defaultImportance,
+          importance: Importance.high,
         ),
       );
       await android.createNotificationChannel(
@@ -69,7 +70,7 @@ class LocalNotificationService {
           NotificationConstants.monthlyChannelId,
           NotificationConstants.monthlyChannelName,
           description: NotificationConstants.monthlyChannelDesc,
-          importance: Importance.defaultImportance,
+          importance: Importance.high,
         ),
       );
       await android.createNotificationChannel(
@@ -77,7 +78,7 @@ class LocalNotificationService {
           NotificationConstants.weeklyChannelId,
           NotificationConstants.weeklyChannelName,
           description: NotificationConstants.weeklyChannelDesc,
-          importance: Importance.defaultImportance,
+          importance: Importance.high,
         ),
       );
       await android.createNotificationChannel(
@@ -85,7 +86,7 @@ class LocalNotificationService {
           NotificationConstants.expenseChannelId,
           NotificationConstants.expenseChannelName,
           description: NotificationConstants.expenseChannelDesc,
-          importance: Importance.defaultImportance,
+          importance: Importance.high,
         ),
       );
       await android.createNotificationChannel(
@@ -93,7 +94,7 @@ class LocalNotificationService {
           NotificationConstants.iouChannelId,
           NotificationConstants.iouChannelName,
           description: NotificationConstants.iouChannelDesc,
-          importance: Importance.defaultImportance,
+          importance: Importance.high,
         ),
       );
       await android.createNotificationChannel(
@@ -109,9 +110,10 @@ class LocalNotificationService {
           NotificationConstants.engagementChannelId,
           NotificationConstants.engagementChannelName,
           description: NotificationConstants.engagementChannelDesc,
-          importance: Importance.defaultImportance,
+          importance: Importance.high,
         ),
       );
+      debugPrint('[LocalNotifications] all channels created');
     }
 
     _initialized = true;
@@ -124,8 +126,11 @@ class LocalNotificationService {
   Future<void> _configureLocalTimeZone() async {
     try {
       final info = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(info.identifier));
-    } catch (_) {
+      final locationName = info.identifier;
+      tz.setLocalLocation(tz.getLocation(locationName));
+      debugPrint('[LocalNotifications] timezone set to $locationName');
+    } catch (e) {
+      debugPrint('[LocalNotifications] timezone error: $e — falling back to UTC');
       try {
         tz.setLocalLocation(tz.getLocation('UTC'));
       } catch (_) {}
@@ -166,6 +171,7 @@ class LocalNotificationService {
     await _cancelAllScheduled();
 
     final location = tz.local;
+    debugPrint('[LocalNotifications] rescheduleAllFromPrefs — location=${location.name}');
 
     // 1. Morning reminder
     if (prefs.morningReminderEnabled) {
@@ -180,6 +186,7 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/add-expense'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled morning @ ${prefs.morningReminderHour}:${prefs.morningReminderMinute}');
     }
 
     // 2. Night reminder
@@ -195,6 +202,7 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/expenses'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled night @ ${prefs.nightReminderHour}:${prefs.nightReminderMinute}');
     }
 
     // 3. Monthly income reminder (1st of month)
@@ -211,9 +219,10 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/add-income'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled monthly income');
     }
 
-    // 4. Monthly report reminder (28th of month)
+    // 4. Monthly report reminder
     if (prefs.monthlyReportReminderEnabled) {
       await _scheduleMonthlyReminder(
         id: NotificationConstants.monthlyReportReminderId,
@@ -227,6 +236,7 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/reports'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled monthly report');
     }
 
     // 5. Weekly summary reminder
@@ -243,6 +253,7 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/reports'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled weekly summary');
     }
 
     // 6. Recurring template reminder (existing)
@@ -259,6 +270,7 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/recurring-templates'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled recurring');
     }
 
     // 7. Backup reminder (existing)
@@ -275,6 +287,7 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/settings'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled backup');
     }
 
     // 8. IOU pending reminder
@@ -291,6 +304,7 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/udhar'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled IOU');
     }
 
     // 9. Inactivity reminder (daily at 8 PM, actual firing depends on logic)
@@ -306,9 +320,15 @@ class LocalNotificationService {
         payload: NotificationRouter.buildPayload('/add-expense'),
         location: location,
       );
+      debugPrint('[LocalNotifications] scheduled inactivity');
     }
 
-    debugPrint('[LocalNotifications] rescheduleAllFromPrefs complete');
+    // Log pending notifications for verification.
+    final pending = await _plugin.pendingNotificationRequests();
+    debugPrint('[LocalNotifications] rescheduleAllFromPrefs complete — ${pending.length} pending');
+    for (final p in pending) {
+      debugPrint('[LocalNotifications]   id=${p.id} title="${p.title}"');
+    }
   }
 
   /// Legacy method — redirects to [rescheduleAllFromPrefs].
@@ -386,24 +406,28 @@ class LocalNotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
-    await _plugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: scheduled,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          channelName,
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
+    try {
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduled,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelName,
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: const DarwinNotificationDetails(),
         ),
-        iOS: const DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: payload,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: payload,
+      );
+    } catch (e) {
+      debugPrint('[LocalNotifications] _scheduleDailyReminder error (id=$id): $e');
+    }
   }
 
   Future<void> _scheduleWeeklyReminder({
@@ -420,24 +444,28 @@ class LocalNotificationService {
   }) async {
     final next = _nextWeeklyOccurrence(location, weekday, hour, minute);
 
-    await _plugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: next,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          channelName,
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
+    try {
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: next,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelName,
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: const DarwinNotificationDetails(),
         ),
-        iOS: const DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      payload: payload,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+        payload: payload,
+      );
+    } catch (e) {
+      debugPrint('[LocalNotifications] _scheduleWeeklyReminder error (id=$id): $e');
+    }
   }
 
   Future<void> _scheduleMonthlyReminder({
@@ -454,24 +482,28 @@ class LocalNotificationService {
   }) async {
     final next = _nextMonthlyOccurrence(location, day, hour, minute);
 
-    await _plugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: next,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          channelName,
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
+    try {
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: next,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelName,
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+          iOS: const DarwinNotificationDetails(),
         ),
-        iOS: const DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
-      payload: payload,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
+        payload: payload,
+      );
+    } catch (e) {
+      debugPrint('[LocalNotifications] _scheduleMonthlyReminder error (id=$id): $e');
+    }
   }
 
   // ── Date helpers ─────────────────────────────────────────────────────
