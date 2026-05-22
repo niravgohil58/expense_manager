@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: DrawerHost.menuButton(context),
-        title: const Text('Expense Manager'),
+        title: const Text('Expense Budget Tracker'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
