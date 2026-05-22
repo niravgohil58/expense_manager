@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import '../../core/ads/ads_controller.dart';
 import '../../core/constants/supported_currencies.dart';
 import '../../core/database/database_helper.dart';
+import '../../core/services/app_update_service.dart';
+import '../../core/services/rate_app_service.dart';
 import '../../data/export/csv_export_service.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
@@ -480,6 +482,36 @@ class SettingsScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  // ── App (Android-only) ────────────────────
+                  if (Platform.isAndroid) ...[
+                    const SizedBox(height: DesignConstants.spacingLg),
+                    Text('App', style: AppTextStyles.heading4),
+                    const SizedBox(height: DesignConstants.spacingSm),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.system_update_rounded,
+                          color: scheme.primary),
+                      title: const Text('Check for update'),
+                      subtitle: const Text(
+                        'Check for the latest version on Play Store',
+                      ),
+                      onTap: backup.isBusy
+                          ? null
+                          : () => AppUpdateService.instance
+                              .manualCheckForUpdate(context),
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.star_rate_rounded,
+                          color: AppColors.accent),
+                      title: const Text('Rate this app'),
+                      subtitle: const Text(
+                        'Love the app? Rate us on Play Store!',
+                      ),
+                      onTap: () =>
+                          RateAppService.instance.openStoreListing(),
+                    ),
+                  ],
                 ],
               ),
               if (backup.isBusy)

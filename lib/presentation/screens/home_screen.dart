@@ -8,6 +8,7 @@ import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/formatting/app_currency.dart';
 import '../../core/notifications/local_notification_service.dart';
+import '../../core/services/app_update_service.dart';
 import '../../core/preferences/app_preferences.dart';
 import '../../data/models/account_model.dart';
 import '../providers/account_provider.dart';
@@ -31,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData(silentReload: false);
       _checkNotificationPermission();
+      _checkForAppUpdate();
     });
   }
 
@@ -44,6 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
     await accountProvider.loadAccounts(showLoading: showLoading);
     await expenseProvider.loadExpenses(showLoading: showLoading);
     await incomeProvider.loadIncomes(showLoading: showLoading);
+  }
+
+  Future<void> _checkForAppUpdate() async {
+    await AppUpdateService.instance.checkAndPromptIfNeeded(context);
   }
 
   Future<void> _checkNotificationPermission() async {
