@@ -91,14 +91,8 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
               TextFormField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'e.g. HDFC Bank, SBI Savings',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
                   prefixIcon: Icon(
                     Icons.account_balance,
                     color: AppColors.primary,
@@ -118,13 +112,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
               const SizedBox(height: DesignConstants.spacingXs),
               DropdownButtonFormField<AccountType>(
                 initialValue: _selectedType,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                  ),
-                ),
+                decoration: const InputDecoration(),
                 items: AccountType.values.map((type) {
                   return DropdownMenuItem(
                     value: type,
@@ -165,11 +153,6 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
                 decoration: InputDecoration(
                   prefixText: cf.prefix,
                   hintText: '0.00',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                  ),
                 ),
                 style: AppTextStyles.amountMedium,
                 validator: (value) {

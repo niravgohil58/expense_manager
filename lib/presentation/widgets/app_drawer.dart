@@ -122,8 +122,10 @@ class AppDrawer extends StatelessWidget {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 vertical: DesignConstants.spacingSm,
+              ).copyWith(
+                bottom: DesignConstants.spacingSm + MediaQuery.paddingOf(context).bottom,
               ),
               children: [
                 ListTile(

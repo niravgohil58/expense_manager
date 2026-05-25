@@ -237,9 +237,9 @@ class _ReportScreenState extends State<ReportScreen> {
                         width: double.infinity,
                         padding: DesignConstants.paddingMd,
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: Theme.of(context).cardColor,
                           borderRadius: DesignConstants.borderRadiusMd,
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -307,7 +307,7 @@ class _ReportScreenState extends State<ReportScreen> {
                               ],
                             ),
                             const SizedBox(height: DesignConstants.spacingMd),
-                            Divider(height: 1, color: AppColors.border),
+                            Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
                             const SizedBox(height: DesignConstants.spacingSm),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -319,7 +319,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTextStyles.labelMedium.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ),
@@ -352,9 +352,9 @@ class _ReportScreenState extends State<ReportScreen> {
                   Container(
                     padding: DesignConstants.paddingMd,
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Theme.of(context).cardColor,
                       borderRadius: DesignConstants.borderRadiusMd,
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -391,9 +391,9 @@ class _ReportScreenState extends State<ReportScreen> {
                   Container(
                     padding: DesignConstants.paddingMd,
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Theme.of(context).cardColor,
                       borderRadius: DesignConstants.borderRadiusMd,
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                     child: Column(
                       children: List.generate(12, (i) {
@@ -426,9 +426,9 @@ class _ReportScreenState extends State<ReportScreen> {
                   Container(
                     padding: DesignConstants.paddingMd,
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Theme.of(context).cardColor,
                       borderRadius: DesignConstants.borderRadiusMd,
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                     child: _categoryData.isEmpty
                         ? const Center(

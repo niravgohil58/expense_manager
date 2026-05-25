@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -10,7 +11,6 @@ import '../providers/budget_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/settings_provider.dart';
-import '../widgets/drawer_host.dart';
 
 class BudgetsScreen extends StatefulWidget {
   const BudgetsScreen({super.key});
@@ -93,7 +93,10 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: DrawerHost.menuButton(context),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: Text(l10n.budgetsTitle),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,

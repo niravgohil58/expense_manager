@@ -293,16 +293,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 decoration: InputDecoration(
                   prefixText: cf.prefix,
                   hintText: '0.00',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
                 ),
                 style: AppTextStyles.amountMedium,
                 validator: (value) {
@@ -414,12 +404,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? category.color.withValues(alpha: 0.2)
-                                : AppColors.surface,
+                                : Theme.of(context).cardColor,
                             borderRadius: DesignConstants.borderRadiusMd,
                             border: Border.all(
                               color: isSelected
                                   ? category.color
-                                  : AppColors.border,
+                                  : Theme.of(context).colorScheme.outlineVariant,
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -437,7 +427,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 style: AppTextStyles.labelSmall.copyWith(
                                   color: isSelected
                                       ? category.color
-                                      : AppColors.textPrimary,
+                                      : Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -457,18 +447,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 builder: (context, provider, _) {
                   return DropdownButtonFormField<String>(
                     initialValue: _selectedAccountId,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: DesignConstants.borderRadiusMd,
-                        borderSide: BorderSide(color: AppColors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: DesignConstants.borderRadiusMd,
-                        borderSide: BorderSide(color: AppColors.border),
-                      ),
-                    ),
+                    decoration: const InputDecoration(),
                     items: provider.accounts.map((account) {
                       return DropdownMenuItem(
                         value: account.id,
@@ -493,9 +472,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   width: double.infinity,
                   padding: DesignConstants.paddingMd,
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: Theme.of(context).cardColor,
                     borderRadius: DesignConstants.borderRadiusMd,
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                   ),
                   child: Row(
                     children: [
@@ -517,18 +496,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               TextFormField(
                 controller: _noteController,
                 maxLines: 2,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Add a note...',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
                 ),
               ),
               const SizedBox(height: DesignConstants.spacingXl),

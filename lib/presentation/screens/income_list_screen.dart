@@ -789,9 +789,9 @@ class _IncomeCard extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: DesignConstants.spacingSm),
             padding: DesignConstants.paddingMd,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: Theme.of(context).cardColor,
               borderRadius: DesignConstants.borderRadiusMd,
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: Row(
               children: [
@@ -816,7 +816,7 @@ class _IncomeCard extends StatelessWidget {
                       Text(
                         accountLabel,
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       if (income.note != null && income.note!.isNotEmpty)

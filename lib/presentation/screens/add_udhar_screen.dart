@@ -161,18 +161,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               TextFormField(
                 controller: _personNameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Enter name',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
                   prefixIcon: Icon(Icons.person, color: AppColors.primary),
                 ),
                 validator: (value) {
@@ -198,15 +188,6 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                 decoration: InputDecoration(
                   prefixText: cf.prefix,
                   hintText: '0.00',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
                 ),
                 style: AppTextStyles.amountMedium,
                 validator: (value) {
@@ -229,17 +210,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                 builder: (context, provider, _) {
                   return DropdownButtonFormField<String>(
                     initialValue: _selectedAccountId,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: DesignConstants.borderRadiusMd,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: DesignConstants.borderRadiusMd,
-                        borderSide: BorderSide(color: AppColors.border),
-                      ),
-                    ),
+                    decoration: const InputDecoration(),
                     items: provider.accounts.map((account) {
                       return DropdownMenuItem(
                         value: account.id,
@@ -263,9 +234,9 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                   width: double.infinity,
                   padding: DesignConstants.paddingMd,
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: Theme.of(context).cardColor,
                     borderRadius: DesignConstants.borderRadiusMd,
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                   ),
                   child: Row(
                     children: [
@@ -287,13 +258,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               TextFormField(
                 controller: _noteController,
                 maxLines: 2,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Add a note...',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                  ),
                 ),
               ),
               const SizedBox(height: DesignConstants.spacingXl),
@@ -357,10 +323,10 @@ class _TypeButton extends StatelessWidget {
       child: Container(
         padding: DesignConstants.paddingMd,
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : AppColors.surface,
+          color: isSelected ? color.withValues(alpha: 0.15) : Theme.of(context).cardColor,
           borderRadius: DesignConstants.borderRadiusMd,
           border: Border.all(
-            color: isSelected ? color : AppColors.border,
+            color: isSelected ? color : Theme.of(context).colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -369,7 +335,7 @@ class _TypeButton extends StatelessWidget {
             Text(
               label,
               style: AppTextStyles.labelMedium.copyWith(
-                color: isSelected ? color : AppColors.textPrimary,
+                color: isSelected ? color : Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Text(subtitle, style: AppTextStyles.caption),

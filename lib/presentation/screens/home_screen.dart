@@ -317,9 +317,9 @@ class _HomeScreenState extends State<HomeScreen> {
           width: double.infinity,
           padding: DesignConstants.paddingMd,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Theme.of(context).cardColor,
             borderRadius: DesignConstants.borderRadiusMd,
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -376,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     width: 1,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
-                    color: AppColors.border,
+                    color: Theme.of(context).colorScheme.outlineVariant,
                   ),
                   Expanded(
                     child: InkWell(
@@ -428,7 +428,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: DesignConstants.spacingSm),
-              Divider(height: 1, color: AppColors.border),
+              Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
               const SizedBox(height: DesignConstants.spacingXs),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -626,9 +626,9 @@ class _AccountCard extends StatelessWidget {
       child: Container(
         padding: DesignConstants.paddingMd,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).cardColor,
           borderRadius: DesignConstants.borderRadiusMd,
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Row(
           children: [

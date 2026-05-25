@@ -12,7 +12,6 @@ import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/recurring_provider.dart';
 import '../providers/settings_provider.dart';
-import '../widgets/drawer_host.dart';
 
 class RecurringTemplatesScreen extends StatefulWidget {
   const RecurringTemplatesScreen({super.key});
@@ -61,7 +60,10 @@ class _RecurringTemplatesScreenState extends State<RecurringTemplatesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: DrawerHost.menuButton(context),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
         title: Text(l10n.recurringTitle),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,

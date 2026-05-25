@@ -107,9 +107,9 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
                   margin: const EdgeInsets.only(bottom: DesignConstants.spacingSm),
                   padding: DesignConstants.paddingMd,
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: Theme.of(context).cardColor,
                     borderRadius: DesignConstants.borderRadiusMd,
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +128,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
                       Text(
                         dateFmt.format(t.date),
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       if (t.note != null && t.note!.isNotEmpty)

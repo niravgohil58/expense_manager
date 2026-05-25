@@ -168,16 +168,6 @@ class _TransferScreenState extends State<TransferScreen> {
                   decoration: InputDecoration(
                     prefixText: cf.prefix,
                     hintText: '0.00',
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: DesignConstants.borderRadiusMd,
-                      borderSide: BorderSide(color: AppColors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: DesignConstants.borderRadiusMd,
-                      borderSide: BorderSide(color: AppColors.border),
-                    ),
                   ),
                   style: AppTextStyles.amountMedium,
                   validator: (value) {
@@ -200,14 +190,7 @@ class _TransferScreenState extends State<TransferScreen> {
                   builder: (context, provider, _) {
                     return DropdownButtonFormField<String>(
                       initialValue: _fromAccountId,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: AppColors.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: DesignConstants.borderRadiusMd,
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                      ),
+                      decoration: const InputDecoration(),
                       items: provider.accounts.map((account) {
                         return DropdownMenuItem(
                           value: account.id,
@@ -238,14 +221,7 @@ class _TransferScreenState extends State<TransferScreen> {
                   builder: (context, provider, _) {
                     return DropdownButtonFormField<String>(
                       initialValue: _toAccountId,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: AppColors.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: DesignConstants.borderRadiusMd,
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                      ),
+                      decoration: const InputDecoration(),
                       items: provider.accounts.map((account) {
                         return DropdownMenuItem(
                           value: account.id,
@@ -269,9 +245,9 @@ class _TransferScreenState extends State<TransferScreen> {
                     width: double.infinity,
                     padding: DesignConstants.paddingMd,
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Theme.of(context).cardColor,
                       borderRadius: DesignConstants.borderRadiusMd,
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                     child: Row(
                       children: [
@@ -293,14 +269,8 @@ class _TransferScreenState extends State<TransferScreen> {
                 TextFormField(
                   controller: _noteController,
                   maxLines: 2,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Add a note...',
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: DesignConstants.borderRadiusMd,
-                      borderSide: BorderSide(color: AppColors.border),
-                    ),
                   ),
                 ),
                 const SizedBox(height: DesignConstants.spacingXl),

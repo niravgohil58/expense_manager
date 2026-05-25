@@ -321,9 +321,9 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                       width: double.infinity,
                       padding: DesignConstants.paddingLg,
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
+                        color: Theme.of(context).cardColor,
                         borderRadius: DesignConstants.borderRadiusMd,
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                       child: Center(
                         child: Text(
@@ -342,9 +342,9 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                         ),
                         padding: DesignConstants.paddingMd,
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: Theme.of(context).cardColor,
                           borderRadius: DesignConstants.borderRadiusMd,
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                         ),
                         child: Row(
                           children: [
@@ -423,7 +423,7 @@ class _InfoItem extends StatelessWidget {
         Text(
           value,
           style: AppTextStyles.labelMedium.copyWith(
-            color: valueColor ?? AppColors.textPrimary,
+            color: valueColor ?? Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],

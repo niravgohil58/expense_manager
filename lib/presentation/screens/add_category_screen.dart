@@ -136,18 +136,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Category Name',
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -180,12 +170,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary.withValues(alpha: 0.1)
-                            : AppColors.surface,
+                            : Theme.of(context).cardColor,
                         borderRadius: DesignConstants.borderRadiusSm,
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary
-                              : AppColors.border,
+                              : Theme.of(context).colorScheme.outlineVariant,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -193,7 +183,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                         icon,
                         color: isSelected
                             ? AppColors.primary
-                            : AppColors.textSecondary,
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   );
@@ -224,7 +214,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                         color: color,
                         shape: BoxShape.circle,
                         border: isSelected
-                            ? Border.all(color: AppColors.textPrimary, width: 2)
+                            ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2)
                             : null,
                       ),
                       child: isSelected

@@ -233,7 +233,7 @@ class _IouTipsCard extends StatelessWidget {
                     child: Text(
                       l10n.iouTipsTitle,
                       style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -256,7 +256,7 @@ class _IouTipsCard extends StatelessWidget {
                 child: Text(
                   l10n.iouTipsBody,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.35,
                   ),
                 ),
@@ -359,9 +359,9 @@ class _UdharCard extends StatelessWidget {
       child: Container(
         padding: DesignConstants.paddingMd,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).cardColor,
           borderRadius: DesignConstants.borderRadiusMd,
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Row(
           children: [

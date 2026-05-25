@@ -242,9 +242,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                     prefixText: cf.prefix,
                     border: const OutlineInputBorder(),
                   ),
-                  style: AppTextStyles.amountLarge.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
+                  style: AppTextStyles.amountLarge,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter amount';
