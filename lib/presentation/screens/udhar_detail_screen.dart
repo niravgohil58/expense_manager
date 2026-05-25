@@ -150,7 +150,9 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: RefreshIndicator(
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
         onRefresh: _refreshDetail,
         child: Consumer<UdharProvider>(
           builder: (context, provider, _) {
@@ -385,6 +387,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
             );
           },
         ),
+      ),
       ),
       floatingActionButton: Consumer<UdharProvider>(
         builder: (context, provider, _) {

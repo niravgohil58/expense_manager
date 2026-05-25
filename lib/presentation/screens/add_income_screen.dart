@@ -214,7 +214,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
             ),
         ],
       ),
-      body: Consumer<AccountProvider>(
+      body: SafeArea(
+        top: false,
+        child: Consumer<AccountProvider>(
         builder: (context, accountProvider, child) {
           if (accountProvider.isLoading && accountProvider.accounts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -348,6 +350,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

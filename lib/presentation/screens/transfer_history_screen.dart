@@ -52,7 +52,9 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: Consumer2<ExpenseProvider, AccountProvider>(
+      body: SafeArea(
+        top: false,
+        child: Consumer2<ExpenseProvider, AccountProvider>(
         builder: (context, expense, accounts, _) {
           if (expense.isLoading && expense.transfers.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -141,6 +143,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

@@ -22,7 +22,9 @@ class RemoveAdsScreen extends StatelessWidget {
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: Consumer<PurchaseProvider>(
+      body: SafeArea(
+        top: false,
+        child: Consumer<PurchaseProvider>(
         builder: (context, purchase, _) {
           return Stack(
             children: [
@@ -218,6 +220,7 @@ class RemoveAdsScreen extends StatelessWidget {
             ],
           );
         },
+      ),
       ),
     );
   }

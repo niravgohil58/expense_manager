@@ -493,7 +493,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           ),
         ],
       ),
-      body: Consumer2<ExpenseProvider, AdsController>(
+      body: SafeArea(
+        top: false,
+        child: Consumer2<ExpenseProvider, AdsController>(
         builder: (context, provider, ads, _) {
           if (provider.isLoading && provider.expenses.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -632,6 +634,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             ],
           );
         },
+      ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/add-expense'),

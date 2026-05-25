@@ -76,7 +76,9 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: Form(
+      body: SafeArea(
+        top: false,
+        child: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: DesignConstants.screenPadding,
@@ -210,6 +212,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

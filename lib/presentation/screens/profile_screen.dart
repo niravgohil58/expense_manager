@@ -21,8 +21,10 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.profileTitle),
       ),
-      body: user == null
-          ? Center(child: Text(l10n.profileNotSignedIn))
+      body: SafeArea(
+        top: false,
+        child: user == null
+            ? Center(child: Text(l10n.profileNotSignedIn))
           : ListView(
               padding: DesignConstants.paddingLg,
               children: [
@@ -84,6 +86,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
+      ),
     );
   }
 }

@@ -37,7 +37,9 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: Consumer<CategoryProvider>(
+      body: SafeArea(
+        top: false,
+        child: Consumer<CategoryProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading && provider.categories.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -182,6 +184,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                   ),
           );
         },
+      ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/add-category'),

@@ -247,7 +247,9 @@ class SettingsScreen extends StatelessWidget {
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: Consumer<BackupProvider>(
+      body: SafeArea(
+        top: false,
+        child: Consumer<BackupProvider>(
         builder: (context, backup, _) {
           return Stack(
             children: [
@@ -538,6 +540,7 @@ class SettingsScreen extends StatelessWidget {
             ],
           );
         },
+      ),
       ),
     );
   }

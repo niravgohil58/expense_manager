@@ -16,7 +16,9 @@ class AboutScreen extends StatelessWidget {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
       ),
-      body: FutureBuilder<PackageInfo>(
+      body: SafeArea(
+        top: false,
+        child: FutureBuilder<PackageInfo>(
         future: PackageInfo.fromPlatform(),
         builder: (context, snap) {
           final info = snap.data;
@@ -45,6 +47,7 @@ class AboutScreen extends StatelessWidget {
             ],
           );
         },
+      ),
       ),
     );
   }

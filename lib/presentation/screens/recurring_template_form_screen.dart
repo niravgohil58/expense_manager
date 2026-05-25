@@ -115,7 +115,9 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
       ),
-      body: ListView(
+      body: SafeArea(
+        top: false,
+        child: ListView(
         padding: DesignConstants.screenPadding,
         children: [
           SegmentedButton<bool>(
@@ -222,6 +224,7 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
             child: Text(_busy ? 'Saving…' : 'Save template'),
           ),
         ],
+      ),
       ),
     );
   }

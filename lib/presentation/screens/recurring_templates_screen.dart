@@ -70,8 +70,10 @@ class _RecurringTemplatesScreenState extends State<RecurringTemplatesScreen> {
         onPressed: () => context.push('/recurring-templates/add'),
         child: const Icon(Icons.add),
       ),
-      body: rec.isLoading && rec.templates.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+      body: SafeArea(
+        top: false,
+        child: rec.isLoading && rec.templates.isEmpty
+            ? const Center(child: CircularProgressIndicator())
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -126,6 +128,7 @@ class _RecurringTemplatesScreenState extends State<RecurringTemplatesScreen> {
                 ),
               ],
             ),
+      ),
     );
   }
 }

@@ -105,8 +105,10 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           ),
         ],
       ),
-      body: budget.isLoading && cats.categories.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+      body: SafeArea(
+        top: false,
+        child: budget.isLoading && cats.categories.isEmpty
+            ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Padding(
@@ -202,6 +204,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                 ),
               ],
             ),
+      ),
     );
   }
 }

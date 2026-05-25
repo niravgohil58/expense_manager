@@ -140,7 +140,9 @@ class _TransferScreenState extends State<TransferScreen> {
           ),
         ],
       ),
-      body: Form(
+      body: SafeArea(
+        top: false,
+        child: Form(
         key: _formKey,
         child: RefreshIndicator(
           onRefresh: () => _refreshAccounts(context),
@@ -332,6 +334,7 @@ class _TransferScreenState extends State<TransferScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

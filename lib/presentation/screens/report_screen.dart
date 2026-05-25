@@ -169,7 +169,9 @@ class _ReportScreenState extends State<ReportScreen> {
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: _isLoading
+      body: SafeArea(
+        top: false,
+        child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () => _loadData(silent: true),
@@ -509,6 +511,7 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
             ),
             ),
+      ),
     );
   }
 

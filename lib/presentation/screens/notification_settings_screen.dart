@@ -94,7 +94,9 @@ class _NotificationSettingsScreenState
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
       ),
-      body: !notifications.isSupportedMobile
+      body: SafeArea(
+        top: false,
+        child: !notifications.isSupportedMobile
           ? Center(
               child: Padding(
                 padding: DesignConstants.screenPadding,
@@ -151,6 +153,7 @@ class _NotificationSettingsScreenState
                 const SizedBox(height: DesignConstants.spacingXl),
               ],
             ),
+      ),
     );
   }
 

@@ -64,7 +64,9 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
           ),
         ],
       ),
-      body: Consumer<UdharProvider>(
+      body: SafeArea(
+        top: false,
+        child: Consumer<UdharProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading && provider.udharList.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -186,6 +188,7 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
             ),
           );
         },
+      ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/add-udhar'),

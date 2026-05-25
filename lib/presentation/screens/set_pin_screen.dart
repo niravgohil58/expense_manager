@@ -70,7 +70,9 @@ class _SetPinScreenState extends State<SetPinScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
       ),
-      body: Padding(
+      body: SafeArea(
+        top: false,
+        child: Padding(
         padding: DesignConstants.screenPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -121,6 +123,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

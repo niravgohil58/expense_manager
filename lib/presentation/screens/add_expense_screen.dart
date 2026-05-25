@@ -270,7 +270,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ),
         ],
       ),
-      body: Form(
+      body: SafeArea(
+        top: false,
+        child: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: DesignConstants.screenPadding,
@@ -562,6 +564,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

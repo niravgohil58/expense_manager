@@ -492,7 +492,9 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
           ),
         ],
       ),
-      body: Consumer2<IncomeProvider, AdsController>(
+      body: SafeArea(
+        top: false,
+        child: Consumer2<IncomeProvider, AdsController>(
         builder: (context, provider, ads, _) {
           if (provider.isLoading && provider.incomes.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -631,6 +633,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
             ],
           );
         },
+      ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/add-income'),

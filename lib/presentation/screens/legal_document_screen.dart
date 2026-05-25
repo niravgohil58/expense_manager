@@ -37,7 +37,9 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: FutureBuilder<String>(
+      body: SafeArea(
+        top: false,
+        child: FutureBuilder<String>(
         future: _markdownFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -88,6 +90,7 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }
