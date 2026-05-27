@@ -12,4 +12,5 @@
 ///
 /// Paste that full string below (between the quotes). Leave empty only while testing
 /// email/password only — Google button may fail on Android without this.
-const String kGoogleOAuthWebClientId = '';
+const String kGoogleOAuthWebClientId =
+    '426735393366-k0aea68hpis11ei1e636cddkn48466ld.apps.googleusercontent.com';
