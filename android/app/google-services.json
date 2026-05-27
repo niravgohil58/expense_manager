@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "426735393366-pgdvcul69jg0c1un55pujs4m3b4in35c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.expenseincome.app",
+            "certificate_hash": "2d7631595217cfe19842db1902b071ac7ce4df0d"
+          }
+        },
+        {
           "client_id": "426735393366-rlh68ooioe2bgaqq5r43njh74inng02f.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
