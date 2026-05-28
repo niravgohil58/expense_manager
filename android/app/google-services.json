@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "426735393366-j4ts7gndt8to34tm8qhooo0sc8c2t0hk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.expenseincome.app",
+            "certificate_hash": "9e8cdd08319d6369f338519d41f288a9907a323a"
+          }
+        },
+        {
           "client_id": "426735393366-ja08cl06pn3hl12uqldi0popeq31msia.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

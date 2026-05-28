@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../core/config/google_sign_in_config.dart';
+import '../../core/platform/android_signing_info.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/preferences/app_preferences.dart';
 import '../../data/services/user_profile_service.dart';
@@ -82,20 +83,38 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
-  /// Android typically needs [GoogleSignIn.serverClientId] (Web OAuth client ID)
-  /// so `authentication.idToken` is non-null for Firebase — see [kGoogleOAuthWebClientId].
+  /// Android: prefer [GoogleSignIn.serverClientId] (Web OAuth client ID) so Firebase
+  /// gets a non-null `idToken`. When [kGoogleOAuthWebClientId] is empty, the
+  /// google-services plugin's `default_web_client_id` is used on Android.
   GoogleSignIn _googleSignIn() {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      final webId = kGoogleOAuthWebClientId.trim();
+      if (webId.isNotEmpty) {
+        return GoogleSignIn(
+          scopes: const ['email', 'profile'],
+          serverClientId: webId,
+        );
+      }
+      return GoogleSignIn(scopes: const ['email', 'profile']);
+    }
     final webId = kGoogleOAuthWebClientId.trim();
-    final androidWithServerId = !kIsWeb &&
-        defaultTargetPlatform == TargetPlatform.android &&
-        webId.isNotEmpty;
-    if (androidWithServerId) {
+    if (webId.isNotEmpty) {
       return GoogleSignIn(
         scopes: const ['email', 'profile'],
         serverClientId: webId,
       );
     }
     return GoogleSignIn(scopes: const ['email', 'profile']);
+  }
+
+  Future<String> _androidSigningHint() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return '';
+    }
+    final sha1 = await AndroidSigningInfo.getSigningSha1();
+    if (sha1 == null || sha1.isEmpty) return '';
+    return ' App signing SHA-1: $sha1 — add this to Firebase if missing, '
+        'then download new google-services.json and rebuild.';
   }
 
   Future<UserCredential> signInWithGoogle() async {
@@ -108,14 +127,12 @@ class AuthProvider extends ChangeNotifier {
       if (e.code == 'sign_in_failed' ||
           details.contains('10') ||
           details.contains('DEVELOPER_ERROR')) {
+        final signingHint = await _androidSigningHint();
         throw FirebaseAuthException(
           code: 'google-android-config',
-          message: 'Google Sign-In setup incomplete (Android often reports code 10). '
-              'In Firebase: Project settings → Your Android app → add SHA-1 '
-              '(debug: ~/.android/debug.keystore). Authentication → enable Google. '
-              'Download a new google-services.json — "oauth_client" must not be empty. '
-              'Then set kGoogleOAuthWebClientId in '
-              'lib/core/config/google_sign_in_config.dart (Web client ID from Firebase).',
+          message: 'Google Sign-In failed (code 10).$signingHint '
+              'Check Play Console → Setup → App integrity → App signing key SHA-1 '
+              'is in Firebase, and Authentication → Google → Web SDK is configured.',
         );
       }
       throw FirebaseAuthException(
