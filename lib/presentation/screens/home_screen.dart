@@ -16,6 +16,7 @@ import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/drawer_host.dart';
+import '../widgets/notification_permission_dialog.dart';
 
 /// Home screen with account balances and quick actions
 class HomeScreen extends StatefulWidget {
@@ -26,6 +27,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static bool _sessionNotificationDialogDismissed = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,44 +56,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkNotificationPermission() async {
-    final prefs = context.read<AppPreferences>();
     if (!LocalNotificationService.instance.isSupportedMobile) return;
 
+    final prefs = context.read<AppPreferences>();
     final isGranted = await Permission.notification.isGranted;
     if (isGranted) return;
 
-    if (prefs.hasRequestedNotificationPermission) return;
+    if (_sessionNotificationDialogDismissed) return;
 
     if (!mounted) return;
 
-    await showDialog(
+    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
-      builder: (context) => AlertDialog(
-        title: const Text('Enable Notifications'),
-        content: const Text(
-          'Expense Manager requires notification permission to send you daily expense reminders, budget warnings, and pending IOU alerts. This helps you stay on top of your finances.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await prefs.setHasRequestedNotificationPermission(true);
-              
-              final result = await Permission.notification.request();
-              if (result.isDenied || result.isPermanentlyDenied) {
-                // Fallback to turn off all reminders if they denied
-                await prefs.disableAllReminders();
-              } else if (result.isGranted) {
-                // If they accept, schedule them
-                await LocalNotificationService.instance.rescheduleAllFromPrefs(prefs);
-              }
-            },
-            child: const Text('Allow'),
-          ),
-        ],
-      ),
+      builder: (context) => const NotificationPermissionDialog(),
     );
+
+    if (result == null || result == false) {
+      _sessionNotificationDialogDismissed = true;
+    } else {
+      final status = await Permission.notification.request();
+      if (status.isGranted) {
+        await LocalNotificationService.instance.rescheduleAllFromPrefs(prefs);
+      } else {
+        _sessionNotificationDialogDismissed = true;
+      }
+    }
   }
 
   @override
@@ -226,44 +217,47 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActions() {
-    return Row(
-      children: [
-        Expanded(
-          child: _QuickActionButton(
-            icon: Icons.add_circle_outline,
-            label: 'Income',
-            color: AppColors.success,
-            onTap: () => context.push('/income'),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _QuickActionButton(
+              icon: Icons.add_circle_outline,
+              label: 'Income',
+              color: AppColors.success,
+              onTap: () => context.push('/income'),
+            ),
           ),
-        ),
-        const SizedBox(width: DesignConstants.spacingXs),
-        Expanded(
-          child: _QuickActionButton(
-            icon: Icons.remove_circle_outline,
-            label: 'Expense',
-            color: AppColors.expense,
-            onTap: () => context.push('/add-expense'),
+          const SizedBox(width: DesignConstants.spacingXs),
+          Expanded(
+            child: _QuickActionButton(
+              icon: Icons.remove_circle_outline,
+              label: 'Expense',
+              color: AppColors.expense,
+              onTap: () => context.push('/add-expense'),
+            ),
           ),
-        ),
-        const SizedBox(width: DesignConstants.spacingXs),
-        Expanded(
-          child: _QuickActionButton(
-            icon: Icons.swap_horiz,
-            label: 'Transfer',
-            color: AppColors.primary,
-            onTap: () => context.push('/transfer'),
+          const SizedBox(width: DesignConstants.spacingXs),
+          Expanded(
+            child: _QuickActionButton(
+              icon: Icons.swap_horiz,
+              label: 'Transfer',
+              color: AppColors.primary,
+              onTap: () => context.push('/transfer'),
+            ),
           ),
-        ),
-        const SizedBox(width: DesignConstants.spacingXs),
-        Expanded(
-          child: _QuickActionButton(
-            icon: Icons.people,
-            label: 'IOUs',
-            color: AppColors.udharDena,
-            onTap: () => context.push('/add-udhar'),
+          const SizedBox(width: DesignConstants.spacingXs),
+          Expanded(
+            child: _QuickActionButton(
+              icon: Icons.people,
+              label: 'IOUs',
+              color: AppColors.udharDena,
+              onTap: () => context.push('/add-udhar'),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -685,20 +679,27 @@ class _QuickActionButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: DesignConstants.borderRadiusMd,
       child: Container(
-        padding: DesignConstants.paddingMd,
+        padding: const EdgeInsets.symmetric(
+          vertical: DesignConstants.spacingSm,
+          horizontal: DesignConstants.spacingXxs,
+        ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: DesignConstants.borderRadiusMd,
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: color, size: DesignConstants.iconSizeLg),
             const SizedBox(height: DesignConstants.spacingXs),
-            Text(
-              label,
-              style: AppTextStyles.labelSmall.copyWith(color: color),
-              textAlign: TextAlign.center,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: AppTextStyles.labelSmall.copyWith(color: color),
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),

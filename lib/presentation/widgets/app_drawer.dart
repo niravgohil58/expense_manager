@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,8 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
+import '../../core/services/app_update_service.dart';
+import '../../core/services/rate_app_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
@@ -251,6 +255,25 @@ class AppDrawer extends StatelessWidget {
                   title: Text(l10n.drawerAbout),
                   onTap: () => push('/about'),
                 ),
+                if (Platform.isAndroid) ...[
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.system_update_rounded),
+                    title: const Text('Check for update'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      AppUpdateService.instance.manualCheckForUpdate(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.star_rate_rounded, color: AppColors.accent),
+                    title: const Text('Rate this app'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      RateAppService.instance.openStoreListing();
+                    },
+                  ),
+                ],
               ],
             ),
           ),

@@ -30,6 +30,7 @@ class AdsController extends ChangeNotifier {
   AdsRemoteSnapshot _snapshot = AdsRemoteSnapshot.disabled();
   InterstitialAd? _interstitial;
   AppOpenAd? _appOpen;
+  bool _isShowingFullScreenAd = false;
 
   DateTime? _lastInterstitialShownAt;
   DateTime? _lastAppOpenShownAt;
@@ -207,17 +208,24 @@ class AdsController extends ChangeNotifier {
     if (ad == null) return;
 
     ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) {
+        _isShowingFullScreenAd = true;
+      },
       onAdDismissedFullScreenContent: (disposed) {
         disposed.dispose();
         _interstitial = null;
         _lastInterstitialShownAt = DateTime.now();
         unawaited(preloadInterstitial());
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          _isShowingFullScreenAd = false;
+        });
       },
       onAdFailedToShowFullScreenContent: (disposed, err) {
         debugPrint('[ExpenseAds] Interstitial show failed: $err');
         disposed.dispose();
         _interstitial = null;
         unawaited(preloadInterstitial());
+        _isShowingFullScreenAd = false;
       },
     );
 
@@ -267,6 +275,10 @@ class AdsController extends ChangeNotifier {
     required bool lockBlocking,
   }) async {
     if (!_supported || _adsRemoved || !_snapshot.showAppOpen || lockBlocking) return;
+    if (_isShowingFullScreenAd) {
+      debugPrint('[ExpenseAds] Suppressing App Open Ad: Interstitial ad was recently showing.');
+      return;
+    }
     if (shouldDeferAppOpenForRoute(routePath)) return;
 
     final last = _lastAppOpenShownAt;

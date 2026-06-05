@@ -8,6 +8,8 @@ import '../../core/constants/text_styles.dart';
 import '../../core/notifications/local_notification_service.dart';
 import '../../core/preferences/app_preferences.dart';
 
+import '../widgets/notification_permission_dialog.dart';
+
 /// Dedicated screen for managing all notification preferences.
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -37,25 +39,44 @@ class _NotificationSettingsScreenState
 
     if (!mounted) return false;
 
-    await showDialog(
+    final allowed = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Permission Required'),
-        content: const Text(
-          'Please give the permission from setting for notification and then on this.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              openAppSettings();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      barrierDismissible: true,
+      builder: (context) => const NotificationPermissionDialog(),
     );
+
+    if (allowed == true) {
+      final status = await Permission.notification.request();
+      if (status.isGranted) {
+        return true;
+      } else {
+        if (mounted) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text('Permission Required'),
+              content: const Text(
+                'Please give the permission from settings for notifications to enable this reminder.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    openAppSettings();
+                  },
+                  child: const Text('Open Settings'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
     
     return false;
   }
