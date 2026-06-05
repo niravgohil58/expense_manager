@@ -7,6 +7,7 @@ import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
 import '../../data/models/recurring_template_model.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
@@ -42,7 +43,7 @@ class _RecurringTemplatesScreenState extends State<RecurringTemplatesScreen> {
       await accountProv.loadAccounts(showLoading: false);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Posted')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.recurringPosted)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +105,7 @@ class _RecurringTemplatesScreenState extends State<RecurringTemplatesScreen> {
                             '${t.kindExpense ? l10n.recurringKindExpense : l10n.recurringKindIncome} · ${cf.format(t.amount)}',
                           ),
                           subtitle: Text(
-                            '${t.frequency} · ${t.categoryRef}${t.note != null ? '\n${t.note}' : ''}',
+                            '${getFrequencyDisplayName(context, t.frequency)} · ${getCategoryNameFromString(context, t.categoryRef)}${t.note != null ? '\n${t.note}' : ''}',
                           ),
                           isThreeLine: t.note != null,
                           trailing: PopupMenuButton<String>(
@@ -114,13 +115,13 @@ class _RecurringTemplatesScreenState extends State<RecurringTemplatesScreen> {
                                 await rec.deleteTemplate(t.id);
                                 if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Removed')),
+                                  SnackBar(content: Text(l10n.recurringRemoved)),
                                 );
                               }
                             },
                             itemBuilder: (context) => [
                               PopupMenuItem(value: 'post', child: Text(l10n.recurringPostNow)),
-                              const PopupMenuItem(value: 'del', child: Text('Delete')),
+                              PopupMenuItem(value: 'del', child: Text(l10n.commonDelete)),
                             ],
                           ),
                         ),

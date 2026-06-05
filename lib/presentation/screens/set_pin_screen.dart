@@ -7,6 +7,8 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
 import '../providers/lock_provider.dart';
+import '../../l10n/app_localizations.dart';
+
 
 /// First-time or change PIN: saves SHA-256 hash via [LockProvider.setPin].
 class SetPinScreen extends StatefulWidget {
@@ -33,13 +35,13 @@ class _SetPinScreenState extends State<SetPinScreen> {
     final b = _confirm.text.trim();
     if (a.length < 4 || b.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PIN must be at least 4 digits')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pinAtLeast4Digits)),
       );
       return;
     }
     if (a != b) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PINs do not match')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pinDoNotMatch)),
       );
       return;
     }
@@ -66,7 +68,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Set app PIN'),
+        title: Text(AppLocalizations.of(context)!.titleAppSecurityPin),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
       ),
@@ -78,8 +80,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Choose a numeric PIN (stored securely on device). '
-              'Used when app lock is enabled.',
+              AppLocalizations.of(context)!.pinDescription,
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -94,7 +95,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                 LengthLimitingTextInputFormatter(12),
               ],
               decoration: InputDecoration(
-                labelText: 'PIN',
+                labelText: AppLocalizations.of(context)!.pinLabel,
                 border: OutlineInputBorder(
                   borderRadius: DesignConstants.borderRadiusMd,
                 ),
@@ -110,7 +111,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                 LengthLimitingTextInputFormatter(12),
               ],
               decoration: InputDecoration(
-                labelText: 'Confirm PIN',
+                labelText: AppLocalizations.of(context)!.pinConfirmLabel,
                 border: OutlineInputBorder(
                   borderRadius: DesignConstants.borderRadiusMd,
                 ),
@@ -119,7 +120,11 @@ class _SetPinScreenState extends State<SetPinScreen> {
             const SizedBox(height: DesignConstants.spacingLg),
             FilledButton(
               onPressed: _busy ? null : _save,
-              child: Text(_busy ? 'Saving…' : 'Save PIN'),
+              child: Text(
+                _busy
+                    ? AppLocalizations.of(context)!.pinSaving
+                    : AppLocalizations.of(context)!.pinSave,
+              ),
             ),
           ],
         ),

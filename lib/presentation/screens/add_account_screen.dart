@@ -9,6 +9,8 @@ import '../../core/formatting/app_currency.dart';
 import '../../data/models/account_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 
 /// Screen for adding a new account
 class AddAccountScreen extends StatefulWidget {
@@ -50,8 +52,8 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
     final error = context.read<AccountProvider>().error;
     if (error == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account added successfully'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.accAddedSuccess),
           backgroundColor: AppColors.success,
         ),
       );
@@ -71,7 +73,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Add Account'),
+        title: Text(AppLocalizations.of(context)!.titleAddAccount),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -86,21 +88,21 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Name Field
-              Text('Account Name', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.accNameLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  hintText: 'e.g. HDFC Bank, SBI Savings',
-                  prefixIcon: Icon(
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.accNameHint,
+                  prefixIcon: const Icon(
                     Icons.account_balance,
                     color: AppColors.primary,
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter account name';
+                    return AppLocalizations.of(context)!.accEnterName;
                   }
                   return null;
                 },
@@ -108,7 +110,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Account Type
-              Text('Account Type', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.accTypeLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               DropdownButtonFormField<AccountType>(
                 initialValue: _selectedType,
@@ -126,7 +128,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
                           size: 20,
                         ),
                         const SizedBox(width: DesignConstants.spacingSm),
-                        Text(type.displayName),
+                        Text(getAccountTypeDisplayName(context, type)),
                       ],
                     ),
                   );
@@ -140,7 +142,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Initial Balance
-              Text('Initial Balance', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.accInitialBalance, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _balanceController,
@@ -157,10 +159,10 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
                 style: AppTextStyles.amountMedium,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter initial balance';
+                    return AppLocalizations.of(context)!.accEnterInitialBalance;
                   }
                   if (double.tryParse(value) == null) {
-                    return 'Please enter a valid amount';
+                    return AppLocalizations.of(context)!.accEnterValidAmount;
                   }
                   return null;
                 },
@@ -189,7 +191,7 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
                             color: AppColors.textOnPrimary,
                           ),
                         )
-                      : Text('Create Account', style: AppTextStyles.button),
+                      : Text(AppLocalizations.of(context)!.accCreateButton, style: AppTextStyles.button),
                 ),
               ),
             ],

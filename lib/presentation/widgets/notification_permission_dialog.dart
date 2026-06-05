@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
+import '../../l10n/app_localizations.dart';
+
 
 class NotificationPermissionDialog extends StatelessWidget {
   const NotificationPermissionDialog({super.key});
@@ -25,7 +27,7 @@ class NotificationPermissionDialog extends StatelessWidget {
               children: [
                 const SizedBox(height: DesignConstants.spacingXs),
                 Text(
-                  'Enable Notifications',
+                  AppLocalizations.of(context)!.notifDialogTitle,
                   style: AppTextStyles.heading3.copyWith(
                     color: scheme.onSurface,
                     fontWeight: FontWeight.bold,
@@ -33,7 +35,7 @@ class NotificationPermissionDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: DesignConstants.spacingMd),
                 Text(
-                  'Expense Manager requires notification permission to send you daily expense reminders, budget warnings, and pending IOU alerts. This helps you stay on top of your finances.',
+                  AppLocalizations.of(context)!.notifDialogBody,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -47,7 +49,7 @@ class NotificationPermissionDialog extends StatelessWidget {
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
                         child: Text(
-                          'Cancel',
+                          AppLocalizations.of(context)!.commonCancel,
                           style: TextStyle(color: scheme.onSurfaceVariant),
                         ),
                       ),
@@ -65,7 +67,7 @@ class NotificationPermissionDialog extends StatelessWidget {
                             vertical: DesignConstants.spacingSm,
                           ),
                         ),
-                        child: const Text('Allow'),
+                        child: Text(AppLocalizations.of(context)!.commonAllow),
                       ),
                     ],
                   ),

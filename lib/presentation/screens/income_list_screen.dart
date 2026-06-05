@@ -17,6 +17,9 @@ import '../../data/query/income_filters.dart';
 import '../providers/account_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
+
 
 /// Income list with search, filters, and sort (Phase D).
 class IncomeListScreen extends StatefulWidget {
@@ -125,7 +128,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Filters', style: AppTextStyles.heading4),
+                        Text(AppLocalizations.of(context)!.listFilters, style: AppTextStyles.heading4),
                         IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () => Navigator.pop(ctx),
@@ -133,14 +136,14 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('Date range', style: AppTextStyles.labelMedium),
+                    Text(AppLocalizations.of(context)!.listDateRange, style: AppTextStyles.labelMedium),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
                         ChoiceChip(
-                          label: const Text('All dates'),
+                          label: Text(AppLocalizations.of(context)!.listAllDates),
                           selected:
                               draft.startDate == null && draft.endDate == null,
                           onSelected: (_) {
@@ -153,7 +156,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                           },
                         ),
                         ChoiceChip(
-                          label: const Text('This month'),
+                          label: Text(AppLocalizations.of(context)!.listThisMonth),
                           selected: _isThisMonth(
                             draft.startDate,
                             draft.endDate,
@@ -176,7 +179,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                           },
                         ),
                         ChoiceChip(
-                          label: const Text('Last 30 days'),
+                          label: Text(AppLocalizations.of(context)!.listLast30Days),
                           selected: _isLast30Days(
                             draft.startDate,
                             draft.endDate,
@@ -215,7 +218,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                             icon: const Icon(Icons.calendar_today, size: 18),
                             label: Text(
                               draft.startDate == null
-                                  ? 'From'
+                                  ? AppLocalizations.of(context)!.listFrom
                                   : DateFormat(
                                       'dd MMM yyyy',
                                     ).format(draft.startDate!),
@@ -241,7 +244,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                             icon: const Icon(Icons.event, size: 18),
                             label: Text(
                               draft.endDate == null
-                                  ? 'To'
+                                  ? AppLocalizations.of(context)!.listTo
                                   : DateFormat(
                                       'dd MMM yyyy',
                                     ).format(draft.endDate!),
@@ -274,7 +277,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                     ),
                     const SizedBox(height: 16),
                     InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Category'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.formCategory),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String?>(
                           isExpanded: true,
@@ -283,14 +286,14 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                             distinctCategories,
                           ),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All categories'),
+                              child: Text(AppLocalizations.of(context)!.listAllCategories),
                             ),
                             ...distinctCategories.map(
                               (name) => DropdownMenuItem<String?>(
                                 value: name,
-                                child: Text(name),
+                                child: Text(getCategoryNameFromString(context, name)),
                               ),
                             ),
                           ],
@@ -307,7 +310,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                     ),
                     const SizedBox(height: 12),
                     InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Account'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.listAccountLabel),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String?>(
                           isExpanded: true,
@@ -316,9 +319,9 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                             accountProvider,
                           ),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All accounts'),
+                              child: Text(AppLocalizations.of(context)!.listAllAccounts),
                             ),
                             ...accountProvider.accounts.map(
                               (a) => DropdownMenuItem<String?>(
@@ -340,27 +343,27 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                     ),
                     const SizedBox(height: 12),
                     InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Sort'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.listSortLabel),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<IncomeSort>(
                           isExpanded: true,
                           value: draft.sort,
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: IncomeSort.dateNewestFirst,
-                              child: Text('Date · newest'),
+                              child: Text(AppLocalizations.of(context)!.listSortNewest),
                             ),
                             DropdownMenuItem(
                               value: IncomeSort.dateOldestFirst,
-                              child: Text('Date · oldest'),
+                              child: Text(AppLocalizations.of(context)!.listSortOldest),
                             ),
                             DropdownMenuItem(
                               value: IncomeSort.amountHighFirst,
-                              child: Text('Amount · high'),
+                              child: Text(AppLocalizations.of(context)!.listSortHigh),
                             ),
                             DropdownMenuItem(
                               value: IncomeSort.amountLowFirst,
-                              child: Text('Amount · low'),
+                              child: Text(AppLocalizations.of(context)!.listSortLow),
                             ),
                           ],
                           onChanged: (v) {
@@ -382,7 +385,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                               _searchController.clear();
                               await incomeProvider.clearIncomeFilters();
                             },
-                            child: const Text('Clear all'),
+                            child: Text(AppLocalizations.of(context)!.listClearAll),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -392,7 +395,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                               Navigator.pop(ctx);
                               await incomeProvider.setIncomeFilters(draft);
                             },
-                            child: const Text('Apply'),
+                            child: Text(AppLocalizations.of(context)!.listApply),
                           ),
                         ),
                       ],
@@ -433,20 +436,19 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete income'),
+        title: Text(AppLocalizations.of(context)!.listDeleteIncomeTitle),
         content: Text(
-          'Remove this "${income.category}" income entry? '
-          'If deleting would leave an account balance negative, the delete will be blocked.',
+          AppLocalizations.of(context)!.listDeleteIncomeConfirmDetail(getCategoryNameFromString(context, income.category)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.commonDelete),
           ),
         ],
       ),
@@ -459,7 +461,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(provider.error ?? 'Could not delete income'),
+          content: Text(provider.error ?? AppLocalizations.of(context)!.listIncomeDeleteFailed),
           backgroundColor: AppColors.error,
         ),
       );
@@ -480,7 +482,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: DrawerHost.menuButton(context),
-        title: const Text('Income'),
+        title: Text(AppLocalizations.of(context)!.titleIncomes),
         backgroundColor: AppColors.success,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -516,7 +518,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search notes, category, amount…',
+                    hintText: AppLocalizations.of(context)!.listSearchHint,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isEmpty
                         ? null
@@ -553,7 +555,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                         setState(() {});
                       },
                       icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear filters'),
+                      label: Text(AppLocalizations.of(context)!.listClearFilters),
                     ),
                   ),
                 ),
@@ -572,7 +574,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                       children: [
                         Chip(
                           label: Text(
-                            _filterSummary(provider.incomeFilters),
+                            _filterSummary(context, provider.incomeFilters),
                             style: AppTextStyles.caption,
                           ),
                         ),
@@ -644,7 +646,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     );
   }
 
-  String _filterSummary(IncomeFilters f) {
+  String _filterSummary(BuildContext context, IncomeFilters f) {
     final parts = <String>[];
     final q = f.searchQuery?.trim();
     if (q != null && q.isNotEmpty) {
@@ -658,26 +660,27 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
       final b = f.endDate != null
           ? DateFormat('dd/MM').format(f.endDate!)
           : '…';
-      parts.add('Dates $a–$b');
+      parts.add(AppLocalizations.of(context)!.listDatesRangeSummary(a, b));
     }
     if (f.categoryLabel != null && f.categoryLabel!.trim().isNotEmpty) {
-      parts.add(f.categoryLabel!.trim());
+      parts.add(getCategoryNameFromString(context, f.categoryLabel!.trim()));
     }
-    if (f.accountId != null) parts.add('Account');
-    parts.add(_sortLabel(f.sort));
+    if (f.accountId != null) parts.add(AppLocalizations.of(context)!.listAccountLabel);
+    parts.add(_sortLabel(context, f.sort));
     return parts.join(' · ');
   }
 
-  String _sortLabel(IncomeSort s) {
+  String _sortLabel(BuildContext context, IncomeSort s) {
+    final l10n = AppLocalizations.of(context)!;
     switch (s) {
       case IncomeSort.dateNewestFirst:
-        return 'Newest';
+        return l10n.listSortNewest;
       case IncomeSort.dateOldestFirst:
-        return 'Oldest';
+        return l10n.listSortOldest;
       case IncomeSort.amountHighFirst:
-        return 'Amount ↓';
+        return l10n.listSortHigh;
       case IncomeSort.amountLowFirst:
-        return 'Amount ↑';
+        return l10n.listSortLow;
     }
   }
 
@@ -694,13 +697,13 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
             Icon(Icons.savings_outlined, size: 64, color: AppColors.textHint),
             const SizedBox(height: DesignConstants.spacingMd),
             Text(
-              'No income yet',
+              AppLocalizations.of(context)!.listNoIncomesYet,
               style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: DesignConstants.spacingXs),
-            Text('Tap + to record income', style: AppTextStyles.bodySmall),
+            Text(AppLocalizations.of(context)!.listTapToRecordIncome, style: AppTextStyles.bodySmall),
           ],
         ),
       );
@@ -716,8 +719,8 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
             const SizedBox(height: DesignConstants.spacingMd),
             Text(
               hasFilters
-                  ? 'No income matches your filters'
-                  : 'No income to show',
+                  ? AppLocalizations.of(context)!.listNoIncomeMatches
+                  : AppLocalizations.of(context)!.listNoIncomeToShow,
               style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -730,7 +733,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                 await provider.clearIncomeFilters();
                 setState(() {});
               },
-              child: const Text('Clear filters'),
+              child: Text(AppLocalizations.of(context)!.listClearFilters),
             ),
           ],
         ),
@@ -808,7 +811,7 @@ class _IncomeCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(income.category, style: AppTextStyles.labelMedium),
+                      Text(getCategoryNameFromString(context, income.category), style: AppTextStyles.labelMedium),
                       Text(
                         dateFormatter.format(income.date),
                         style: AppTextStyles.caption,

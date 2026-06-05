@@ -10,6 +10,9 @@ import '../../data/models/udhar_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
+
 
 /// Udhar detail screen with settlement history
 class UdharDetailScreen extends StatefulWidget {
@@ -59,13 +62,13 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Settlement'),
+        title: Text(AppLocalizations.of(context)!.udharAddSettlement),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Pending: ${pendFmt.format(udhar.pendingAmount)}',
+              '${AppLocalizations.of(context)!.udharPendingLabel}: ${pendFmt.format(udhar.pendingAmount)}',
               style: AppTextStyles.bodyMedium,
             ),
             const SizedBox(height: DesignConstants.spacingMd),
@@ -78,7 +81,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: AppLocalizations.of(context)!.formAmount,
                 prefixText: prefix,
                 border: OutlineInputBorder(
                   borderRadius: DesignConstants.borderRadiusMd,
@@ -91,7 +94,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                 return DropdownButtonFormField<String>(
                   initialValue: selectedAccountId,
                   decoration: InputDecoration(
-                    labelText: 'Account',
+                    labelText: AppLocalizations.of(context)!.listAccountLabel,
                     border: OutlineInputBorder(
                       borderRadius: DesignConstants.borderRadiusMd,
                     ),
@@ -111,7 +114,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.commonCancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -128,7 +131,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Add Settlement'),
+            child: Text(AppLocalizations.of(context)!.udharAddSettlement),
           ),
         ],
       ),
@@ -145,7 +148,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('IOU details'),
+        title: Text(AppLocalizations.of(context)!.titleIouDetails),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -165,7 +168,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                     padding: EdgeInsets.only(
                       top: MediaQuery.sizeOf(context).height * 0.25,
                     ),
-                    child: const Center(child: Text('IOU not found')),
+                    child: Center(child: Text(AppLocalizations.of(context)!.udharIouNotFound)),
                   ),
                 ],
               );
@@ -235,7 +238,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                                           DesignConstants.borderRadiusXs,
                                     ),
                                     child: Text(
-                                      udhar.type.shortName,
+                                      getUdharTypeShortName(context, udhar.type),
                                       style: AppTextStyles.labelSmall.copyWith(
                                         color: color,
                                       ),
@@ -251,16 +254,16 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             _InfoItem(
-                              label: 'Total Amount',
+                              label: AppLocalizations.of(context)!.udharTotalAmount,
                               value: formatter.format(udhar.amount),
                             ),
                             _InfoItem(
-                              label: 'Settled',
+                              label: AppLocalizations.of(context)!.udharSettledLabel,
                               value: formatter.format(udhar.paidAmount),
                               valueColor: AppColors.success,
                             ),
                             _InfoItem(
-                              label: 'Pending',
+                              label: AppLocalizations.of(context)!.udharPendingLabel,
                               value: formatter.format(udhar.pendingAmount),
                               valueColor: color,
                             ),
@@ -268,7 +271,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                         ),
                         const SizedBox(height: DesignConstants.spacingMd),
                         Text(
-                          'Date: ${dateFormatter.format(udhar.date)}',
+                          AppLocalizations.of(context)!.udharDetailDate(dateFormatter.format(udhar.date)),
                           style: AppTextStyles.bodySmall,
                         ),
                         if (udhar.note != null && udhar.note!.isNotEmpty)
@@ -277,7 +280,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                               top: DesignConstants.spacingXs,
                             ),
                             child: Text(
-                              'Note: ${udhar.note}',
+                              AppLocalizations.of(context)!.udharDetailNote(udhar.note!),
                               style: AppTextStyles.bodySmall,
                             ),
                           ),
@@ -305,12 +308,12 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Settlement History', style: AppTextStyles.heading4),
+                      Text(AppLocalizations.of(context)!.udharSettlementHistory, style: AppTextStyles.heading4),
                       if (!udhar.isSettled)
                         TextButton.icon(
                           onPressed: _showSettlementDialog,
                           icon: const Icon(Icons.add),
-                          label: const Text('Add'),
+                          label: Text(AppLocalizations.of(context)!.commonAdd),
                         ),
                     ],
                   ),
@@ -327,7 +330,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          'No settlements yet',
+                          AppLocalizations.of(context)!.udharNoSettlementsYet,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -399,7 +402,7 @@ class _UdharDetailScreenState extends State<UdharDetailScreen> {
             backgroundColor: AppColors.success,
             foregroundColor: AppColors.textOnPrimary,
             icon: const Icon(Icons.add),
-            label: const Text('Add Settlement'),
+            label: Text(AppLocalizations.of(context)!.udharAddSettlement),
           );
         },
       ),

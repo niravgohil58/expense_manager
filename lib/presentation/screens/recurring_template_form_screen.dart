@@ -9,6 +9,9 @@ import '../../data/models/category_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/recurring_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
+
 
 /// Form for creating a recurring template (manual “Post now” from list).
 class RecurringTemplateFormScreen extends StatefulWidget {
@@ -59,25 +62,25 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
     final amt = double.tryParse(_amount.text.trim());
     if (amt == null || amt <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid amount')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.recurringEnterValidAmount)),
       );
       return;
     }
     if (_accountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select an account')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.recurringSelectAccount)),
       );
       return;
     }
     if (_expense && _cat == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select a category')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.recurringSelectCategory)),
       );
       return;
     }
     if (!_expense && _incomeCategory.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter income category label')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.recurringEnterIncomeCategoryLabel)),
       );
       return;
     }
@@ -111,7 +114,7 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New template'),
+        title: Text(AppLocalizations.of(context)!.titleAddTemplate),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
       ),
@@ -121,9 +124,9 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
         padding: DesignConstants.screenPadding,
         children: [
           SegmentedButton<bool>(
-            segments: const [
-              ButtonSegment(value: true, label: Text('Expense'), icon: Icon(Icons.remove_circle_outline)),
-              ButtonSegment(value: false, label: Text('Income'), icon: Icon(Icons.add_circle_outline)),
+            segments: [
+              ButtonSegment(value: true, label: Text(AppLocalizations.of(context)!.recurringKindExpense), icon: const Icon(Icons.remove_circle_outline)),
+              ButtonSegment(value: false, label: Text(AppLocalizations.of(context)!.recurringKindIncome), icon: const Icon(Icons.add_circle_outline)),
             ],
             selected: {_expense},
             onSelectionChanged: (s) => setState(() => _expense = s.first),
@@ -135,18 +138,18 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
             ],
-            decoration: const InputDecoration(
-              labelText: 'Amount',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.formAmount,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
           if (_expense)
             InputDecorator(
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.formCategory,
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<Category>(
@@ -157,7 +160,7 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
                           ? cats.firstWhere((c) => c.id == _cat!.id)
                           : cats.first,
                   items: cats
-                      .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                      .map((c) => DropdownMenuItem(value: c, child: Text(getCategoryName(context, c))))
                       .toList(),
                   onChanged: cats.isEmpty ? null : (v) => setState(() => _cat = v),
                 ),
@@ -166,17 +169,17 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
           else
             TextField(
               controller: _incomeCategory,
-              decoration: const InputDecoration(
-                labelText: 'Category label (e.g. Salary)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.recurringCategoryLabelHint,
+                border: const OutlineInputBorder(),
               ),
             ),
           const SizedBox(height: 16),
           InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Account',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.listAccountLabel,
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -193,18 +196,18 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
           ),
           const SizedBox(height: 16),
           InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Frequency',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.recurringFrequency,
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: _frequency,
-                items: const [
-                  DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
-                  DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                items: [
+                  DropdownMenuItem(value: 'monthly', child: Text(AppLocalizations.of(context)!.frequencyMonthly)),
+                  DropdownMenuItem(value: 'weekly', child: Text(AppLocalizations.of(context)!.frequencyWeekly)),
                 ],
                 onChanged: (v) => setState(() => _frequency = v ?? 'monthly'),
               ),
@@ -213,15 +216,15 @@ class _RecurringTemplateFormScreenState extends State<RecurringTemplateFormScree
           const SizedBox(height: 16),
           TextField(
             controller: _note,
-            decoration: const InputDecoration(
-              labelText: 'Note (optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.formNoteOptional,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _busy ? null : _save,
-            child: Text(_busy ? 'Saving…' : 'Save template'),
+            child: Text(_busy ? AppLocalizations.of(context)!.recurringSaving : AppLocalizations.of(context)!.recurringSaveTemplate),
           ),
         ],
       ),

@@ -260,6 +260,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   title: 'Expense Manager',
                   debugShowCheckedModeBanner: false,
                   themeMode: settings.themeMode,
+                  locale: settings.locale,
                   theme: buildLightTheme(),
                   darkTheme: buildDarkTheme(),
                   localizationsDelegates: AppLocalizations.localizationsDelegates,

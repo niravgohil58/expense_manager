@@ -7,6 +7,8 @@ import 'app_drawer.dart';
 import 'drawer_host.dart';
 import 'ads/shell_banner_slot.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Bottom navigation shell for main app screens (owns [Drawer]).
 class BottomNavShell extends StatefulWidget {
   const BottomNavShell({super.key, required this.child});
@@ -25,6 +27,7 @@ class _BottomNavShellState extends State<BottomNavShell> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return DrawerHost(
       openDrawer: _openDrawer,
@@ -56,32 +59,41 @@ class _BottomNavShellState extends State<BottomNavShell> {
                 vertical: DesignConstants.spacingXs,
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _NavItem(
-                    icon: Icons.home_rounded,
-                    label: 'Home',
-                    path: '/home',
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.home_rounded,
+                      label: l10n.navHome,
+                      path: '/home',
+                    ),
                   ),
-                  _NavItem(
-                    icon: Icons.trending_up_rounded,
-                    label: 'Income',
-                    path: '/income',
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.trending_up_rounded,
+                      label: l10n.navIncome,
+                      path: '/income',
+                    ),
                   ),
-                  _NavItem(
-                    icon: Icons.receipt_long_rounded,
-                    label: 'Expenses',
-                    path: '/expenses',
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.receipt_long_rounded,
+                      label: l10n.navExpenses,
+                      path: '/expenses',
+                    ),
                   ),
-                  _NavItem(
-                    icon: Icons.people_rounded,
-                    label: 'IOUs',
-                    path: '/udhar',
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.people_rounded,
+                      label: l10n.navIous,
+                      path: '/udhar',
+                    ),
                   ),
-                  _NavItem(
-                    icon: Icons.bar_chart_rounded,
-                    label: 'Reports',
-                    path: '/reports',
+                  Expanded(
+                    child: _NavItem(
+                      icon: Icons.bar_chart_rounded,
+                      label: l10n.navReports,
+                      path: '/reports',
+                    ),
                   ),
                 ],
               ),
@@ -113,11 +125,13 @@ class _NavItem extends StatelessWidget {
       borderRadius: DesignConstants.borderRadiusMd,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: DesignConstants.spacingSm,
+          horizontal: DesignConstants.spacingXxs,
           vertical: DesignConstants.spacingXs,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               icon,
@@ -127,8 +141,11 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: DesignConstants.spacingXxs),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected ? active : inactive,
               ),

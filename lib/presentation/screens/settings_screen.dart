@@ -18,6 +18,8 @@ import '../../data/backup/backup_service.dart';
 import '../providers/account_provider.dart';
 import '../providers/backup_provider.dart';
 import '../providers/category_provider.dart';
+import '../../l10n/app_localizations.dart';
+
 import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/lock_provider.dart';
@@ -48,14 +50,13 @@ class SettingsScreen extends StatelessWidget {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Backup saved'),
+          title: Text(AppLocalizations.of(context)!.settingsBackupSaved),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'File is in app storage. Copy the path below to upload via '
-                'Files, Google Drive, or share manually.',
+              Text(
+                AppLocalizations.of(context)!.settingsBackupSavedSubtitle,
               ),
               const SizedBox(height: 12),
               SelectableText(path),
@@ -67,14 +68,14 @@ class SettingsScreen extends StatelessWidget {
                 Clipboard.setData(ClipboardData(text: path));
                 Navigator.pop(ctx);
                 messenger.showSnackBar(
-                  const SnackBar(content: Text('Path copied to clipboard')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.settingsPathCopied)),
                 );
               },
-              child: const Text('Copy path'),
+              child: Text(AppLocalizations.of(context)!.settingsCopyPath),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
+              child: Text(AppLocalizations.of(context)!.commonGotIt),
             ),
           ],
         ),
@@ -85,7 +86,7 @@ class SettingsScreen extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.settingsExportFailed(e.toString()))),
         );
       }
     }
@@ -95,20 +96,18 @@ class SettingsScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Restore backup?'),
-        content: const Text(
-          'This will replace ALL data on this device with the backup file. '
-          'Current expenses, accounts, IOUs, and incomes will be overwritten. '
-          'This cannot be undone.',
+        title: Text(AppLocalizations.of(context)!.settingsRestoreBackupTitle),
+        content: Text(
+          AppLocalizations.of(context)!.settingsRestoreBackupConfirm,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Replace data'),
+            child: Text(AppLocalizations.of(context)!.settingsReplaceData),
           ),
         ],
       ),
@@ -156,7 +155,7 @@ class SettingsScreen extends StatelessWidget {
     if (jsonStr == null || jsonStr.isEmpty) {
       if (context.mounted) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Could not read file')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.settingsCouldNotReadFile)),
         );
       }
       return;
@@ -168,18 +167,18 @@ class SettingsScreen extends StatelessWidget {
       await _reloadAllData(context);
       if (!context.mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Backup restored')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.settingsBackupRestored)),
       );
     } on BackupFormatException catch (e) {
       if (context.mounted) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Invalid backup: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.settingsInvalidBackup(e.toString()))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Restore failed: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.settingsRestoreFailed(e.toString()))),
         );
       }
     }
@@ -195,26 +194,26 @@ class SettingsScreen extends StatelessWidget {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('CSV export saved'),
+          title: Text(AppLocalizations.of(context)!.settingsCsvExportSaved),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Three files in app documents:'),
+                Text(AppLocalizations.of(context)!.settingsThreeFilesSaved),
                 const SizedBox(height: 8),
-                SelectableText('Accounts:\n$a'),
+                SelectableText('${AppLocalizations.of(context)!.settingsAccountsLabel}\n$a'),
                 const SizedBox(height: 8),
-                SelectableText('Expenses:\n$e'),
+                SelectableText('${AppLocalizations.of(context)!.settingsExpensesLabel}\n$e'),
                 const SizedBox(height: 8),
-                SelectableText('Incomes:\n$i'),
+                SelectableText('${AppLocalizations.of(context)!.settingsIncomesLabel}\n$i'),
               ],
             ),
           ),
           actions: [
             FilledButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
+              child: Text(AppLocalizations.of(context)!.commonGotIt),
             ),
           ],
         ),
@@ -222,9 +221,9 @@ class SettingsScreen extends StatelessWidget {
       if (context.mounted) {
         await context.read<AdsController>().presentInterstitialIfEligible();
       }
-    } catch (e) {
+    } catch (err) {
       if (context.mounted) {
-        messenger.showSnackBar(SnackBar(content: Text('CSV export failed: $e')));
+        messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.settingsCsvExportFailed(err.toString()))));
       }
     }
   }
@@ -240,7 +239,7 @@ class SettingsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Settings'),
+        title: Text(AppLocalizations.of(context)!.titleSettings),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -254,26 +253,26 @@ class SettingsScreen extends StatelessWidget {
               ListView(
                 padding: DesignConstants.screenPadding,
                 children: [
-                  Text('Appearance', style: AppTextStyles.heading4),
+                  Text(AppLocalizations.of(context)!.settingsAppearance, style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Consumer<SettingsProvider>(
                     builder: (context, settings, _) {
                       return SegmentedButton<ThemeMode>(
-                        segments: const [
+                        segments: [
                           ButtonSegment(
                             value: ThemeMode.system,
-                            label: Text('System'),
-                            icon: Icon(Icons.brightness_auto, size: 18),
+                            label: Text(AppLocalizations.of(context)!.settingsSystem),
+                            icon: const Icon(Icons.brightness_auto, size: 18),
                           ),
                           ButtonSegment(
                             value: ThemeMode.light,
-                            label: Text('Light'),
-                            icon: Icon(Icons.light_mode, size: 18),
+                            label: Text(AppLocalizations.of(context)!.settingsLight),
+                            icon: const Icon(Icons.light_mode, size: 18),
                           ),
                           ButtonSegment(
                             value: ThemeMode.dark,
-                            label: Text('Dark'),
-                            icon: Icon(Icons.dark_mode, size: 18),
+                            label: Text(AppLocalizations.of(context)!.settingsDark),
+                            icon: const Icon(Icons.dark_mode, size: 18),
                           ),
                         ],
                         selected: {settings.themeMode},
@@ -289,15 +288,26 @@ class SettingsScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.notifications_outlined,
                         color: scheme.primary),
-                    title: const Text('Notification Settings'),
-                    subtitle: const Text(
-                      'Manage all reminders and alerts',
+                    title: Text(AppLocalizations.of(context)!.titleNotificationSettings),
+                    subtitle: Text(
+                      AppLocalizations.of(context)!.settingsNotificationSubtitle,
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/notification-settings'),
                   ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.translate_outlined,
+                        color: scheme.primary),
+                    title: Text(AppLocalizations.of(context)!.titleLanguageSettings),
+                    subtitle: Text(
+                      AppLocalizations.of(context)!.settingsLanguageSubtitle,
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/select-language'),
+                  ),
                   const SizedBox(height: DesignConstants.spacingLg),
-                  Text('Region & security', style: AppTextStyles.heading4),
+                  Text(AppLocalizations.of(context)!.settingsRegionSecurity, style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Consumer<SettingsProvider>(
                     builder: (context, settings, _) {
@@ -315,7 +325,7 @@ class SettingsScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  'Currency',
+                                  AppLocalizations.of(context)!.settingsCurrency,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall
@@ -358,9 +368,9 @@ class SettingsScreen extends StatelessWidget {
                       return SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         secondary: Icon(Icons.lock_outline, color: scheme.primary),
-                        title: const Text('Require PIN'),
-                        subtitle: const Text(
-                          'Locks when returning from background',
+                        title: Text(AppLocalizations.of(context)!.settingsRequirePin),
+                        subtitle: Text(
+                          AppLocalizations.of(context)!.settingsRequirePinSubtitle,
                         ),
                         value: settings.appLockEnabled,
                         onChanged: (v) async {
@@ -373,18 +383,18 @@ class SettingsScreen extends StatelessWidget {
                             final ok = await showDialog<bool>(
                               context: context,
                               builder: (ctx) => AlertDialog(
-                                title: const Text('Turn off app lock?'),
-                                content: const Text(
-                                  'PIN will be removed from secure storage.',
+                                title: Text(AppLocalizations.of(context)!.settingsTurnOffAppLock),
+                                content: Text(
+                                  AppLocalizations.of(context)!.settingsTurnOffAppLockConfirm,
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(ctx, false),
-                                    child: const Text('Cancel'),
+                                    child: Text(AppLocalizations.of(context)!.commonCancel),
                                   ),
                                   FilledButton(
                                     onPressed: () => Navigator.pop(ctx, true),
-                                    child: const Text('Turn off'),
+                                    child: Text(AppLocalizations.of(context)!.settingsTurnOff),
                                   ),
                                 ],
                               ),
@@ -401,8 +411,8 @@ class SettingsScreen extends StatelessWidget {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.pin_outlined, color: scheme.primary),
-                    title: const Text('Change PIN'),
-                    subtitle: const Text('Set a new PIN (requires lock enabled)'),
+                    title: Text(AppLocalizations.of(context)!.settingsChangePin),
+                    subtitle: Text(AppLocalizations.of(context)!.settingsChangePinSubtitle),
                     onTap: () async {
                       await context.push('/set-pin');
                       if (context.mounted) {
@@ -411,10 +421,10 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
-                  Text('Data', style: AppTextStyles.heading4),
+                  Text(AppLocalizations.of(context)!.settingsData, style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Text(
-                    'Backup contains accounts, categories, expenses, transfers, incomes, IOUs, and settlements. Restore replaces everything locally.',
+                    AppLocalizations.of(context)!.settingsBackupDescription,
                     style: AppTextStyles.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -423,9 +433,9 @@ class SettingsScreen extends StatelessWidget {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.upload_file, color: scheme.primary),
-                    title: const Text('Export backup'),
-                    subtitle: const Text(
-                      'Saves JSON to app folder — copy path or upload via Files/Drive',
+                    title: Text(AppLocalizations.of(context)!.settingsExportBackup),
+                    subtitle: Text(
+                      AppLocalizations.of(context)!.settingsExportBackupSubtitle,
                     ),
                     onTap: backup.isBusy ? null : () => _export(context),
                   ),
@@ -433,9 +443,9 @@ class SettingsScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.table_chart_outlined,
                         color: scheme.primary),
-                    title: const Text('Export CSV (accounts, expenses, incomes)'),
-                    subtitle: const Text(
-                      'Three comma-separated files in app documents',
+                    title: Text(AppLocalizations.of(context)!.settingsExportCsv),
+                    subtitle: Text(
+                      AppLocalizations.of(context)!.settingsExportCsvSubtitle,
                     ),
                     onTap: backup.isBusy ? null : () => _exportCsv(context),
                   ),
@@ -443,25 +453,25 @@ class SettingsScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.download_for_offline_outlined,
                         color: scheme.primary),
-                    title: const Text('Restore from backup'),
-                    subtitle: const Text(
-                      'Choose your backup file (JSON). Replaces local data',
+                    title: Text(AppLocalizations.of(context)!.settingsRestoreBackup),
+                    subtitle: Text(
+                      AppLocalizations.of(context)!.settingsRestoreBackupSubtitle,
                     ),
                     onTap: backup.isBusy ? null : () => _import(context),
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
-                  Text('Purchases', style: AppTextStyles.heading4),
+                  Text(AppLocalizations.of(context)!.settingsPurchases, style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Consumer<PurchaseProvider>(
                     builder: (context, purchase, _) {
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: Icon(Icons.restore, color: scheme.primary),
-                        title: const Text('Restore purchases'),
+                        title: Text(AppLocalizations.of(context)!.settingsRestorePurchases),
                         subtitle: Text(
                           purchase.adsRemoved
-                              ? 'Ads already removed'
-                              : 'Recover your ad-free purchase',
+                              ? AppLocalizations.of(context)!.settingsAdsAlreadyRemoved
+                              : AppLocalizations.of(context)!.settingsRecoverAdFree,
                         ),
                         onTap: purchase.adsRemoved
                             ? null
@@ -472,8 +482,8 @@ class SettingsScreen extends StatelessWidget {
                                     SnackBar(
                                       content: Text(
                                         purchase.adsRemoved
-                                            ? 'Purchase restored!'
-                                            : 'No previous purchase found.',
+                                            ? AppLocalizations.of(context)!.settingsPurchaseRestored
+                                            : AppLocalizations.of(context)!.settingsNoPurchaseFound,
                                       ),
                                     ),
                                   );
@@ -490,16 +500,16 @@ class SettingsScreen extends StatelessWidget {
                   color: Color(0x66000000),
                 ),
               if (backup.isBusy)
-                const Center(
+                Center(
                   child: Card(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('Working…'),
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(AppLocalizations.of(context)!.settingsWorking),
                         ],
                       ),
                     ),

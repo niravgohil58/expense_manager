@@ -7,6 +7,7 @@ import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
 import '../../data/models/category_model.dart';
 import '../providers/category_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   const AddCategoryScreen({super.key, this.category});
@@ -91,8 +92,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(widget.category != null
-              ? 'Category updated'
-              : 'Category added successfully'),
+              ? AppLocalizations.of(context)!.catUpdatedSuccess
+              : AppLocalizations.of(context)!.catAddedSuccess),
           backgroundColor: AppColors.success,
         ),
       );
@@ -103,8 +104,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           content: Text(
             provider.error ??
                 (widget.category != null
-                    ? 'Failed to update category'
-                    : 'Failed to add category'),
+                    ? AppLocalizations.of(context)!.catUpdateFailed
+                    : AppLocalizations.of(context)!.catAddFailed),
           ),
           backgroundColor: AppColors.error,
         ),
@@ -117,7 +118,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(widget.category != null ? 'Edit Category' : 'Add Category'),
+        title: Text(widget.category != null
+            ? AppLocalizations.of(context)!.titleEditCategory
+            : AppLocalizations.of(context)!.titleAddCategory),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -132,16 +135,16 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Name Field
-              Text('Name', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.catNameLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  hintText: 'Category Name',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.catNameHint,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter category name';
+                    return AppLocalizations.of(context)!.catEnterName;
                   }
                   return null;
                 },
@@ -149,7 +152,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Icon Selection
-              Text('Icon', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.catIconLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               GridView.builder(
                 shrinkWrap: true,
@@ -192,7 +195,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Color Selection
-              Text('Color', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.catColorLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               GridView.builder(
                 shrinkWrap: true,
@@ -252,7 +255,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             color: AppColors.textOnPrimary,
                           ),
                         )
-                      : Text('Save Category', style: AppTextStyles.button),
+                      : Text(AppLocalizations.of(context)!.catSaveButton, style: AppTextStyles.button),
                 ),
               ),
             ],

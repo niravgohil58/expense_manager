@@ -9,6 +9,8 @@ import '../../core/notifications/local_notification_service.dart';
 import '../../core/preferences/app_preferences.dart';
 
 import '../widgets/notification_permission_dialog.dart';
+import '../../l10n/app_localizations.dart';
+
 
 /// Dedicated screen for managing all notification preferences.
 class NotificationSettingsScreen extends StatefulWidget {
@@ -110,7 +112,7 @@ class _NotificationSettingsScreenState
     return Scaffold(
       backgroundColor: scheme.surface,
       appBar: AppBar(
-        title: const Text('Notification Settings'),
+        title: Text(AppLocalizations.of(context)!.titleNotificationSettings),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,

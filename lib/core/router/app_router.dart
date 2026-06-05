@@ -30,6 +30,7 @@ import '../../presentation/screens/remove_ads_screen.dart';
 import '../../presentation/screens/notification_settings_screen.dart';
 import '../../presentation/screens/set_pin_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
+import '../../presentation/screens/select_language_screen.dart';
 import '../../presentation/screens/transfer_history_screen.dart';
 import '../../presentation/screens/transfer_screen.dart';
 import '../../presentation/screens/udhar_detail_screen.dart';
@@ -58,6 +59,17 @@ class AppRouter {
       refreshListenable: authProvider,
       redirect: (context, state) {
         final loc = state.matchedLocation;
+
+        // Force Language Selection on first open
+        final needsLanguage = prefs.languageCode == null;
+        if (needsLanguage) {
+          if (loc != '/select-language' &&
+              loc != '/terms' &&
+              loc != '/privacy') {
+            return '/select-language';
+          }
+          return null;
+        }
 
         if (!authProvider.firebaseAuthEnabled) {
           if (!prefs.onboardingCompleted &&
@@ -116,6 +128,13 @@ class AppRouter {
         );
       },
       routes: [
+        GoRoute(
+          path: '/select-language',
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => SelectLanguageScreen(
+            isFirstTime: prefs.languageCode == null,
+          ),
+        ),
         GoRoute(
           path: '/login',
           parentNavigatorKey: rootNavigatorKey,

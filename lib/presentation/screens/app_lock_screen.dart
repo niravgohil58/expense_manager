@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
 import '../providers/lock_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Full-screen PIN gate shown when [LockProvider.needsLockOverlay].
 class AppLockScreen extends StatefulWidget {
@@ -28,14 +29,14 @@ class _AppLockScreenState extends State<AppLockScreen> {
   Future<void> _submit() async {
     final pin = _controller.text.trim();
     if (pin.length < 4) {
-      setState(() => _error = 'Enter at least 4 digits');
+      setState(() => _error = AppLocalizations.of(context)!.lockEnterDigits);
       return;
     }
     final ok = await context.read<LockProvider>().verifyPin(pin);
     if (!mounted) return;
     if (!ok) {
       setState(() {
-        _error = 'Incorrect PIN';
+        _error = AppLocalizations.of(context)!.lockIncorrectPin;
         _controller.clear();
       });
     }
@@ -53,10 +54,13 @@ class _AppLockScreenState extends State<AppLockScreen> {
               const SizedBox(height: DesignConstants.spacingXl),
               Icon(Icons.lock_outline, size: 64, color: AppColors.primary),
               const SizedBox(height: DesignConstants.spacingMd),
-              Text('App locked', style: AppTextStyles.heading3),
+              Text(
+                AppLocalizations.of(context)!.lockAppLocked,
+                style: AppTextStyles.heading3,
+              ),
               const SizedBox(height: DesignConstants.spacingSm),
               Text(
-                'Enter your PIN to continue',
+                AppLocalizations.of(context)!.lockEnterPinToContinue,
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -71,7 +75,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                   LengthLimitingTextInputFormatter(12),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'PIN',
+                  labelText: AppLocalizations.of(context)!.pinLabel,
                   errorText: _error,
                   filled: true,
                   border: OutlineInputBorder(
@@ -85,7 +89,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _submit,
-                  child: const Text('Unlock'),
+                  child: Text(AppLocalizations.of(context)!.lockUnlock),
                 ),
               ),
             ],

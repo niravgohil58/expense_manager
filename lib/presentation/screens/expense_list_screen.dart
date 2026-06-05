@@ -18,6 +18,9 @@ import '../providers/account_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
+
 
 /// Expense list with search, filters, and sort (Phase C).
 class ExpenseListScreen extends StatefulWidget {
@@ -124,7 +127,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Filters', style: AppTextStyles.heading4),
+                        Text(AppLocalizations.of(context)!.listFilters, style: AppTextStyles.heading4),
                         IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () => Navigator.pop(ctx),
@@ -132,14 +135,14 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('Date range', style: AppTextStyles.labelMedium),
+                    Text(AppLocalizations.of(context)!.listDateRange, style: AppTextStyles.labelMedium),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
                         ChoiceChip(
-                          label: const Text('All dates'),
+                          label: Text(AppLocalizations.of(context)!.listAllDates),
                           selected:
                               draft.startDate == null && draft.endDate == null,
                           onSelected: (_) {
@@ -152,7 +155,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           },
                         ),
                         ChoiceChip(
-                          label: const Text('This month'),
+                          label: Text(AppLocalizations.of(context)!.listThisMonth),
                           selected: _isThisMonth(
                             draft.startDate,
                             draft.endDate,
@@ -175,7 +178,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           },
                         ),
                         ChoiceChip(
-                          label: const Text('Last 30 days'),
+                          label: Text(AppLocalizations.of(context)!.listLast30Days),
                           selected: _isLast30Days(
                             draft.startDate,
                             draft.endDate,
@@ -214,7 +217,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                             icon: const Icon(Icons.calendar_today, size: 18),
                             label: Text(
                               draft.startDate == null
-                                  ? 'From'
+                                  ? AppLocalizations.of(context)!.listFrom
                                   : DateFormat(
                                       'dd MMM yyyy',
                                     ).format(draft.startDate!),
@@ -240,7 +243,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                             icon: const Icon(Icons.event, size: 18),
                             label: Text(
                               draft.endDate == null
-                                  ? 'To'
+                                  ? AppLocalizations.of(context)!.listTo
                                   : DateFormat(
                                       'dd MMM yyyy',
                                     ).format(draft.endDate!),
@@ -273,7 +276,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     ),
                     const SizedBox(height: 16),
                     InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Category'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.formCategory),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String?>(
                           isExpanded: true,
@@ -282,14 +285,14 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                             categoryProvider,
                           ),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All categories'),
+                              child: Text(AppLocalizations.of(context)!.listAllCategories),
                             ),
                             ...categoryProvider.categories.map(
                               (c) => DropdownMenuItem<String?>(
                                 value: c.id,
-                                child: Text(c.name),
+                                child: Text(getCategoryName(context, c)),
                               ),
                             ),
                           ],
@@ -306,7 +309,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     ),
                     const SizedBox(height: 12),
                     InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Account'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.listAccountLabel),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String?>(
                           isExpanded: true,
@@ -315,9 +318,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                             accountProvider,
                           ),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All accounts'),
+                              child: Text(AppLocalizations.of(context)!.listAllAccounts),
                             ),
                             ...accountProvider.accounts.map(
                               (a) => DropdownMenuItem<String?>(
@@ -339,27 +342,27 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     ),
                     const SizedBox(height: 12),
                     InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Sort'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.listSortLabel),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<ExpenseSort>(
                           isExpanded: true,
                           value: draft.sort,
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: ExpenseSort.dateNewestFirst,
-                              child: Text('Date · newest'),
+                              child: Text(AppLocalizations.of(context)!.listSortNewest),
                             ),
                             DropdownMenuItem(
                               value: ExpenseSort.dateOldestFirst,
-                              child: Text('Date · oldest'),
+                              child: Text(AppLocalizations.of(context)!.listSortOldest),
                             ),
                             DropdownMenuItem(
                               value: ExpenseSort.amountHighFirst,
-                              child: Text('Amount · high'),
+                              child: Text(AppLocalizations.of(context)!.listSortHigh),
                             ),
                             DropdownMenuItem(
                               value: ExpenseSort.amountLowFirst,
-                              child: Text('Amount · low'),
+                              child: Text(AppLocalizations.of(context)!.listSortLow),
                             ),
                           ],
                           onChanged: (v) {
@@ -381,7 +384,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                               _searchController.clear();
                               await expenseProvider.clearExpenseFilters();
                             },
-                            child: const Text('Clear all'),
+                            child: Text(AppLocalizations.of(context)!.listClearAll),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -391,7 +394,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                               Navigator.pop(ctx);
                               await expenseProvider.setExpenseFilters(draft);
                             },
-                            child: const Text('Apply'),
+                            child: Text(AppLocalizations.of(context)!.listApply),
                           ),
                         ),
                       ],
@@ -432,20 +435,19 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete expense'),
+        title: Text(AppLocalizations.of(context)!.listDeleteExpenseTitle),
         content: Text(
-          'Remove this expense from ${expense.category.name}? '
-          'The amount will be added back to the account.',
+          AppLocalizations.of(context)!.listDeleteExpenseConfirmDetail(getCategoryName(context, expense.category)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.commonDelete),
           ),
         ],
       ),
@@ -458,7 +460,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(provider.error ?? 'Could not delete expense'),
+          content: Text(provider.error ?? AppLocalizations.of(context)!.listExpenseDeleteFailed),
           backgroundColor: AppColors.error,
         ),
       );
@@ -481,7 +483,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: DrawerHost.menuButton(context),
-        title: const Text('Expenses'),
+        title: Text(AppLocalizations.of(context)!.titleExpenses),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -517,7 +519,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search notes, category, amount…',
+                    hintText: AppLocalizations.of(context)!.listSearchHint,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isEmpty
                         ? null
@@ -554,7 +556,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         setState(() {});
                       },
                       icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear filters'),
+                      label: Text(AppLocalizations.of(context)!.listClearFilters),
                     ),
                   ),
                 ),
@@ -573,7 +575,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       children: [
                         Chip(
                           label: Text(
-                            _filterSummary(provider.expenseFilters),
+                            _filterSummary(context, provider.expenseFilters),
                             style: AppTextStyles.caption,
                           ),
                         ),
@@ -645,7 +647,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     );
   }
 
-  String _filterSummary(ExpenseFilters f) {
+  String _filterSummary(BuildContext context, ExpenseFilters f) {
     final parts = <String>[];
     final q = f.searchQuery?.trim();
     if (q != null && q.isNotEmpty) {
@@ -659,24 +661,25 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       final b = f.endDate != null
           ? DateFormat('dd/MM').format(f.endDate!)
           : '…';
-      parts.add('Dates $a–$b');
+      parts.add(AppLocalizations.of(context)!.listDatesRangeSummary(a, b));
     }
-    if (f.categoryId != null) parts.add('Category');
-    if (f.accountId != null) parts.add('Account');
-    parts.add(_sortLabel(f.sort));
+    if (f.categoryId != null) parts.add(AppLocalizations.of(context)!.formCategory);
+    if (f.accountId != null) parts.add(AppLocalizations.of(context)!.listAccountLabel);
+    parts.add(_sortLabel(context, f.sort));
     return parts.join(' · ');
   }
 
-  String _sortLabel(ExpenseSort s) {
+  String _sortLabel(BuildContext context, ExpenseSort s) {
+    final l10n = AppLocalizations.of(context)!;
     switch (s) {
       case ExpenseSort.dateNewestFirst:
-        return 'Newest';
+        return l10n.listSortNewest;
       case ExpenseSort.dateOldestFirst:
-        return 'Oldest';
+        return l10n.listSortOldest;
       case ExpenseSort.amountHighFirst:
-        return 'Amount ↓';
+        return l10n.listSortHigh;
       case ExpenseSort.amountLowFirst:
-        return 'Amount ↑';
+        return l10n.listSortLow;
     }
   }
 
@@ -697,14 +700,14 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             ),
             const SizedBox(height: DesignConstants.spacingMd),
             Text(
-              'No expenses yet',
+              AppLocalizations.of(context)!.listNoExpensesYet,
               style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: DesignConstants.spacingXs),
             Text(
-              'Tap + to add your first expense',
+              AppLocalizations.of(context)!.listTapToRecordExpense,
               style: AppTextStyles.bodySmall,
             ),
           ],
@@ -722,8 +725,8 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             const SizedBox(height: DesignConstants.spacingMd),
             Text(
               hasFilters
-                  ? 'No expenses match your filters'
-                  : 'No expenses to show',
+                  ? AppLocalizations.of(context)!.listNoExpenseMatches
+                  : AppLocalizations.of(context)!.listNoExpenseToShow,
               style: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -736,7 +739,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                 await provider.clearExpenseFilters();
                 setState(() {});
               },
-              child: const Text('Clear filters'),
+              child: Text(AppLocalizations.of(context)!.listClearFilters),
             ),
           ],
         ),
@@ -806,7 +809,7 @@ class _ExpenseCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(expense.category.name, style: AppTextStyles.labelMedium),
+                  Text(getCategoryName(context, expense.category), style: AppTextStyles.labelMedium),
                   Text(
                     dateFormatter.format(expense.date),
                     style: AppTextStyles.caption,

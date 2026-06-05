@@ -10,6 +10,8 @@ import '../../core/formatting/app_currency.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../l10n/app_localizations.dart';
+
 
 /// Transfer screen for moving money between accounts
 class TransferScreen extends StatefulWidget {
@@ -67,13 +69,13 @@ class _TransferScreenState extends State<TransferScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_fromAccountId == null || _toAccountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select both accounts')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.transferSelectBoth)),
       );
       return;
     }
     if (_fromAccountId == _toAccountId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot transfer to the same account')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.transferSameAccount)),
       );
       return;
     }
@@ -93,8 +95,8 @@ class _TransferScreenState extends State<TransferScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Transfer completed successfully'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.transferSuccess),
           backgroundColor: AppColors.success,
         ),
       );
@@ -105,7 +107,7 @@ class _TransferScreenState extends State<TransferScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            context.read<ExpenseProvider>().error ?? 'Transfer failed',
+            context.read<ExpenseProvider>().error ?? AppLocalizations.of(context)!.transferFailed,
           ),
           backgroundColor: AppColors.error,
         ),
@@ -128,13 +130,13 @@ class _TransferScreenState extends State<TransferScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Transfer Money'),
+        title: Text(AppLocalizations.of(context)!.titleTransferBalance),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Transfer history',
+            tooltip: AppLocalizations.of(context)!.titleTransferHistory,
             icon: const Icon(Icons.history),
             onPressed: () => context.push('/transfer-history'),
           ),
@@ -153,7 +155,7 @@ class _TransferScreenState extends State<TransferScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Amount Field
-                Text('Amount', style: AppTextStyles.labelMedium),
+                Text(AppLocalizations.of(context)!.formAmount, style: AppTextStyles.labelMedium),
                 const SizedBox(height: DesignConstants.spacingXs),
                 TextFormField(
                   controller: _amountController,
@@ -172,11 +174,11 @@ class _TransferScreenState extends State<TransferScreen> {
                   style: AppTextStyles.amountMedium,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter amount';
+                      return AppLocalizations.of(context)!.formEnterAmount;
                     }
                     if (double.tryParse(value) == null ||
                         double.parse(value) <= 0) {
-                      return 'Please enter a valid amount';
+                      return AppLocalizations.of(context)!.formEnterValidAmount;
                     }
                     return null;
                   },
@@ -184,7 +186,7 @@ class _TransferScreenState extends State<TransferScreen> {
                 const SizedBox(height: DesignConstants.spacingLg),
 
                 // From Account
-                Text('From Account', style: AppTextStyles.labelMedium),
+                Text(AppLocalizations.of(context)!.transferFromAccount, style: AppTextStyles.labelMedium),
                 const SizedBox(height: DesignConstants.spacingXs),
                 Consumer<AccountProvider>(
                   builder: (context, provider, _) {
@@ -215,7 +217,7 @@ class _TransferScreenState extends State<TransferScreen> {
                 const SizedBox(height: DesignConstants.spacingMd),
 
                 // To Account
-                Text('To Account', style: AppTextStyles.labelMedium),
+                Text(AppLocalizations.of(context)!.transferToAccount, style: AppTextStyles.labelMedium),
                 const SizedBox(height: DesignConstants.spacingXs),
                 Consumer<AccountProvider>(
                   builder: (context, provider, _) {
@@ -236,7 +238,7 @@ class _TransferScreenState extends State<TransferScreen> {
                 const SizedBox(height: DesignConstants.spacingLg),
 
                 // Date Selection
-                Text('Date', style: AppTextStyles.labelMedium),
+                Text(AppLocalizations.of(context)!.formDate, style: AppTextStyles.labelMedium),
                 const SizedBox(height: DesignConstants.spacingXs),
                 InkWell(
                   onTap: _selectDate,
@@ -264,13 +266,13 @@ class _TransferScreenState extends State<TransferScreen> {
                 const SizedBox(height: DesignConstants.spacingLg),
 
                 // Note Field
-                Text('Note (Optional)', style: AppTextStyles.labelMedium),
+                Text(AppLocalizations.of(context)!.formNoteOptional, style: AppTextStyles.labelMedium),
                 const SizedBox(height: DesignConstants.spacingXs),
                 TextFormField(
                   controller: _noteController,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    hintText: 'Add a note...',
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.formAddNoteHint,
                   ),
                 ),
                 const SizedBox(height: DesignConstants.spacingXl),
@@ -297,7 +299,7 @@ class _TransferScreenState extends State<TransferScreen> {
                               color: AppColors.textOnPrimary,
                             ),
                           )
-                        : Text('Transfer', style: AppTextStyles.button),
+                        : Text(AppLocalizations.of(context)!.transferButton, style: AppTextStyles.button),
                   ),
                 ),
               ],

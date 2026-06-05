@@ -11,6 +11,8 @@ import '../../data/models/transfer_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../l10n/app_localizations.dart';
+
 
 /// Lists recorded transfers (sorted newest first).
 class TransferHistoryScreen extends StatefulWidget {
@@ -47,7 +49,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Transfer History'),
+        title: Text(AppLocalizations.of(context)!.titleTransferHistory),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,

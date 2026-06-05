@@ -17,6 +17,8 @@ import '../providers/income_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/drawer_host.dart';
 import '../widgets/notification_permission_dialog.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 
 /// Home screen with account balances and quick actions
 class HomeScreen extends StatefulWidget {
@@ -90,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: DrawerHost.menuButton(context),
-        title: const Text('Expense Budget Tracker'),
+        title: Text(AppLocalizations.of(context)!.homeTitle),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -111,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Accounts', style: AppTextStyles.heading4),
+                  Text(AppLocalizations.of(context)!.homeAccounts, style: AppTextStyles.heading4),
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
@@ -120,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: TextButton.icon(
                       onPressed: () => context.push('/add-account'),
                       icon: const Icon(Icons.add_circle, color: AppColors.primary),
-                      label: Text('ADD ACCOUNT', style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                      label: Text(AppLocalizations.of(context)!.homeAddAccount, style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -130,13 +132,13 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Quick Actions
-              Text('Quick Actions', style: AppTextStyles.heading4),
+              Text(AppLocalizations.of(context)!.homeQuickActions, style: AppTextStyles.heading4),
               const SizedBox(height: DesignConstants.spacingSm),
               _buildQuickActions(),
               const SizedBox(height: DesignConstants.spacingLg),
 
               // This Month Summary
-              Text('This Month', style: AppTextStyles.heading4),
+              Text(AppLocalizations.of(context)!.homeThisMonth, style: AppTextStyles.heading4),
               const SizedBox(height: DesignConstants.spacingSm),
               _buildMonthSummary(),
             ],
@@ -174,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Total Balance',
+                AppLocalizations.of(context)!.drawerTotalBalanceLabel,
                 style: AppTextStyles.labelMedium.copyWith(
                   color: AppColors.textOnPrimary.withValues(alpha: 0.8),
                 ),
@@ -224,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _QuickActionButton(
               icon: Icons.add_circle_outline,
-              label: 'Income',
+              label: AppLocalizations.of(context)!.recurringKindIncome,
               color: AppColors.success,
               onTap: () => context.push('/income'),
             ),
@@ -233,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _QuickActionButton(
               icon: Icons.remove_circle_outline,
-              label: 'Expense',
+              label: AppLocalizations.of(context)!.recurringKindExpense,
               color: AppColors.expense,
               onTap: () => context.push('/add-expense'),
             ),
@@ -242,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _QuickActionButton(
               icon: Icons.swap_horiz,
-              label: 'Transfer',
+              label: AppLocalizations.of(context)!.drawerTransfer,
               color: AppColors.primary,
               onTap: () => context.push('/transfer'),
             ),
@@ -251,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _QuickActionButton(
               icon: Icons.people,
-              label: 'IOUs',
+              label: AppLocalizations.of(context)!.navIous,
               color: AppColors.udharDena,
               onTap: () => context.push('/add-udhar'),
             ),
@@ -348,11 +350,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Spent',
-                                    style: AppTextStyles.labelSmall,
-                                  ),
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)!.homeSpent,
+                                      style: AppTextStyles.labelSmall,
+                                    ),
                                   _monthSummaryMoneyLine(
                                     formatter.format(spent),
                                     AppTextStyles.amountMedium.copyWith(
@@ -400,11 +402,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Earned',
-                                    style: AppTextStyles.labelSmall,
-                                  ),
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)!.homeEarned,
+                                      style: AppTextStyles.labelSmall,
+                                    ),
                                   _monthSummaryMoneyLine(
                                     formatter.format(earned),
                                     AppTextStyles.amountMedium.copyWith(
@@ -429,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Net this month',
+                      AppLocalizations.of(context)!.homeNetThisMonth,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.labelSmall.copyWith(
@@ -469,7 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ListTile(
                 title: Text(account.name, style: AppTextStyles.heading4),
-                subtitle: Text(account.type.displayName),
+                subtitle: Text(getAccountTypeDisplayName(context, account.type)),
                 trailing: Consumer<SettingsProvider>(
                   builder: (context, settings, _) => Text(
                     AppCurrencyFormat(settings.currencyCode)
@@ -482,7 +484,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.edit, color: AppColors.primary),
-                title: const Text('Rename Account'),
+                title: Text(AppLocalizations.of(context)!.homeRenameAccount),
                 onTap: () {
                   Navigator.pop(context);
                   _showRenameDialog(context, account);
@@ -490,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.add_card, color: AppColors.success),
-                title: const Text('Add Money'),
+                title: Text(AppLocalizations.of(context)!.homeAddMoney),
                 onTap: () {
                   Navigator.pop(context);
                   _showAddMoneyDialog(context, account);
@@ -509,20 +511,21 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
-          title: const Text('Rename Account'),
+          title: Text(l10n.homeRenameAccount),
           content: TextField(
             controller: controller,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              labelText: 'Account Name',
-              hintText: 'e.g. HDFC Bank',
+            decoration: InputDecoration(
+              labelText: l10n.homeAccountName,
+              hintText: l10n.homeAccountNameHint,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -534,7 +537,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (context.mounted) Navigator.pop(context);
                 }
               },
-              child: const Text('Save'),
+              child: Text(l10n.commonSave),
             ),
           ],
         );
@@ -547,12 +550,13 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
-          title: const Text('Add Money'),
+          title: Text(l10n.homeAddMoney),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Add balance to ${account.name}'),
+              Text(l10n.homeAddBalanceTo(account.name)),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
@@ -561,7 +565,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  labelText: 'Amount',
+                  labelText: l10n.homeAmount,
                   prefixText: AppCurrencyFormat(
                     context.read<SettingsProvider>().currencyCode,
                   ).prefix,
@@ -572,7 +576,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -585,7 +589,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (context.mounted) Navigator.pop(context);
                 }
               },
-              child: const Text('Add'),
+              child: Text(l10n.homeAddMoney),
             ),
           ],
         );
@@ -636,16 +640,16 @@ class _AccountCard extends StatelessWidget {
           ),
           const SizedBox(width: DesignConstants.spacingMd),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(account.name, style: AppTextStyles.labelMedium),
-                Text(
-                  account.type.displayName,
-                  style: AppTextStyles.caption,
-                ),
-              ],
-            ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(account.name, style: AppTextStyles.labelMedium),
+                  Text(
+                    getAccountTypeDisplayName(context, account.type),
+                    style: AppTextStyles.caption,
+                  ),
+                ],
+              ),
           ),
           Text(
             formatter.format(account.balance),

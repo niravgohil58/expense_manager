@@ -5,6 +5,8 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
 import '../providers/purchase_provider.dart';
+import '../../l10n/app_localizations.dart';
+
 
 /// Screen presenting the "Remove Ads" in-app purchase offer.
 class RemoveAdsScreen extends StatelessWidget {
@@ -17,7 +19,7 @@ class RemoveAdsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: scheme.surface,
       appBar: AppBar(
-        title: const Text('Remove Ads'),
+        title: Text(AppLocalizations.of(context)!.titleRemoveAds),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -56,8 +58,8 @@ class RemoveAdsScreen extends StatelessWidget {
                     // Heading
                     Text(
                       purchase.adsRemoved
-                          ? 'You\'re ad-free!'
-                          : 'Enjoy an ad-free experience',
+                          ? AppLocalizations.of(context)!.adsAdFree
+                          : AppLocalizations.of(context)!.adsHeroTitle,
                       style: AppTextStyles.heading3.copyWith(
                         color: scheme.onSurface,
                       ),
@@ -66,8 +68,8 @@ class RemoveAdsScreen extends StatelessWidget {
                     const SizedBox(height: DesignConstants.spacingSm),
                     Text(
                       purchase.adsRemoved
-                          ? 'Thank you for your support. All ads have been permanently removed.'
-                          : 'Remove all ads with a single one-time purchase.',
+                          ? AppLocalizations.of(context)!.adsHeroSubtitleActive
+                          : AppLocalizations.of(context)!.adsHeroSubtitleOffer,
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -88,7 +90,7 @@ class RemoveAdsScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'What you get',
+                              AppLocalizations.of(context)!.adsWhatYouGet,
                               style: AppTextStyles.heading4.copyWith(
                                 color: scheme.onSurface,
                               ),
@@ -96,27 +98,27 @@ class RemoveAdsScreen extends StatelessWidget {
                             const SizedBox(height: DesignConstants.spacingMd),
                             _BenefitRow(
                               icon: Icons.check_circle_rounded,
-                              text: 'No banner ads',
+                              text: AppLocalizations.of(context)!.adsBenefitBanners,
                             ),
                             const SizedBox(height: DesignConstants.spacingSm),
                             _BenefitRow(
                               icon: Icons.check_circle_rounded,
-                              text: 'No interstitial popups',
+                              text: AppLocalizations.of(context)!.adsBenefitInterstitials,
                             ),
                             const SizedBox(height: DesignConstants.spacingSm),
                             _BenefitRow(
                               icon: Icons.check_circle_rounded,
-                              text: 'No app-open ads',
+                              text: AppLocalizations.of(context)!.adsBenefitAppOpen,
                             ),
                             const SizedBox(height: DesignConstants.spacingSm),
                             _BenefitRow(
                               icon: Icons.check_circle_rounded,
-                              text: 'No native ads in lists',
+                              text: AppLocalizations.of(context)!.adsBenefitNative,
                             ),
                             const SizedBox(height: DesignConstants.spacingSm),
                             _BenefitRow(
                               icon: Icons.check_circle_rounded,
-                              text: 'One-time purchase — pay once, forever',
+                              text: AppLocalizations.of(context)!.adsBenefitOneTime,
                             ),
                           ],
                         ),
@@ -131,16 +133,16 @@ class RemoveAdsScreen extends StatelessWidget {
                       Center(
                         child: TextButton.icon(
                           icon: const Icon(Icons.restore, size: 18),
-                          label: const Text('Restore previous purchase'),
+                          label: Text(AppLocalizations.of(context)!.adsRestore),
                           onPressed: purchase.purchaseState == PurchaseState.loading
                               ? null
                               : () async {
                                   await purchase.restorePurchases();
                                   if (context.mounted && !purchase.adsRemoved) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                          'No previous purchase found.',
+                                          AppLocalizations.of(context)!.adsNoPurchaseFound,
                                         ),
                                       ),
                                     );
@@ -170,7 +172,7 @@ class RemoveAdsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: DesignConstants.spacingMd),
                             Text(
-                              'All ads have been removed',
+                              AppLocalizations.of(context)!.adsSuccessTitle,
                               style: AppTextStyles.heading4.copyWith(
                                 color: AppColors.success,
                               ),
@@ -178,8 +180,7 @@ class RemoveAdsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: DesignConstants.spacingSm),
                             Text(
-                              'Your ad-free experience is active. '
-                              'This applies to banners, interstitials, native ads, and app-open ads.',
+                              AppLocalizations.of(context)!.adsSuccessBody,
                               style: AppTextStyles.bodySmall.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
@@ -201,16 +202,16 @@ class RemoveAdsScreen extends StatelessWidget {
                   dismissible: false,
                   color: Color(0x66000000),
                 ),
-                const Center(
+                Center(
                   child: Card(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('Processing purchase…'),
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(AppLocalizations.of(context)!.adsProcessing),
                         ],
                       ),
                     ),
@@ -237,8 +238,8 @@ class _RemoveAdsBuyButton extends StatelessWidget {
     final isLoading = purchase.purchaseState == PurchaseState.loading;
 
     final label = product != null
-        ? 'Remove Ads — ${product.price}'
-        : 'Remove Ads';
+        ? AppLocalizations.of(context)!.adsRemoveWithPrice(product.price)
+        : AppLocalizations.of(context)!.adsRemove;
 
     return SizedBox(
       width: double.infinity,
@@ -253,7 +254,7 @@ class _RemoveAdsBuyButton extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        purchase.errorMessage ?? 'Purchase failed.',
+                        purchase.errorMessage ?? AppLocalizations.of(context)!.adsPurchaseFailed,
                       ),
                     ),
                   );

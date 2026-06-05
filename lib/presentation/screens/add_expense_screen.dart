@@ -18,6 +18,8 @@ import '../../data/models/expense_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 
 import '../providers/category_provider.dart';
 import '../../data/models/category_model.dart';
@@ -96,7 +98,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not attach image: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.formAttachImageError(e.toString()))),
       );
     }
   }
@@ -120,13 +122,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (_selectedAccountId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an account')));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.formSelectAccount)));
       return;
     }
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.formSelectCategory)));
       return;
     }
 
@@ -167,8 +169,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         SnackBar(
           content: Text(
             _isEditing
-                ? 'Expense updated successfully'
-                : 'Expense added successfully',
+                ? AppLocalizations.of(context)!.formExpenseUpdated
+                : AppLocalizations.of(context)!.formExpenseAdded,
           ),
           backgroundColor: AppColors.success,
         ),
@@ -191,8 +193,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           content: Text(
             provider.error ??
                 (_isEditing
-                    ? 'Failed to update expense'
-                    : 'Failed to add expense'),
+                    ? AppLocalizations.of(context)!.formExpenseUpdateFailed
+                    : AppLocalizations.of(context)!.formExpenseAddFailed),
           ),
           backgroundColor: AppColors.error,
         ),
@@ -204,17 +206,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Expense'),
-        content: const Text('Are you sure you want to delete this expense?'),
+        title: Text(AppLocalizations.of(context)!.formDeleteExpenseTitle),
+        content: Text(AppLocalizations.of(context)!.formDeleteExpenseConfirm),
         actions: [
           TextButton(
             onPressed: () => context.pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.commonCancel),
           ),
           TextButton(
             onPressed: () => context.pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.commonDelete),
           ),
         ],
       ),
@@ -230,8 +232,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Expense deleted successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.listExpenseDeleted),
             backgroundColor: AppColors.success,
           ),
         );
@@ -241,7 +243,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           SnackBar(
             content: Text(
               context.read<ExpenseProvider>().error ??
-                  'Failed to delete expense',
+                  AppLocalizations.of(context)!.listExpenseDeleteFailed,
             ),
             backgroundColor: AppColors.error,
           ),
@@ -258,7 +260,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Expense' : 'Add Expense'),
+        title: Text(_isEditing
+            ? AppLocalizations.of(context)!.titleEditExpense
+            : AppLocalizations.of(context)!.titleAddExpense),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -280,7 +284,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Amount Field
-              Text('Amount', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formAmount, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _amountController,
@@ -297,11 +301,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 style: AppTextStyles.amountMedium,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter amount';
+                    return AppLocalizations.of(context)!.formEnterAmount;
                   }
                   if (double.tryParse(value) == null ||
                       double.parse(value) <= 0) {
-                    return 'Please enter a valid amount';
+                    return AppLocalizations.of(context)!.formEnterValidAmount;
                   }
                   return null;
                 },
@@ -311,12 +315,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   OutlinedButton.icon(
                     onPressed: _pickReceipt,
                     icon: const Icon(Icons.photo_camera_outlined),
-                    label: const Text('Attach receipt'),
+                    label: Text(AppLocalizations.of(context)!.formAttachReceipt),
                   ),
                   if (_receiptPath != null)
                     TextButton(
                       onPressed: () => setState(() => _receiptPath = null),
-                      child: const Text('Remove'),
+                      child: Text(AppLocalizations.of(context)!.formRemove),
                     ),
                 ],
               ),
@@ -338,10 +342,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Category', style: AppTextStyles.labelMedium),
+                  Text(AppLocalizations.of(context)!.formCategory, style: AppTextStyles.labelMedium),
                   TextButton(
                     onPressed: () => context.push('/manage-categories'),
-                    child: const Text('Manage'),
+                    child: Text(AppLocalizations.of(context)!.formManage),
                   ),
                 ],
               ),
@@ -423,7 +427,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               ),
                               const SizedBox(width: DesignConstants.spacingXs),
                               Text(
-                                category.name,
+                                getCategoryName(context, category),
                                 style: AppTextStyles.labelSmall.copyWith(
                                   color: isSelected
                                       ? category.color
@@ -441,7 +445,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Account Selection
-              Text('Payment From', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formPaymentFrom, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               Consumer<AccountProvider>(
                 builder: (context, provider, _) {
@@ -463,7 +467,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Date Selection
-              Text('Date', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formDate, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               InkWell(
                 onTap: _selectDate,
@@ -491,13 +495,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Note Field
-              Text('Note (Optional)', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formNoteOptional, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _noteController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  hintText: 'Add a note...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.formAddNoteHint,
                 ),
               ),
               const SizedBox(height: DesignConstants.spacingXl),
@@ -525,7 +529,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           ),
                         )
                       : Text(
-                          _isEditing ? 'Update Expense' : 'Save Expense',
+                          _isEditing ? AppLocalizations.of(context)!.formUpdateExpense : AppLocalizations.of(context)!.formSaveExpense,
                           style: AppTextStyles.button,
                         ),
                 ),

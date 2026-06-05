@@ -7,6 +7,7 @@ import '../../core/constants/design_constants.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/formatting/app_currency.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 import '../providers/budget_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
@@ -167,7 +168,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                                 children: [
                                   Icon(cat.icon, color: cat.color, size: 22),
                                   const SizedBox(width: 8),
-                                  Expanded(child: Text(cat.name, style: AppTextStyles.labelLarge)),
+                                  Expanded(child: Text(getCategoryName(context, cat), style: AppTextStyles.labelLarge)),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -178,7 +179,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                                       controller: _controllers[cat.id],
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       decoration: InputDecoration(
-                                        labelText: 'Limit (${cf.prefix.trim()})',
+                                        labelText: AppLocalizations.of(context)!.budgetsLimitLabel(cf.prefix.trim()),
                                         border: const OutlineInputBorder(),
                                         isDense: true,
                                       ),
@@ -194,7 +195,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                                   color: spent > lim ? AppColors.error : AppColors.primary,
                                 ),
                                 Text(
-                                  'Spent ${cf.format(spent)} / ${cf.format(lim)}',
+                                  AppLocalizations.of(context)!.budgetsSpentProgress(cf.format(spent), cf.format(lim)),
                                   style: AppTextStyles.bodySmall,
                                 ),
                               ],

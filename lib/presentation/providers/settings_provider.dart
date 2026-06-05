@@ -25,10 +25,13 @@ class SettingsProvider extends ChangeNotifier {
   late int _backupReminderMinute;
 
   late bool _iouScreenTipsVisible;
+  String? _languageCode;
 
   ThemeMode get themeMode => _themeMode;
   String get currencyCode => _currencyCode;
   bool get appLockEnabled => _appLockEnabled;
+  String? get languageCode => _languageCode;
+  Locale? get locale => _languageCode != null ? Locale(_languageCode!) : null;
 
   bool get recurringReminderEnabled => _recurringReminderEnabled;
   int get recurringReminderWeekday => _recurringReminderWeekday;
@@ -55,6 +58,7 @@ class SettingsProvider extends ChangeNotifier {
     _backupReminderHour = _prefs.backupReminderHour;
     _backupReminderMinute = _prefs.backupReminderMinute;
     _iouScreenTipsVisible = _prefs.iouScreenTipsVisible;
+    _languageCode = _prefs.languageCode;
   }
 
   Future<void> _rescheduleNotifications() async {
@@ -70,6 +74,12 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setCurrencyCode(String code) async {
     await _prefs.setCurrencyCode(code);
     _currencyCode = code;
+    notifyListeners();
+  }
+
+  Future<void> setLanguageCode(String? code) async {
+    await _prefs.setLanguageCode(code);
+    _languageCode = code;
     notifyListeners();
   }
 

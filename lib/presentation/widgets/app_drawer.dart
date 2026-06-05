@@ -199,8 +199,8 @@ class AppDrawer extends StatelessWidget {
                     if (purchase.adsRemoved) return const SizedBox.shrink();
                     return ListTile(
                       leading: Icon(Icons.block_rounded, color: AppColors.accent),
-                      title: const Text('Remove Ads'),
-                      subtitle: const Text('One-time purchase'),
+                      title: Text(l10n.titleRemoveAds),
+                      subtitle: Text(l10n.drawerRemoveAdsSubtitle),
                       onTap: () => push('/remove-ads'),
                     );
                   },
@@ -259,7 +259,7 @@ class AppDrawer extends StatelessWidget {
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.system_update_rounded),
-                    title: const Text('Check for update'),
+                    title: Text(l10n.drawerCheckUpdate),
                     onTap: () {
                       Navigator.pop(context);
                       AppUpdateService.instance.manualCheckForUpdate(context);
@@ -267,7 +267,7 @@ class AppDrawer extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.star_rate_rounded, color: AppColors.accent),
-                    title: const Text('Rate this app'),
+                    title: Text(l10n.drawerRateApp),
                     onTap: () {
                       Navigator.pop(context);
                       RateAppService.instance.openStoreListing();

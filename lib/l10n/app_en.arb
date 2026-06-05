@@ -86,5 +86,436 @@
   "profileNoDisplayName": "User",
   "profileUserIdLabel": "User ID",
   "profileSignOut": "Sign out",
-  "drawerProfile": "Profile"
+  "drawerProfile": "Profile",
+  "titleAddAccount": "Add Account",
+  "titleAddCategory": "Add Category",
+  "titleEditCategory": "Edit Category",
+  "titleAddExpense": "Add Expense",
+  "titleEditExpense": "Edit Expense",
+  "titleAddIncome": "Add Income",
+  "titleEditIncome": "Edit Income",
+  "titleAddIou": "Add IOU",
+  "titleExpenses": "Expenses",
+  "titleIncomes": "Incomes",
+  "titleManageCategories": "Manage Categories",
+  "titleNotificationSettings": "Notification Settings",
+  "titleAddTemplate": "Add Template",
+  "titleRemoveAds": "Remove Ads",
+  "titleMonthlyReport": "Monthly Report",
+  "titleSelectLanguage": "Select Language",
+  "titleLanguageSettings": "Language Settings",
+  "titleAppSecurityPin": "App Security PIN",
+  "titleSettings": "Settings",
+  "titleTransferHistory": "Transfer History",
+  "titleTransferBalance": "Transfer Balance",
+  "titleIouDetails": "IOU Details",
+  "titleIouDebtTracker": "IOU Debt Tracker",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonSave": "Save",
+  "commonContinue": "Continue",
+  "commonAllow": "Allow",
+  "notifDialogTitle": "Enable Notifications",
+  "notifDialogBody": "Expense Manager requires notification permission to send you daily expense reminders, budget warnings, and pending IOU alerts. This helps you stay on top of your finances.",
+  "drawerRemoveAdsSubtitle": "One-time purchase",
+  "drawerCheckUpdate": "Check for update",
+  "drawerRateApp": "Rate this app",
+  "selectLanguageWelcome": "Welcome to Expense Manager",
+  "selectLanguageInstruction": "Please select your preferred language to continue.",
+  "navHome": "Home",
+  "navIncome": "Income",
+  "navExpenses": "Expenses",
+  "navIous": "IOUs",
+  "navReports": "Reports",
+  "categoryFood": "Food",
+  "categoryTravel": "Travel",
+  "categoryRent": "Rent",
+  "categoryShopping": "Shopping",
+  "categoryOther": "Other",
+  "accountTypeCash": "Cash",
+  "accountTypeBank": "Bank",
+  "udharTypeLent": "Lent (they owe you)",
+  "udharTypeBorrowed": "Borrowed (you owe)",
+  "udharTypeReceivable": "Receivable",
+  "udharTypePayable": "Payable",
+  "udharStatusPending": "Pending",
+  "udharStatusPartial": "Partial",
+  "udharStatusCompleted": "Completed",
+  "frequencyMonthly": "Monthly",
+  "frequencyWeekly": "Weekly",
+  "homeTitle": "Expense Budget Tracker",
+  "homeAccounts": "Accounts",
+  "homeAddAccount": "ADD ACCOUNT",
+  "homeQuickActions": "Quick Actions",
+  "homeThisMonth": "This Month",
+  "homeSpent": "Spent",
+  "homeEarned": "Earned",
+  "homeNetThisMonth": "Net this month",
+  "homeRenameAccount": "Rename Account",
+  "homeAddMoney": "Add Money",
+  "homeAccountName": "Account Name",
+  "homeAccountNameHint": "e.g. HDFC Bank",
+  "homeAddBalanceTo": "Add balance to {accountName}",
+  "@homeAddBalanceTo": {
+    "placeholders": {
+      "accountName": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAmount": "Amount",
+  "settingsAppearance": "Appearance",
+  "settingsSystem": "System",
+  "settingsLight": "Light",
+  "settingsDark": "Dark",
+  "settingsNotificationSubtitle": "Manage all reminders and alerts",
+  "settingsLanguageSubtitle": "Change app display language",
+  "settingsRegionSecurity": "Region & security",
+  "settingsCurrency": "Currency",
+  "settingsRequirePin": "Require PIN",
+  "settingsRequirePinSubtitle": "Locks when returning from background",
+  "settingsChangePin": "Change PIN",
+  "settingsChangePinSubtitle": "Set a new PIN (requires lock enabled)",
+  "settingsTurnOffAppLock": "Turn off app lock?",
+  "settingsTurnOffAppLockConfirm": "PIN will be removed from secure storage.",
+  "settingsTurnOff": "Turn off",
+  "settingsData": "Data",
+  "settingsBackupDescription": "Backup contains accounts, categories, expenses, transfers, incomes, IOUs, and settlements. Restore replaces everything locally.",
+  "settingsExportBackup": "Export backup",
+  "settingsExportBackupSubtitle": "Saves JSON to app folder — copy path or upload via Files/Drive",
+  "settingsExportCsv": "Export CSV (accounts, expenses, incomes)",
+  "settingsExportCsvSubtitle": "Three comma-separated files in app documents",
+  "settingsRestoreBackup": "Restore from backup",
+  "settingsRestoreBackupSubtitle": "Choose your backup file (JSON). Replaces local data",
+  "settingsBackupSaved": "Backup saved",
+  "settingsBackupSavedSubtitle": "File is in app storage. Copy the path below to upload via Files, Google Drive, or share manually.",
+  "settingsCopyPath": "Copy path",
+  "settingsPathCopied": "Path copied to clipboard",
+  "settingsExportFailed": "Export failed: {error}",
+  "@settingsExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreBackupTitle": "Restore backup?",
+  "settingsRestoreBackupConfirm": "This will replace ALL data on this device with the backup file. Current expenses, accounts, IOUs, and incomes will be overwritten. This cannot be undone.",
+  "settingsReplaceData": "Replace data",
+  "settingsFilePickerUnavailable": "File picker unavailable.",
+  "settingsCouldNotReadFile": "Could not read file",
+  "settingsBackupRestored": "Backup restored",
+  "settingsInvalidBackup": "Invalid backup: {error}",
+  "@settingsInvalidBackup": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreFailed": "Restore failed: {error}",
+  "@settingsRestoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsCsvExportSaved": "CSV export saved",
+  "settingsThreeFilesSaved": "Three files in app documents:",
+  "settingsAccountsLabel": "Accounts:",
+  "settingsExpensesLabel": "Expenses:",
+  "settingsIncomesLabel": "Incomes:",
+  "settingsCsvExportFailed": "CSV export failed: {error}",
+  "@settingsCsvExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPurchases": "Purchases",
+  "settingsRestorePurchases": "Restore purchases",
+  "settingsAdsAlreadyRemoved": "Ads already removed",
+  "settingsRecoverAdFree": "Recover your ad-free purchase",
+  "settingsPurchaseRestored": "Purchase restored!",
+  "settingsNoPurchaseFound": "No previous purchase found.",
+  "settingsWorking": "Working…",
+  "listFilters": "Filters",
+  "listDateRange": "Date range",
+  "listAllDates": "All dates",
+  "listThisMonth": "This month",
+  "listLast30Days": "Last 30 days",
+  "listAllCategories": "All categories",
+  "listAllAccounts": "All accounts",
+  "listSortNewest": "Date · newest",
+  "listSortOldest": "Date · oldest",
+  "listSortHigh": "Amount · high",
+  "listSortLow": "Amount · low",
+  "listClearAll": "Clear all",
+  "listApply": "Apply",
+  "listClearFilters": "Clear filters",
+  "listDeleteIncomeTitle": "Delete income",
+  "listDeleteExpenseTitle": "Delete expense",
+  "listDeleteIncomeConfirm": "Are you sure you want to delete this income?",
+  "listDeleteExpenseConfirm": "Are you sure you want to delete this expense?",
+  "listNoIncomesYet": "No incomes yet",
+  "listNoExpensesYet": "No expenses yet",
+  "listTapToRecordIncome": "Tap + to record income",
+  "listTapToRecordExpense": "Tap + to record expense",
+  "listIncomeDeleted": "Income deleted successfully",
+  "listExpenseDeleted": "Expense deleted successfully",
+  "listIncomeDeleteFailed": "Failed to delete income",
+  "listExpenseDeleteFailed": "Failed to delete expense",
+  "formAmount": "Amount",
+  "formEnterAmount": "Please enter amount",
+  "formEnterValidAmount": "Please enter a valid amount",
+  "formAttachReceipt": "Attach receipt",
+  "formRemove": "Remove",
+  "formAttachImageError": "Could not attach image: {error}",
+  "@formAttachImageError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "formSelectAccount": "Please select an account",
+  "formSelectCategory": "Please select a category",
+  "formExpenseUpdated": "Expense updated successfully",
+  "formExpenseAdded": "Expense added successfully",
+  "formExpenseUpdateFailed": "Failed to update expense",
+  "formExpenseAddFailed": "Failed to add expense",
+  "formIncomeUpdated": "Income updated successfully",
+  "formIncomeAdded": "Income added successfully",
+  "formIncomeUpdateFailed": "Failed to update income",
+  "formIncomeAddFailed": "Failed to add income",
+  "formCategory": "Category",
+  "formPaymentFrom": "Payment From",
+  "formDepositTo": "Deposit To",
+  "formDate": "Date",
+  "formNoteOptional": "Note (Optional)",
+  "formAddNoteHint": "Add a note...",
+  "formUpdateExpense": "Update Expense",
+  "formSaveExpense": "Save Expense",
+  "formUpdateIncome": "Update Income",
+  "formSaveIncome": "Save Income",
+  "formDeleteExpenseTitle": "Delete Expense",
+  "formDeleteIncomeTitle": "Delete Income",
+  "formDeleteExpenseConfirm": "Are you sure you want to delete this expense?",
+  "formDeleteIncomeConfirm": "Are you sure you want to delete this income?",
+  "formManage": "Manage",
+  "transferSelectBoth": "Please select both accounts",
+  "transferSameAccount": "Cannot transfer to the same account",
+  "transferSuccess": "Transfer completed successfully",
+  "transferFailed": "Transfer failed",
+  "transferFromAccount": "From Account",
+  "transferToAccount": "To Account",
+  "transferButton": "Transfer",
+  "transferNoTransfersYet": "No transfers yet",
+  "udharLentOn": "Lent on {date}",
+  "@udharLentOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "udharBorrowedOn": "Borrowed on {date}",
+  "@udharBorrowedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "udharSettled": "Settled: {amount}",
+  "@udharSettled": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "udharPersonNameRequired": "Please enter person name",
+  "udharPersonNameLabel": "Person Name",
+  "udharEnterNameHint": "Enter name",
+  "udharMoneyGave": "Money you gave",
+  "udharMoneyTook": "Money you took",
+  "udharSaveIou": "Save IOU",
+  "udharSaved": "IOU saved",
+  "udharAddSettlement": "Add Settlement",
+  "udharIouNotFound": "IOU not found",
+  "udharTotalAmount": "Total Amount",
+  "udharSettledLabel": "Settled",
+  "udharPendingLabel": "Pending",
+  "udharDetailDate": "Date: {date}",
+  "@udharDetailDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "udharDetailNote": "Note: {note}",
+  "@udharDetailNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "udharSettlementHistory": "Settlement History",
+  "udharNoSettlementsYet": "No settlements yet",
+  "reportTotalSpent": "Total spent",
+  "reportTotalEarned": "Total earned",
+  "reportNetForYear": "Net for {year}",
+  "@reportNetForYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "reportIncomeVsExpensesByMonth": "Income vs expenses by month",
+  "reportNoExpenseData": "No expense data",
+  "reportExpensesByCategory": "Expenses by category",
+  "reportIouSummary": "IOU summary",
+  "budgetsLimitLabel": "Limit ({prefix})",
+  "@budgetsLimitLabel": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsSpentProgress": "Spent {spent} / {limit}",
+  "@budgetsSpentProgress": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringPosted": "Posted",
+  "recurringRemoved": "Removed",
+  "recurringEnterValidAmount": "Enter a valid amount",
+  "recurringSelectAccount": "Select an account",
+  "recurringSelectCategory": "Select a category",
+  "recurringEnterIncomeCategoryLabel": "Enter income category label",
+  "recurringCategoryLabelHint": "Category label (e.g. Salary)",
+  "recurringFrequency": "Frequency",
+  "recurringSaving": "Saving…",
+  "recurringSaveTemplate": "Save template",
+  "lockEnterDigits": "Enter at least 4 digits",
+  "lockIncorrectPin": "Incorrect PIN",
+  "lockAppLocked": "App locked",
+  "lockEnterPinToContinue": "Enter your PIN to continue",
+  "lockUnlock": "Unlock",
+  "pinAtLeast4Digits": "PIN must be at least 4 digits",
+  "pinDoNotMatch": "PINs do not match",
+  "pinDescription": "Choose a numeric PIN (stored securely on device). Used when app lock is enabled.",
+  "pinConfirmLabel": "Confirm PIN",
+  "pinSave": "Save PIN",
+  "pinSaving": "Saving…",
+  "pinLabel": "PIN",
+  "adsAdFree": "You're ad-free!",
+  "adsHeroTitle": "Enjoy an ad-free experience",
+  "adsHeroSubtitleActive": "Thank you for your support. All ads have been permanently removed.",
+  "adsHeroSubtitleOffer": "Remove all ads with a single one-time purchase.",
+  "adsWhatYouGet": "What you get",
+  "adsBenefitBanners": "No banner ads",
+  "adsBenefitInterstitials": "No interstitial popups",
+  "adsBenefitAppOpen": "No app-open ads",
+  "adsBenefitNative": "No native ads in lists",
+  "adsBenefitOneTime": "One-time purchase — pay once, forever",
+  "adsRestore": "Restore previous purchase",
+  "adsNoPurchaseFound": "No previous purchase found.",
+  "adsSuccessTitle": "All ads have been removed",
+  "adsSuccessBody": "Your ad-free experience is active. This applies to banners, interstitials, native ads, and app-open ads.",
+  "adsProcessing": "Processing purchase…",
+  "adsRemoveWithPrice": "Remove Ads — {price}",
+  "@adsRemoveWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "adsRemove": "Remove Ads",
+  "adsPurchaseFailed": "Purchase failed.",
+  "listFrom": "From",
+  "listTo": "To",
+  "listAccountLabel": "Account",
+  "listSortLabel": "Sort",
+  "listSearchHint": "Search notes, category, amount…",
+  "listNoIncomeMatches": "No income matches your filters",
+  "listNoIncomeToShow": "No income to show",
+  "listNoExpenseMatches": "No expenses match your filters",
+  "listNoExpenseToShow": "No expenses to show",
+  "listDeleteIncomeConfirmDetail": "Remove this \"{category}\" income entry? If deleting would leave an account balance negative, the delete will be blocked.",
+  "@listDeleteIncomeConfirmDetail": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "listDeleteExpenseConfirmDetail": "Remove this expense from {category}? The amount will be added back to the account.",
+  "@listDeleteExpenseConfirmDetail": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "listDatesRangeSummary": "Dates {a}–{b}",
+  "@listDatesRangeSummary": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "udharToReceive": "To receive",
+  "udharToReceiveSubtitle": "Money owed to you",
+  "udharToPay": "To pay",
+  "udharToPaySubtitle": "Money you owe",
+  "udharOpenIous": "Open IOUs",
+  "formCategoryHint": "e.g. Salary, Freelance, Gift",
+  "formEnterCategory": "Please enter category",
+  "formTypeLabel": "Type",
+  "udharLentLabel": "Lent",
+  "udharBorrowedLabel": "Borrowed",
+  "commonAdd": "Add",
+  "accAddedSuccess": "Account added successfully",
+  "accNameLabel": "Account Name",
+  "accNameHint": "e.g. HDFC Bank, SBI Savings",
+  "accEnterName": "Please enter account name",
+  "accTypeLabel": "Account Type",
+  "accInitialBalance": "Initial Balance",
+  "accEnterInitialBalance": "Please enter initial balance",
+  "accEnterValidAmount": "Please enter a valid amount",
+  "accCreateButton": "Create Account",
+  "catUpdatedSuccess": "Category updated",
+  "catAddedSuccess": "Category added successfully",
+  "catUpdateFailed": "Failed to update category",
+  "catAddFailed": "Failed to add category",
+  "catNameLabel": "Name",
+  "catNameHint": "Category Name",
+  "catEnterName": "Please enter category name",
+  "catIconLabel": "Icon",
+  "catColorLabel": "Color",
+  "catSaveButton": "Save Category",
+  "commonEdit": "Edit",
+  "catNoCategories": "No categories found",
+  "catDeleteConfirmTitle": "Delete category?",
+  "catDeleteBuiltInError": "Built-in categories cannot be deleted.",
+  "catDeleteConfirmBody": "This cannot be undone if no expenses use it."
 }

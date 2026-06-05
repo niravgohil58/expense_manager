@@ -5,6 +5,9 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/text_styles.dart';
 import '../../core/constants/design_constants.dart';
 import '../providers/category_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
+
 
 class ManageCategoriesScreen extends StatefulWidget {
   const ManageCategoriesScreen({super.key});
@@ -32,7 +35,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Manage Categories'),
+        title: Text(AppLocalizations.of(context)!.titleManageCategories),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -56,8 +59,8 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                           constraints: BoxConstraints(
                             minHeight: constraints.maxHeight,
                           ),
-                          child: const Center(
-                            child: Text('No categories found'),
+                          child: Center(
+                            child: Text(AppLocalizations.of(context)!.catNoCategories),
                           ),
                         ),
                       );
@@ -94,13 +97,13 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                             const SizedBox(width: DesignConstants.spacingMd),
                             Expanded(
                               child: Text(
-                                category.name,
+                                getCategoryName(context, category),
                                 style: AppTextStyles.bodyLarge,
                               ),
                             ),
                             Expanded(
                               child: Text(
-                                category.name,
+                                getCategoryName(context, category),
                                 style: AppTextStyles.bodyLarge,
                               ),
                             ),
@@ -125,17 +128,17 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                                     final ok = await showDialog<bool>(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
-                                        title: const Text('Delete category?'),
+                                        title: Text(AppLocalizations.of(context)!.catDeleteConfirmTitle),
                                         content: Text(
                                           category.isSystem
-                                              ? 'Built-in categories cannot be deleted.'
-                                              : 'This cannot be undone if no expenses use it.',
+                                              ? AppLocalizations.of(context)!.catDeleteBuiltInError
+                                              : AppLocalizations.of(context)!.catDeleteConfirmBody,
                                         ),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(ctx, false),
-                                            child: const Text('Cancel'),
+                                            child: Text(AppLocalizations.of(context)!.commonCancel),
                                           ),
                                           TextButton(
                                             onPressed: () =>
@@ -143,7 +146,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                                             style: TextButton.styleFrom(
                                               foregroundColor: AppColors.error,
                                             ),
-                                            child: const Text('Delete'),
+                                            child: Text(AppLocalizations.of(context)!.commonDelete),
                                           ),
                                         ],
                                       ),
@@ -164,14 +167,14 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                                     }
                                   },
                                   itemBuilder: (ctx) => [
-                                    const PopupMenuItem(
+                                    PopupMenuItem(
                                       value: 'edit',
-                                      child: Text('Edit'),
+                                      child: Text(AppLocalizations.of(context)!.commonEdit),
                                     ),
                                     PopupMenuItem(
                                       value: 'delete',
                                       enabled: !category.isSystem,
-                                      child: const Text('Delete'),
+                                      child: Text(AppLocalizations.of(context)!.commonDelete),
                                     ),
                                   ],
                                 ),

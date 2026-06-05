@@ -10,6 +10,8 @@ import '../../data/models/udhar_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
+import '../../l10n/app_localizations.dart';
+
 
 /// Add udhar screen with form
 class AddUdharScreen extends StatefulWidget {
@@ -67,7 +69,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
     if (_selectedAccountId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an account')));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.formSelectAccount)));
       return;
     }
 
@@ -87,8 +89,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('IOU saved'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.udharSaved),
           backgroundColor: AppColors.success,
         ),
       );
@@ -111,7 +113,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Add IOU'),
+        title: Text(AppLocalizations.of(context)!.titleAddIou),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -126,14 +128,14 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Type Selection
-              Text('Type', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formTypeLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               Row(
                 children: [
                   Expanded(
                     child: _TypeButton(
-                      label: 'Lent',
-                      subtitle: 'Money you gave',
+                      label: AppLocalizations.of(context)!.udharLentLabel,
+                      subtitle: AppLocalizations.of(context)!.udharMoneyGave,
                       isSelected: _selectedType == UdharType.dena,
                       color: AppColors.udharDena,
                       onTap: () =>
@@ -143,8 +145,8 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                   const SizedBox(width: DesignConstants.spacingSm),
                   Expanded(
                     child: _TypeButton(
-                      label: 'Borrowed',
-                      subtitle: 'Money you took',
+                      label: AppLocalizations.of(context)!.udharBorrowedLabel,
+                      subtitle: AppLocalizations.of(context)!.udharMoneyTook,
                       isSelected: _selectedType == UdharType.lena,
                       color: AppColors.udharLena,
                       onTap: () =>
@@ -156,18 +158,18 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Person Name
-              Text('Person Name', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.udharPersonNameLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _personNameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  hintText: 'Enter name',
-                  prefixIcon: Icon(Icons.person, color: AppColors.primary),
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.udharEnterNameHint,
+                  prefixIcon: const Icon(Icons.person, color: AppColors.primary),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter person name';
+                    return AppLocalizations.of(context)!.udharPersonNameRequired;
                   }
                   return null;
                 },
@@ -175,7 +177,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Amount
-              Text('Amount', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formAmount, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _amountController,
@@ -192,11 +194,11 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                 style: AppTextStyles.amountMedium,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter amount';
+                    return AppLocalizations.of(context)!.formEnterAmount;
                   }
                   if (double.tryParse(value) == null ||
                       double.parse(value) <= 0) {
-                    return 'Please enter a valid amount';
+                    return AppLocalizations.of(context)!.formEnterValidAmount;
                   }
                   return null;
                 },
@@ -204,7 +206,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Account Selection
-              Text('Account', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.listAccountLabel, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               Consumer<AccountProvider>(
                 builder: (context, provider, _) {
@@ -225,7 +227,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Date
-              Text('Date', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formDate, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               InkWell(
                 onTap: _selectDate,
@@ -253,13 +255,13 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Note
-              Text('Note (Optional)', style: AppTextStyles.labelMedium),
+              Text(AppLocalizations.of(context)!.formNoteOptional, style: AppTextStyles.labelMedium),
               const SizedBox(height: DesignConstants.spacingXs),
               TextFormField(
                 controller: _noteController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  hintText: 'Add a note...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.formAddNoteHint,
                 ),
               ),
               const SizedBox(height: DesignConstants.spacingXl),
@@ -288,7 +290,7 @@ class _AddUdharScreenState extends State<AddUdharScreen> {
                             color: AppColors.textOnPrimary,
                           ),
                         )
-                      : Text('Save IOU', style: AppTextStyles.button),
+                      : Text(AppLocalizations.of(context)!.udharSaveIou, style: AppTextStyles.button),
                 ),
               ),
             ],

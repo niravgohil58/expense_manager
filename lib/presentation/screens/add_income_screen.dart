@@ -12,6 +12,8 @@ import '../../data/models/income_model.dart';
 import '../providers/account_provider.dart';
 import '../providers/income_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 
 /// Add or edit income.
 class AddIncomeScreen extends StatefulWidget {
@@ -96,7 +98,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAccountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an account')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.formSelectAccount)),
       );
       return;
     }
@@ -134,12 +136,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     setState(() => _isLoading = false);
 
     final message = provider.error ??
-        (!_isEditing ? 'Could not add income' : 'Could not update income');
+        (!_isEditing ? AppLocalizations.of(context)!.formIncomeAddFailed : AppLocalizations.of(context)!.formIncomeUpdateFailed);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(ok
-            ? (_isEditing ? 'Income updated' : 'Income added successfully')
+            ? (_isEditing ? AppLocalizations.of(context)!.formIncomeUpdated : AppLocalizations.of(context)!.formIncomeAdded)
             : message),
         backgroundColor:
             ok ? AppColors.success : AppColors.error,
@@ -156,19 +158,19 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete income'),
-        content: const Text(
-          'This removes the income and adjusts the selected account balance. Continue?',
+        title: Text(AppLocalizations.of(context)!.formDeleteIncomeTitle),
+        content: Text(
+          AppLocalizations.of(context)!.formDeleteIncomeConfirm,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.commonDelete),
           ),
         ],
       ),
@@ -186,7 +188,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ok ? 'Income deleted' : (err ?? 'Could not delete income'),
+          ok ? AppLocalizations.of(context)!.listIncomeDeleted : (err ?? AppLocalizations.of(context)!.listIncomeDeleteFailed),
         ),
         backgroundColor: ok ? AppColors.success : AppColors.error,
       ),
@@ -202,7 +204,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Income' : 'Add Income'),
+        title: Text(_isEditing
+            ? AppLocalizations.of(context)!.titleEditIncome
+            : AppLocalizations.of(context)!.titleAddIncome),
         backgroundColor: AppColors.success,
         foregroundColor: Colors.white,
         actions: [
@@ -238,18 +242,18 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                     ),
                   ],
                   decoration: InputDecoration(
-                    labelText: 'Amount',
+                    labelText: AppLocalizations.of(context)!.formAmount,
                     prefixText: cf.prefix,
                     border: const OutlineInputBorder(),
                   ),
                   style: AppTextStyles.amountLarge,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter amount';
+                      return AppLocalizations.of(context)!.formEnterAmount;
                     }
                     if (double.tryParse(value) == null ||
                         double.parse(value) <= 0) {
-                      return 'Please enter valid amount';
+                      return AppLocalizations.of(context)!.formEnterValidAmount;
                     }
                     return null;
                   },
@@ -258,23 +262,23 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                 TextFormField(
                   controller: _categoryController,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    hintText: 'e.g. Salary, Freelance, Gift',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.formCategory,
+                    hintText: AppLocalizations.of(context)!.formCategoryHint,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter category';
+                      return AppLocalizations.of(context)!.formEnterCategory;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: DesignConstants.spacingMd),
                 InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Account',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.listAccountLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
@@ -284,12 +288,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   .any((a) => a.id == _selectedAccountId)
                           ? _selectedAccountId
                           : null,
-                      hint: const Text('Select account'),
+                      hint: Text(AppLocalizations.of(context)!.formSelectAccount),
                       items: accountProvider.accounts.map((account) {
                         return DropdownMenuItem(
                           value: account.id,
                           child: Text(
-                            '${account.name} (${account.type.displayName})',
+                            '${account.name} (${getAccountTypeDisplayName(context, account.type)})',
                           ),
                         );
                       }).toList(),
@@ -305,10 +309,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                 InkWell(
                   onTap: _isLoading ? null : () => _selectDate(context),
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Date',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.calendar_today),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.formDate,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: const Icon(Icons.calendar_today),
                     ),
                     child: Text(
                       DateFormat('dd MMM yyyy').format(_selectedDate),
@@ -319,9 +323,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                 TextFormField(
                   controller: _noteController,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Note (Optional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.formNoteOptional,
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 2,
                 ),
@@ -339,7 +343,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       ),
                     ),
                     child: Text(
-                      _isEditing ? 'UPDATE INCOME' : 'SAVE INCOME',
+                      _isEditing ? AppLocalizations.of(context)!.formUpdateIncome.toUpperCase() : AppLocalizations.of(context)!.formSaveIncome.toUpperCase(),
                       style: AppTextStyles.button,
                     ),
                   ),

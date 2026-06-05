@@ -9,6 +9,7 @@ import '../../core/constants/design_constants.dart';
 import '../../core/formatting/app_currency.dart';
 import '../../data/models/category_model.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 import '../providers/account_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/income_provider.dart';
@@ -164,7 +165,7 @@ class _ReportScreenState extends State<ReportScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: DrawerHost.menuButton(context),
-        title: const Text('Reports'),
+        title: Text(AppLocalizations.of(context)!.titleMonthlyReport),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -262,7 +263,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                           CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
-                                          'Total spent',
+                                          AppLocalizations.of(context)!.reportTotalSpent,
                                           style: AppTextStyles.labelSmall,
                                         ),
                                         _reportYearMoneyLine(
@@ -291,7 +292,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                           CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
-                                          'Total earned',
+                                          AppLocalizations.of(context)!.reportTotalEarned,
                                           style: AppTextStyles.labelSmall,
                                         ),
                                         _reportYearMoneyLine(
@@ -315,7 +316,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                 Expanded(
                                   flex: 2,
                                   child: Text(
-                                    'Net for $_selectedYear',
+                                    AppLocalizations.of(context)!.reportNetForYear('$_selectedYear'),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTextStyles.labelMedium.copyWith(
@@ -345,7 +346,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
                   // Monthly comparison chart
                   Text(
-                    'Income vs expenses by month',
+                    AppLocalizations.of(context)!.reportIncomeVsExpensesByMonth,
                     style: AppTextStyles.heading4,
                   ),
                   const SizedBox(height: DesignConstants.spacingSm),
@@ -369,12 +370,12 @@ class _ReportScreenState extends State<ReportScreen> {
                           children: [
                             _reportLegendChip(
                               color: AppColors.expense,
-                              label: 'Spent',
+                              label: AppLocalizations.of(context)!.homeSpent,
                             ),
                             const SizedBox(width: DesignConstants.spacingMd),
                             _reportLegendChip(
                               color: AppColors.success,
-                              label: 'Earned',
+                              label: AppLocalizations.of(context)!.homeEarned,
                             ),
                           ],
                         ),
@@ -420,8 +421,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   const SizedBox(height: DesignConstants.spacingLg),
 
-                  // Category Pie Chart (expenses only)
-                  Text('Expenses by category', style: AppTextStyles.heading4),
+                  Text(AppLocalizations.of(context)!.reportExpensesByCategory, style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Container(
                     padding: DesignConstants.paddingMd,
@@ -431,10 +431,10 @@ class _ReportScreenState extends State<ReportScreen> {
                       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                     ),
                     child: _categoryData.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Padding(
-                              padding: EdgeInsets.all(32),
-                              child: Text('No expense data'),
+                              padding: const EdgeInsets.all(32),
+                              child: Text(AppLocalizations.of(context)!.reportNoExpenseData),
                             ),
                           )
                         : Column(
@@ -451,7 +451,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   const SizedBox(height: DesignConstants.spacingLg),
 
                   // IOU summary
-                  Text('IOU summary', style: AppTextStyles.heading4),
+                  Text(AppLocalizations.of(context)!.reportIouSummary, style: AppTextStyles.heading4),
                   const SizedBox(height: DesignConstants.spacingSm),
                   Consumer<UdharProvider>(
                     builder: (context, provider, _) {
@@ -468,7 +468,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                 children: [
                                   Icon(Icons.arrow_downward,
                                       color: AppColors.udharDena),
-                                  Text('To receive', style: AppTextStyles.labelSmall),
+                                  Text(AppLocalizations.of(context)!.udharToReceive, style: AppTextStyles.labelSmall),
                                   Text(
                                     formatter.format(provider.totalPendingDena),
                                     style: AppTextStyles.amountSmall.copyWith(
@@ -491,7 +491,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                 children: [
                                   Icon(Icons.arrow_upward,
                                       color: AppColors.udharLena),
-                                  Text('To pay', style: AppTextStyles.labelSmall),
+                                  Text(AppLocalizations.of(context)!.udharToPay, style: AppTextStyles.labelSmall),
                                   Text(
                                     formatter.format(provider.totalPendingLena),
                                     style: AppTextStyles.amountSmall.copyWith(
@@ -662,7 +662,7 @@ class _ReportScreenState extends State<ReportScreen> {
             ),
             const SizedBox(width: DesignConstants.spacingXs),
             Text(
-              '${entry.key.name}: ${formatter.format(entry.value)}',
+              '${getCategoryName(context, entry.key)}: ${formatter.format(entry.value)}',
               style: AppTextStyles.bodySmall,
             ),
           ],

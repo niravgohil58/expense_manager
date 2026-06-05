@@ -12,6 +12,7 @@ class AppPreferences {
   static const String keyAppLockEnabled = 'app_lock_enabled';
   static const String keyOnboardingCompleted = 'onboarding_completed';
   static const String keyPrefsSchema = 'prefs_schema_v4';
+  static const String keyLanguageCode = 'app_language_code';
 
   /// Local weekly reminders (flutter_local_notifications).
   static const String keyRecurringReminderEnabled = 'reminder_recurring_enabled';
@@ -135,6 +136,16 @@ class AppPreferences {
 
   Future<void> setCurrencyCode(String code) async {
     await _prefs.setString(keyCurrencyCode, code);
+  }
+
+  String? get languageCode => _prefs.getString(keyLanguageCode);
+
+  Future<void> setLanguageCode(String? code) async {
+    if (code == null) {
+      await _prefs.remove(keyLanguageCode);
+    } else {
+      await _prefs.setString(keyLanguageCode, code);
+    }
   }
 
   bool get appLockEnabled => _prefs.getBool(keyAppLockEnabled) ?? false;

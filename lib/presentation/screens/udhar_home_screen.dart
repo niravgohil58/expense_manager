@@ -12,6 +12,7 @@ import '../providers/account_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/udhar_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/localization/l10n_helpers.dart';
 import '../widgets/drawer_host.dart';
 
 /// Udhar home screen with summary and list
@@ -44,7 +45,7 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: DrawerHost.menuButton(context),
-        title: const Text('IOUs'),
+        title: Text(AppLocalizations.of(context)!.titleIouDebtTracker),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -98,28 +99,28 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
                           },
                         ),
                         Row(
-                          children: [
-                            Expanded(
-                              child: _SummaryCard(
-                                title: 'To receive',
-                                subtitle: 'Money owed to you',
-                                amount: provider.totalPendingDena,
-                                color: AppColors.udharDena,
-                                icon: Icons.arrow_downward,
-                              ),
-                            ),
-                            const SizedBox(width: DesignConstants.spacingMd),
-                            Expanded(
-                              child: _SummaryCard(
-                                title: 'To pay',
-                                subtitle: 'Money you owe',
-                                amount: provider.totalPendingLena,
-                                color: AppColors.udharLena,
-                                icon: Icons.arrow_upward,
-                              ),
-                            ),
-                          ],
-                        ),
+                           children: [
+                             Expanded(
+                               child: _SummaryCard(
+                                 title: AppLocalizations.of(context)!.udharToReceive,
+                                 subtitle: AppLocalizations.of(context)!.udharToReceiveSubtitle,
+                                 amount: provider.totalPendingDena,
+                                 color: AppColors.udharDena,
+                                 icon: Icons.arrow_downward,
+                               ),
+                             ),
+                             const SizedBox(width: DesignConstants.spacingMd),
+                             Expanded(
+                               child: _SummaryCard(
+                                 title: AppLocalizations.of(context)!.udharToPay,
+                                 subtitle: AppLocalizations.of(context)!.udharToPaySubtitle,
+                                 amount: provider.totalPendingLena,
+                                 color: AppColors.udharLena,
+                                 icon: Icons.arrow_upward,
+                               ),
+                             ),
+                           ],
+                         ),
                         const SizedBox(height: DesignConstants.spacingLg),
                         if (provider.pendingUdhar.isEmpty)
                           Builder(
@@ -165,11 +166,11 @@ class _UdharHomeScreenState extends State<UdharHomeScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Open IOUs',
-                                style: AppTextStyles.heading4,
-                              ),
-                              const SizedBox(height: DesignConstants.spacingSm),
+                               Text(
+                                 AppLocalizations.of(context)!.udharOpenIous,
+                                 style: AppTextStyles.heading4,
+                               ),
+                               const SizedBox(height: DesignConstants.spacingSm),
                               ...provider.pendingUdhar.map((udhar) {
                                 return Padding(
                                   padding: const EdgeInsets.only(
@@ -388,12 +389,14 @@ class _UdharCard extends StatelessWidget {
                 children: [
                   Text(udhar.personName, style: AppTextStyles.labelMedium),
                   Text(
-                    '${isDena ? 'Lent' : 'Borrowed'} on ${dateFormatter.format(udhar.date)}',
+                    isDena
+                        ? AppLocalizations.of(context)!.udharLentOn(dateFormatter.format(udhar.date))
+                        : AppLocalizations.of(context)!.udharBorrowedOn(dateFormatter.format(udhar.date)),
                     style: AppTextStyles.caption,
                   ),
                   if (udhar.paidAmount > 0)
                     Text(
-                      'Settled: ${formatter.format(udhar.paidAmount)}',
+                      AppLocalizations.of(context)!.udharSettled(formatter.format(udhar.paidAmount)),
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.success,
                       ),
@@ -418,7 +421,7 @@ class _UdharCard extends StatelessWidget {
                     borderRadius: DesignConstants.borderRadiusXs,
                   ),
                   child: Text(
-                    udhar.type.shortName,
+                    getUdharTypeShortName(context, udhar.type),
                     style: AppTextStyles.caption.copyWith(
                       color: color,
                       fontWeight: FontWeight.w600,
