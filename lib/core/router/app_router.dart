@@ -41,8 +41,10 @@ import '../../presentation/widgets/bottom_nav_shell.dart';
 class AppRouter {
   AppRouter._();
 
-  static final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> rootNavigatorKey =
+      GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> shellNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   static GoRouter? _router;
 
@@ -71,13 +73,15 @@ class AppRouter {
           return null;
         }
 
-        if (!authProvider.firebaseAuthEnabled) {
-          if (!prefs.onboardingCompleted &&
-              loc != '/onboarding' &&
-              loc != '/terms' &&
-              loc != '/privacy') {
+        // Force Onboarding before Login
+        if (!prefs.onboardingCompleted) {
+          if (loc != '/onboarding' && loc != '/terms' && loc != '/privacy') {
             return '/onboarding';
           }
+          return null;
+        }
+
+        if (!authProvider.firebaseAuthEnabled) {
           return null;
         }
 
@@ -90,14 +94,7 @@ class AppRouter {
         }
 
         if (loggedIn && loc == '/login') {
-          return prefs.onboardingCompleted ? '/home' : '/onboarding';
-        }
-
-        if (!prefs.onboardingCompleted &&
-            loc != '/onboarding' &&
-            loc != '/terms' &&
-            loc != '/privacy') {
-          return '/onboarding';
+          return '/home';
         }
 
         return null;
@@ -131,9 +128,8 @@ class AppRouter {
         GoRoute(
           path: '/select-language',
           parentNavigatorKey: rootNavigatorKey,
-          builder: (context, state) => SelectLanguageScreen(
-            isFirstTime: prefs.languageCode == null,
-          ),
+          builder: (context, state) =>
+              SelectLanguageScreen(isFirstTime: prefs.languageCode == null),
         ),
         GoRoute(
           path: '/login',
@@ -182,37 +178,32 @@ class AppRouter {
             GoRoute(
               path: '/home',
               name: 'home',
-              pageBuilder: (context, state) => const NoTransitionPage(
-                child: HomeScreen(),
-              ),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: HomeScreen()),
             ),
             GoRoute(
               path: '/income',
               name: 'income',
-              pageBuilder: (context, state) => const NoTransitionPage(
-                child: IncomeListScreen(),
-              ),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: IncomeListScreen()),
             ),
             GoRoute(
               path: '/expenses',
               name: 'expenses',
-              pageBuilder: (context, state) => const NoTransitionPage(
-                child: ExpenseListScreen(),
-              ),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: ExpenseListScreen()),
             ),
             GoRoute(
               path: '/udhar',
               name: 'udhar',
-              pageBuilder: (context, state) => const NoTransitionPage(
-                child: UdharHomeScreen(),
-              ),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: UdharHomeScreen()),
             ),
             GoRoute(
               path: '/reports',
               name: 'reports',
-              pageBuilder: (context, state) => const NoTransitionPage(
-                child: ReportScreen(),
-              ),
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: ReportScreen()),
             ),
           ],
         ),

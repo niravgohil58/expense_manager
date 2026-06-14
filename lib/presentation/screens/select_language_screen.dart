@@ -8,14 +8,10 @@ import '../../core/constants/text_styles.dart';
 import '../providers/settings_provider.dart';
 import '../../l10n/app_localizations.dart';
 
-
 class SelectLanguageScreen extends StatefulWidget {
   final bool isFirstTime;
 
-  const SelectLanguageScreen({
-    super.key,
-    this.isFirstTime = false,
-  });
+  const SelectLanguageScreen({super.key, this.isFirstTime = false});
 
   @override
   State<SelectLanguageScreen> createState() => _SelectLanguageScreenState();
@@ -33,7 +29,12 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
     {'code': 'te', 'name': 'Telugu', 'native': 'తెలుగు', 'flag': '🇮🇳'},
     {'code': 'es', 'name': 'Spanish', 'native': 'Español', 'flag': '🇪🇸'},
     {'code': 'pt', 'name': 'Portuguese', 'native': 'Português', 'flag': '🇧🇷'},
-    {'code': 'id', 'name': 'Indonesian', 'native': 'Bahasa Indonesia', 'flag': '🇮🇩'},
+    {
+      'code': 'id',
+      'name': 'Indonesian',
+      'native': 'Bahasa Indonesia',
+      'flag': '🇮🇩',
+    },
     {'code': 'de', 'name': 'German', 'native': 'Deutsch', 'flag': '🇩🇪'},
     {'code': 'fr', 'name': 'French', 'native': 'Français', 'flag': '🇫🇷'},
   ];
@@ -53,12 +54,19 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
     context.read<SettingsProvider>().setLanguageCode(code);
   }
 
-  void _onContinue() {
+  void _onContinue() async {
     if (_selectedLanguageCode != null) {
-      if (widget.isFirstTime) {
-        context.go('/home'); // GoRouter redirect will send to onboarding or login
-      } else {
-        context.pop();
+      await context.read<SettingsProvider>().setLanguageCode(
+        _selectedLanguageCode,
+      );
+      if (mounted) {
+        if (widget.isFirstTime) {
+          context.go(
+            '/home',
+          ); // GoRouter redirect will send to onboarding or login
+        } else {
+          context.pop();
+        }
       }
     }
   }
@@ -70,9 +78,11 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
     return Scaffold(
       backgroundColor: scheme.surface,
       appBar: AppBar(
-        title: Text(widget.isFirstTime
-            ? AppLocalizations.of(context)!.titleSelectLanguage
-            : AppLocalizations.of(context)!.titleLanguageSettings),
+        title: Text(
+          widget.isFirstTime
+              ? AppLocalizations.of(context)!.titleSelectLanguage
+              : AppLocalizations.of(context)!.titleLanguageSettings,
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -119,7 +129,8 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                   vertical: DesignConstants.spacingSm,
                 ),
                 itemCount: _languages.length,
-                separatorBuilder: (_, __) => const SizedBox(height: DesignConstants.spacingXs),
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: DesignConstants.spacingXs),
                 itemBuilder: (context, index) {
                   final lang = _languages[index];
                   final code = lang['code']!;
@@ -130,7 +141,9 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: DesignConstants.borderRadiusMd,
                       side: BorderSide(
-                        color: isSelected ? scheme.primary : scheme.outlineVariant,
+                        color: isSelected
+                            ? scheme.primary
+                            : scheme.outlineVariant,
                         width: isSelected ? 2.0 : 1.0,
                       ),
                     ),
@@ -150,7 +163,9 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                         lang['native']!,
                         style: AppTextStyles.labelLarge.copyWith(
                           color: isSelected ? scheme.primary : scheme.onSurface,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                         ),
                       ),
                       subtitle: Text(
@@ -175,7 +190,10 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textOnPrimary,
-                  minimumSize: const Size(double.infinity, DesignConstants.buttonHeightMd),
+                  minimumSize: const Size(
+                    double.infinity,
+                    DesignConstants.buttonHeightMd,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: DesignConstants.borderRadiusMd,
                   ),

@@ -18,7 +18,9 @@ void main() {
   });
 
   testWidgets('first launch shows onboarding when not completed', (WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      'app_language_code': 'en',
+    });
     final prefs = await SharedPreferences.getInstance();
     await AppPreferences.migrateInstallPrefs(prefs);
 
