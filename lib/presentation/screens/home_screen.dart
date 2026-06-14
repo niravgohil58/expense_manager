@@ -17,6 +17,7 @@ import '../providers/income_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/drawer_host.dart';
 import '../widgets/notification_permission_dialog.dart';
+import '../widgets/voice_assistant_sheet.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/localization/l10n_helpers.dart';
 
@@ -113,7 +114,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(AppLocalizations.of(context)!.homeAccounts, style: AppTextStyles.heading4),
+                  Text(
+                    AppLocalizations.of(context)!.homeAccounts,
+                    style: AppTextStyles.heading4,
+                  ),
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
@@ -121,8 +125,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: TextButton.icon(
                       onPressed: () => context.push('/add-account'),
-                      icon: const Icon(Icons.add_circle, color: AppColors.primary),
-                      label: Text(AppLocalizations.of(context)!.homeAddAccount, style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                      icon: const Icon(
+                        Icons.add_circle,
+                        color: AppColors.primary,
+                      ),
+                      label: Text(
+                        AppLocalizations.of(context)!.homeAddAccount,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -132,18 +145,31 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
 
               // Quick Actions
-              Text(AppLocalizations.of(context)!.homeQuickActions, style: AppTextStyles.heading4),
+              Text(
+                AppLocalizations.of(context)!.homeQuickActions,
+                style: AppTextStyles.heading4,
+              ),
               const SizedBox(height: DesignConstants.spacingSm),
               _buildQuickActions(),
               const SizedBox(height: DesignConstants.spacingLg),
 
               // This Month Summary
-              Text(AppLocalizations.of(context)!.homeThisMonth, style: AppTextStyles.heading4),
+              Text(
+                AppLocalizations.of(context)!.homeThisMonth,
+                style: AppTextStyles.heading4,
+              ),
               const SizedBox(height: DesignConstants.spacingSm),
               _buildMonthSummary(),
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => VoiceAssistantSheet.show(context),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textOnPrimary,
+        tooltip: 'Voice Assistant',
+        child: const Icon(Icons.mic_rounded),
       ),
     );
   }
@@ -151,8 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTotalBalanceCard() {
     return Consumer2<AccountProvider, SettingsProvider>(
       builder: (context, provider, settings, _) {
-        final formatter =
-            AppCurrencyFormat(settings.currencyCode).formatter();
+        final formatter = AppCurrencyFormat(settings.currencyCode).formatter();
 
         return Container(
           width: double.infinity,
@@ -302,8 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMonthSummary() {
     return Consumer3<ExpenseProvider, IncomeProvider, SettingsProvider>(
       builder: (context, expense, income, settings, _) {
-        final formatter =
-            AppCurrencyFormat(settings.currencyCode).formatter();
+        final formatter = AppCurrencyFormat(settings.currencyCode).formatter();
 
         final spent = expense.currentMonthTotal;
         final earned = income.currentMonthTotal;
@@ -315,7 +339,9 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: DesignConstants.borderRadiusMd,
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -350,11 +376,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.homeSpent,
-                                      style: AppTextStyles.labelSmall,
-                                    ),
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)!.homeSpent,
+                                    style: AppTextStyles.labelSmall,
+                                  ),
                                   _monthSummaryMoneyLine(
                                     formatter.format(spent),
                                     AppTextStyles.amountMedium.copyWith(
@@ -388,8 +414,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             Container(
                               padding: DesignConstants.paddingSm,
                               decoration: BoxDecoration(
-                                color:
-                                    AppColors.success.withValues(alpha: 0.12),
+                                color: AppColors.success.withValues(
+                                  alpha: 0.12,
+                                ),
                                 borderRadius: DesignConstants.borderRadiusSm,
                               ),
                               child: Icon(
@@ -402,11 +429,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.homeEarned,
-                                      style: AppTextStyles.labelSmall,
-                                    ),
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)!.homeEarned,
+                                    style: AppTextStyles.labelSmall,
+                                  ),
                                   _monthSummaryMoneyLine(
                                     formatter.format(earned),
                                     AppTextStyles.amountMedium.copyWith(
@@ -424,7 +451,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: DesignConstants.spacingSm),
-              Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+              Divider(
+                height: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
               const SizedBox(height: DesignConstants.spacingXs),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -443,8 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: _monthSummaryMoneyLineTrailing(
                       '${net >= 0 ? '+' : ''}${formatter.format(net)}',
                       AppTextStyles.amountSmall.copyWith(
-                        color:
-                            net >= 0 ? AppColors.income : AppColors.expense,
+                        color: net >= 0 ? AppColors.income : AppColors.expense,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -471,12 +500,14 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ListTile(
                 title: Text(account.name, style: AppTextStyles.heading4),
-                subtitle: Text(getAccountTypeDisplayName(context, account.type)),
+                subtitle: Text(
+                  getAccountTypeDisplayName(context, account.type),
+                ),
                 trailing: Consumer<SettingsProvider>(
                   builder: (context, settings, _) => Text(
-                    AppCurrencyFormat(settings.currencyCode)
-                        .formatter()
-                        .format(account.balance),
+                    AppCurrencyFormat(
+                      settings.currencyCode,
+                    ).formatter().format(account.balance),
                     style: AppTextStyles.amountMedium,
                   ),
                 ),
@@ -531,9 +562,9 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 if (controller.text.trim().isNotEmpty) {
                   await context.read<AccountProvider>().renameAccount(
-                        account.id,
-                        controller.text.trim(),
-                      );
+                    account.id,
+                    controller.text.trim(),
+                  );
                   if (context.mounted) Navigator.pop(context);
                 }
               },
@@ -560,7 +591,9 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -583,9 +616,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 final amount = double.tryParse(controller.text);
                 if (amount != null && amount > 0) {
                   await context.read<AccountProvider>().addToBalance(
-                        account.id,
-                        amount,
-                      );
+                    account.id,
+                    amount,
+                  );
                   if (context.mounted) Navigator.pop(context);
                 }
               },
@@ -611,8 +644,7 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter =
-        AppCurrencyFormat(currencyCode).formatter();
+    final formatter = AppCurrencyFormat(currencyCode).formatter();
 
     final isCash = account.type == AccountType.cash;
     final color = isCash ? AppColors.cash : AppColors.bank;
@@ -626,20 +658,22 @@ class _AccountCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: DesignConstants.borderRadiusMd,
-          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
         ),
         child: Row(
           children: [
-          Container(
-            padding: DesignConstants.paddingSm,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: DesignConstants.borderRadiusSm,
+            Container(
+              padding: DesignConstants.paddingSm,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: DesignConstants.borderRadiusSm,
+              ),
+              child: Icon(icon, color: color),
             ),
-            child: Icon(icon, color: color),
-          ),
-          const SizedBox(width: DesignConstants.spacingMd),
-          Expanded(
+            const SizedBox(width: DesignConstants.spacingMd),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -650,17 +684,19 @@ class _AccountCard extends StatelessWidget {
                   ),
                 ],
               ),
-          ),
-          Text(
-            formatter.format(account.balance),
-            style: AppTextStyles.amountSmall.copyWith(
-              color: account.balance >= 0 ? AppColors.income : AppColors.expense,
             ),
-          ),
-
-        ],
+            Text(
+              formatter.format(account.balance),
+              style: AppTextStyles.amountSmall.copyWith(
+                color: account.balance >= 0
+                    ? AppColors.income
+                    : AppColors.expense,
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 

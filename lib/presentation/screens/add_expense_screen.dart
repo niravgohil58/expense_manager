@@ -28,8 +28,19 @@ import '../../data/models/category_model.dart';
 /// Add expense screen with form
 class AddExpenseScreen extends StatefulWidget {
   final Expense? expense;
+  final double? preFilledAmount;
+  final Category? preFilledCategory;
+  final String? preFilledAccountId;
+  final String? preFilledNote;
 
-  const AddExpenseScreen({super.key, this.expense});
+  const AddExpenseScreen({
+    super.key,
+    this.expense,
+    this.preFilledAmount,
+    this.preFilledCategory,
+    this.preFilledAccountId,
+    this.preFilledNote,
+  });
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -51,11 +62,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    final initialAmount = widget.expense?.amount ?? widget.preFilledAmount;
     _amountController = TextEditingController(
-      text: widget.expense?.amount.toString(),
+      text: initialAmount != null ? initialAmount.toString() : '',
     );
-    _noteController = TextEditingController(text: widget.expense?.note);
-    _selectedCategory = widget.expense?.category;
+    _noteController = TextEditingController(
+      text: widget.expense?.note ?? widget.preFilledNote ?? '',
+    );
+    _selectedCategory = widget.expense?.category ?? widget.preFilledCategory;
     _selectedDate = widget.expense?.date ?? DateTime.now();
     _receiptPath = widget.expense?.attachmentPath;
 
@@ -67,6 +81,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       if (widget.expense != null) {
         setState(() {
           _selectedAccountId = widget.expense!.accountId;
+        });
+      } else if (widget.preFilledAccountId != null) {
+        setState(() {
+          _selectedAccountId = widget.preFilledAccountId;
         });
       } else if (accounts.isNotEmpty) {
         setState(() {
@@ -98,7 +116,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.formAttachImageError(e.toString()))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.formAttachImageError(e.toString()),
+          ),
+        ),
       );
     }
   }
@@ -120,15 +142,19 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Future<void> _saveExpense() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAccountId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.formSelectAccount)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.formSelectAccount),
+        ),
+      );
       return;
     }
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.formSelectCategory)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.formSelectCategory),
+        ),
+      );
       return;
     }
 
@@ -146,8 +172,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           date: _selectedDate,
           note: _noteController.text.isNotEmpty ? _noteController.text : null,
           attachmentPath: _receiptPath,
-          clearAttachmentPath: _receiptPath == null &&
-              widget.expense!.attachmentPath != null,
+          clearAttachmentPath:
+              _receiptPath == null && widget.expense!.attachmentPath != null,
         ),
       );
     } else {
@@ -179,8 +205,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       if (!mounted) return;
       // Auto-prompt for Play Store review after N saves (Android only, once)
       if (!_isEditing) {
-        final shouldPrompt =
-            await RateAppService.instance.incrementAndCheckAutoPrompt();
+        final shouldPrompt = await RateAppService.instance
+            .incrementAndCheckAutoPrompt();
         if (shouldPrompt && mounted) {
           await RateAppService.instance.requestInAppReview();
         }
@@ -260,9 +286,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(_isEditing
-            ? AppLocalizations.of(context)!.titleEditExpense
-            : AppLocalizations.of(context)!.titleAddExpense),
+        title: Text(
+          _isEditing
+              ? AppLocalizations.of(context)!.titleEditExpense
+              : AppLocalizations.of(context)!.titleAddExpense,
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
@@ -277,267 +305,298 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       body: SafeArea(
         top: false,
         child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: DesignConstants.screenPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Amount Field
-              Text(AppLocalizations.of(context)!.formAmount, style: AppTextStyles.labelMedium),
-              const SizedBox(height: DesignConstants.spacingXs),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: DesignConstants.screenPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Amount Field
+                Text(
+                  AppLocalizations.of(context)!.formAmount,
+                  style: AppTextStyles.labelMedium,
                 ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                ],
-                decoration: InputDecoration(
-                  prefixText: cf.prefix,
-                  hintText: '0.00',
-                ),
-                style: AppTextStyles.amountMedium,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.formEnterAmount;
-                  }
-                  if (double.tryParse(value) == null ||
-                      double.parse(value) <= 0) {
-                    return AppLocalizations.of(context)!.formEnterValidAmount;
-                  }
-                  return null;
-                },
-              ),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: _pickReceipt,
-                    icon: const Icon(Icons.photo_camera_outlined),
-                    label: Text(AppLocalizations.of(context)!.formAttachReceipt),
+                const SizedBox(height: DesignConstants.spacingXs),
+                TextFormField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  if (_receiptPath != null)
-                    TextButton(
-                      onPressed: () => setState(() => _receiptPath = null),
-                      child: Text(AppLocalizations.of(context)!.formRemove),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d+\.?\d{0,2}'),
                     ),
+                  ],
+                  decoration: InputDecoration(
+                    prefixText: cf.prefix,
+                    hintText: '0.00',
+                  ),
+                  style: AppTextStyles.amountMedium,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return AppLocalizations.of(context)!.formEnterAmount;
+                    }
+                    if (double.tryParse(value) == null ||
+                        double.parse(value) <= 0) {
+                      return AppLocalizations.of(context)!.formEnterValidAmount;
+                    }
+                    return null;
+                  },
+                ),
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _pickReceipt,
+                      icon: const Icon(Icons.photo_camera_outlined),
+                      label: Text(
+                        AppLocalizations.of(context)!.formAttachReceipt,
+                      ),
+                    ),
+                    if (_receiptPath != null)
+                      TextButton(
+                        onPressed: () => setState(() => _receiptPath = null),
+                        child: Text(AppLocalizations.of(context)!.formRemove),
+                      ),
+                  ],
+                ),
+                if (_receiptPath != null) ...[
+                  const SizedBox(height: DesignConstants.spacingSm),
+                  ClipRRect(
+                    borderRadius: DesignConstants.borderRadiusMd,
+                    child: Image.file(
+                      File(_receiptPath!),
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ],
-              ),
-              if (_receiptPath != null) ...[
-                const SizedBox(height: DesignConstants.spacingSm),
-                ClipRRect(
+                const SizedBox(height: DesignConstants.spacingLg),
+
+                // Category Selection
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.formCategory,
+                      style: AppTextStyles.labelMedium,
+                    ),
+                    TextButton(
+                      onPressed: () => context.push('/manage-categories'),
+                      child: Text(AppLocalizations.of(context)!.formManage),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: DesignConstants.spacingXs),
+                Consumer<CategoryProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    // Use enabled categories, or if editing and current category is disabled, include it
+                    final categories = provider.enabledCategories;
+                    if (_isEditing &&
+                        _selectedCategory != null &&
+                        !categories.contains(_selectedCategory)) {
+                      // Ensure the currently selected category is visible even if disabled
+                      // Note: This check relies on object equality or ID equality.
+                      // Since we load fresh categories, the object instance might be different.
+                      // We should match by ID.
+                    }
+
+                    // Helper to check if category is in list
+                    bool containsCategory(List<Category> list, Category? c) {
+                      if (c == null) return false;
+                      return list.any((element) => element.id == c.id);
+                    }
+
+                    // Verify specific selected category is in the list
+                    if (_selectedCategory != null &&
+                        !containsCategory(categories, _selectedCategory)) {
+                      // It's hidden/disabled or custom.
+                      // We need to display it as selected.
+                      // If the provider list doesn't have it, we might need to fetch all or manually add it to display list
+                      // For now, let's just use the selected instance if it's not in the list.
+                      // Ideally we should use the one from the provider's full list if available
+                      final fullList = provider.categories;
+                      final found = fullList.firstWhere(
+                        (e) => e.id == _selectedCategory!.id,
+                        orElse: () => _selectedCategory!,
+                      );
+                      if (!containsCategory(categories, found)) {
+                        categories.add(found);
+                      }
+                    }
+
+                    return Wrap(
+                      spacing: DesignConstants.spacingSm,
+                      runSpacing: DesignConstants.spacingSm,
+                      children: categories.map((category) {
+                        final isSelected = _selectedCategory?.id == category.id;
+                        return InkWell(
+                          onTap: () =>
+                              setState(() => _selectedCategory = category),
+                          borderRadius: DesignConstants.borderRadiusMd,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: DesignConstants.spacingMd,
+                              vertical: DesignConstants.spacingSm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? category.color.withValues(alpha: 0.2)
+                                  : Theme.of(context).cardColor,
+                              borderRadius: DesignConstants.borderRadiusMd,
+                              border: Border.all(
+                                color: isSelected
+                                    ? category.color
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.outlineVariant,
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  category.icon,
+                                  color: category.color,
+                                  size: DesignConstants.iconSizeSm,
+                                ),
+                                const SizedBox(
+                                  width: DesignConstants.spacingXs,
+                                ),
+                                Text(
+                                  getCategoryName(context, category),
+                                  style: AppTextStyles.labelSmall.copyWith(
+                                    color: isSelected
+                                        ? category.color
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                const SizedBox(height: DesignConstants.spacingLg),
+
+                // Account Selection
+                Text(
+                  AppLocalizations.of(context)!.formPaymentFrom,
+                  style: AppTextStyles.labelMedium,
+                ),
+                const SizedBox(height: DesignConstants.spacingXs),
+                Consumer<AccountProvider>(
+                  builder: (context, provider, _) {
+                    return DropdownButtonFormField<String>(
+                      initialValue: _selectedAccountId,
+                      decoration: const InputDecoration(),
+                      items: provider.accounts.map((account) {
+                        return DropdownMenuItem(
+                          value: account.id,
+                          child: Text(account.name),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() => _selectedAccountId = value);
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: DesignConstants.spacingLg),
+
+                // Date Selection
+                Text(
+                  AppLocalizations.of(context)!.formDate,
+                  style: AppTextStyles.labelMedium,
+                ),
+                const SizedBox(height: DesignConstants.spacingXs),
+                InkWell(
+                  onTap: _selectDate,
                   borderRadius: DesignConstants.borderRadiusMd,
-                  child: Image.file(
-                    File(_receiptPath!),
-                    height: 120,
+                  child: Container(
                     width: double.infinity,
-                    fit: BoxFit.cover,
+                    padding: DesignConstants.paddingMd,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: DesignConstants.borderRadiusMd,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: AppColors.primary),
+                        const SizedBox(width: DesignConstants.spacingMd),
+                        Text(
+                          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: DesignConstants.spacingLg),
+
+                // Note Field
+                Text(
+                  AppLocalizations.of(context)!.formNoteOptional,
+                  style: AppTextStyles.labelMedium,
+                ),
+                const SizedBox(height: DesignConstants.spacingXs),
+                TextFormField(
+                  controller: _noteController,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.formAddNoteHint,
+                  ),
+                ),
+                const SizedBox(height: DesignConstants.spacingXl),
+
+                // Save Button
+                SizedBox(
+                  width: double.infinity,
+                  height: DesignConstants.buttonHeightLg,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _saveExpense,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.textOnPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: DesignConstants.borderRadiusMd,
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.textOnPrimary,
+                            ),
+                          )
+                        : Text(
+                            _isEditing
+                                ? AppLocalizations.of(
+                                    context,
+                                  )!.formUpdateExpense
+                                : AppLocalizations.of(context)!.formSaveExpense,
+                            style: AppTextStyles.button,
+                          ),
                   ),
                 ),
               ],
-              const SizedBox(height: DesignConstants.spacingLg),
-
-              // Category Selection
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(AppLocalizations.of(context)!.formCategory, style: AppTextStyles.labelMedium),
-                  TextButton(
-                    onPressed: () => context.push('/manage-categories'),
-                    child: Text(AppLocalizations.of(context)!.formManage),
-                  ),
-                ],
-              ),
-              const SizedBox(height: DesignConstants.spacingXs),
-              Consumer<CategoryProvider>(
-                builder: (context, provider, _) {
-                  if (provider.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  // Use enabled categories, or if editing and current category is disabled, include it
-                  final categories = provider.enabledCategories;
-                  if (_isEditing &&
-                      _selectedCategory != null &&
-                      !categories.contains(_selectedCategory)) {
-                    // Ensure the currently selected category is visible even if disabled
-                    // Note: This check relies on object equality or ID equality.
-                    // Since we load fresh categories, the object instance might be different.
-                    // We should match by ID.
-                  }
-
-                  // Helper to check if category is in list
-                  bool containsCategory(List<Category> list, Category? c) {
-                    if (c == null) return false;
-                    return list.any((element) => element.id == c.id);
-                  }
-
-                  // Verify specific selected category is in the list
-                  if (_selectedCategory != null &&
-                      !containsCategory(categories, _selectedCategory)) {
-                    // It's hidden/disabled or custom.
-                    // We need to display it as selected.
-                    // If the provider list doesn't have it, we might need to fetch all or manually add it to display list
-                    // For now, let's just use the selected instance if it's not in the list.
-                    // Ideally we should use the one from the provider's full list if available
-                    final fullList = provider.categories;
-                    final found = fullList.firstWhere(
-                      (e) => e.id == _selectedCategory!.id,
-                      orElse: () => _selectedCategory!,
-                    );
-                    if (!containsCategory(categories, found)) {
-                      categories.add(found);
-                    }
-                  }
-
-                  return Wrap(
-                    spacing: DesignConstants.spacingSm,
-                    runSpacing: DesignConstants.spacingSm,
-                    children: categories.map((category) {
-                      final isSelected = _selectedCategory?.id == category.id;
-                      return InkWell(
-                        onTap: () =>
-                            setState(() => _selectedCategory = category),
-                        borderRadius: DesignConstants.borderRadiusMd,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: DesignConstants.spacingMd,
-                            vertical: DesignConstants.spacingSm,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? category.color.withValues(alpha: 0.2)
-                                : Theme.of(context).cardColor,
-                            borderRadius: DesignConstants.borderRadiusMd,
-                            border: Border.all(
-                              color: isSelected
-                                  ? category.color
-                                  : Theme.of(context).colorScheme.outlineVariant,
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                category.icon,
-                                color: category.color,
-                                size: DesignConstants.iconSizeSm,
-                              ),
-                              const SizedBox(width: DesignConstants.spacingXs),
-                              Text(
-                                getCategoryName(context, category),
-                                style: AppTextStyles.labelSmall.copyWith(
-                                  color: isSelected
-                                      ? category.color
-                                      : Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-              const SizedBox(height: DesignConstants.spacingLg),
-
-              // Account Selection
-              Text(AppLocalizations.of(context)!.formPaymentFrom, style: AppTextStyles.labelMedium),
-              const SizedBox(height: DesignConstants.spacingXs),
-              Consumer<AccountProvider>(
-                builder: (context, provider, _) {
-                  return DropdownButtonFormField<String>(
-                    initialValue: _selectedAccountId,
-                    decoration: const InputDecoration(),
-                    items: provider.accounts.map((account) {
-                      return DropdownMenuItem(
-                        value: account.id,
-                        child: Text(account.name),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() => _selectedAccountId = value);
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: DesignConstants.spacingLg),
-
-              // Date Selection
-              Text(AppLocalizations.of(context)!.formDate, style: AppTextStyles.labelMedium),
-              const SizedBox(height: DesignConstants.spacingXs),
-              InkWell(
-                onTap: _selectDate,
-                borderRadius: DesignConstants.borderRadiusMd,
-                child: Container(
-                  width: double.infinity,
-                  padding: DesignConstants.paddingMd,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: DesignConstants.borderRadiusMd,
-                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.calendar_today, color: AppColors.primary),
-                      const SizedBox(width: DesignConstants.spacingMd),
-                      Text(
-                        '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                        style: AppTextStyles.bodyLarge,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: DesignConstants.spacingLg),
-
-              // Note Field
-              Text(AppLocalizations.of(context)!.formNoteOptional, style: AppTextStyles.labelMedium),
-              const SizedBox(height: DesignConstants.spacingXs),
-              TextFormField(
-                controller: _noteController,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.formAddNoteHint,
-                ),
-              ),
-              const SizedBox(height: DesignConstants.spacingXl),
-
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                height: DesignConstants.buttonHeightLg,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveExpense,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.textOnPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: DesignConstants.borderRadiusMd,
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.textOnPrimary,
-                          ),
-                        )
-                      : Text(
-                          _isEditing ? AppLocalizations.of(context)!.formUpdateExpense : AppLocalizations.of(context)!.formSaveExpense,
-                          style: AppTextStyles.button,
-                        ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

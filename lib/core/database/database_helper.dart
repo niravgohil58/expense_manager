@@ -47,7 +47,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -99,9 +99,9 @@ class DatabaseHelper {
       final now = DateTime.now().toIso8601String();
       final defaultCategories = [
         {'id': 'food', 'name': 'Food', 'iconCode': 0xe532, 'colorValue': 0xFFE57373, 'isSystem': 1}, // Icons.restaurant
-        {'id': 'travel', 'name': 'Travel', 'iconCode': 0xe1d5, 'colorValue': 0xFF64B5F6, 'isSystem': 1}, // Icons.directions_car
+        {'id': 'travel', 'name': 'Travel', 'iconCode': 0xe1d7, 'colorValue': 0xFF64B5F6, 'isSystem': 1}, // Icons.directions_car
         {'id': 'rent', 'name': 'Rent', 'iconCode': 0xe318, 'colorValue': 0xFF81C784, 'isSystem': 1}, // Icons.home
-        {'id': 'shopping', 'name': 'Shopping', 'iconCode': 0xe59c, 'colorValue': 0xFFBA68C8, 'isSystem': 1}, // Icons.shopping_bag
+        {'id': 'shopping', 'name': 'Shopping', 'iconCode': 0xe59a, 'colorValue': 0xFFBA68C8, 'isSystem': 1}, // Icons.shopping_bag
         {'id': 'other', 'name': 'Other', 'iconCode': 0xe402, 'colorValue': 0xFF90A4AE, 'isSystem': 1}, // Icons.more_horiz
       ];
 
@@ -140,6 +140,17 @@ class DatabaseHelper {
         )
       ''');
     }
+
+    if (oldVersion < 5) {
+      await db.rawUpdate(
+        'UPDATE categories SET iconCode = ? WHERE id = ? AND iconCode = ?',
+        [0xe1d7, 'travel', 0xe1d5],
+      );
+      await db.rawUpdate(
+        'UPDATE categories SET iconCode = ? WHERE id = ? AND iconCode = ?',
+        [0xe59a, 'shopping', 0xe59c],
+      );
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -172,9 +183,9 @@ class DatabaseHelper {
     final now = DateTime.now().toIso8601String();
     final defaultCategories = [
       {'id': 'food', 'name': 'Food', 'iconCode': 0xe532, 'colorValue': 0xFFE57373, 'isSystem': 1},
-      {'id': 'travel', 'name': 'Travel', 'iconCode': 0xe1d5, 'colorValue': 0xFF64B5F6, 'isSystem': 1},
+      {'id': 'travel', 'name': 'Travel', 'iconCode': 0xe1d7, 'colorValue': 0xFF64B5F6, 'isSystem': 1},
       {'id': 'rent', 'name': 'Rent', 'iconCode': 0xe318, 'colorValue': 0xFF81C784, 'isSystem': 1},
-      {'id': 'shopping', 'name': 'Shopping', 'iconCode': 0xe59c, 'colorValue': 0xFFBA68C8, 'isSystem': 1},
+      {'id': 'shopping', 'name': 'Shopping', 'iconCode': 0xe59a, 'colorValue': 0xFFBA68C8, 'isSystem': 1},
       {'id': 'other', 'name': 'Other', 'iconCode': 0xe402, 'colorValue': 0xFF90A4AE, 'isSystem': 1},
     ];
 

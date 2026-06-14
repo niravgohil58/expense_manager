@@ -101,12 +101,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                                 style: AppTextStyles.bodyLarge,
                               ),
                             ),
-                            Expanded(
-                              child: Text(
-                                getCategoryName(context, category),
-                                style: AppTextStyles.bodyLarge,
-                              ),
-                            ),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [

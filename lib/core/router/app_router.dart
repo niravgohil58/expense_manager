@@ -213,8 +213,17 @@ class AppRouter {
           parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final extra = state.extra;
-            final expense = extra is Expense ? extra : null;
-            return AddExpenseScreen(expense: expense);
+            if (extra is Expense) {
+              return AddExpenseScreen(expense: extra);
+            } else if (extra is Map<String, dynamic>) {
+              return AddExpenseScreen(
+                preFilledAmount: extra['amount'] as double?,
+                preFilledCategory: extra['category'] as Category?,
+                preFilledAccountId: extra['accountId'] as String?,
+                preFilledNote: extra['note'] as String?,
+              );
+            }
+            return const AddExpenseScreen();
           },
         ),
         GoRoute(
@@ -223,8 +232,17 @@ class AppRouter {
           parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final extra = state.extra;
-            final income = extra is Income ? extra : null;
-            return AddIncomeScreen(income: income);
+            if (extra is Income) {
+              return AddIncomeScreen(income: extra);
+            } else if (extra is Map<String, dynamic>) {
+              return AddIncomeScreen(
+                preFilledAmount: extra['amount'] as double?,
+                preFilledCategory: extra['category'] as String?,
+                preFilledAccountId: extra['accountId'] as String?,
+                preFilledNote: extra['note'] as String?,
+              );
+            }
+            return const AddIncomeScreen();
           },
         ),
         GoRoute(
