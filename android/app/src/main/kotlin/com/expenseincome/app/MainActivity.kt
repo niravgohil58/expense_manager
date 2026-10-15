@@ -3,8 +3,8 @@ package com.expenseincome.app
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.core.view.WindowCompat
-import io.flutter.embedding.android.FlutterActivity
+import androidx.activity.enableEdgeToEdge
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayInputStream
@@ -12,11 +12,11 @@ import java.security.MessageDigest
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     private val channelName = "com.expenseincome.app/signing"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
     }
 
