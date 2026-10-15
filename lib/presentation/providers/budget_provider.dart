@@ -53,4 +53,22 @@ class BudgetProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  /// Batch update multiple category limits with a single database transaction and single notification.
+  Future<bool> saveLimitsBatch(Map<String, double> limits) async {
+    try {
+      await _repository.upsertLimitsBatch(
+        year: _year,
+        month: _month,
+        limits: limits,
+      );
+      _limits = await _repository.limitsForMonth(_year, _month);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = '$e';
+      notifyListeners();
+      return false;
+    }
+  }
 }

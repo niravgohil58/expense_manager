@@ -23,4 +23,8 @@ class UserProfileService {
     }
     await doc.set(payload, SetOptions(merge: true));
   }
+
+  Future<void> deleteRemoteProfile(String uid) async {
+    await _db.collection('users').doc(uid).delete();
+  }
 }

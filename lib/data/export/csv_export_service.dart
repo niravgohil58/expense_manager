@@ -5,9 +5,16 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../core/database/database_helper.dart';
 
-/// Escapes CSV cells with commas or quotes.
+/// Escapes CSV cells with commas, quotes, and prevents formula injection (CWE-1236).
 String csvEscape(String value) {
-  final s = value.replaceAll('\r\n', ' ').replaceAll('\n', ' ');
+  var s = value.replaceAll('\r\n', ' ').replaceAll('\n', ' ');
+  if (s.isNotEmpty &&
+      (s.startsWith('=') ||
+          s.startsWith('+') ||
+          s.startsWith('-') ||
+          s.startsWith('@'))) {
+    s = "'$s";
+  }
   if (s.contains(',') || s.contains('"')) {
     return '"${s.replaceAll('"', '""')}"';
   }

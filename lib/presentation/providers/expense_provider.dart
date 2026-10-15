@@ -264,6 +264,11 @@ class ExpenseProvider extends ChangeNotifier {
     return await _repository.getExpensesForMonth(year, month);
   }
 
+  /// Get monthly aggregate totals (1..12) for [year] via a single query
+  Future<Map<int, double>> getMonthlyTotalsForYear(int year) async {
+    return await _repository.getMonthlyTotalsForYear(year);
+  }
+
   /// Get total expenses for date range
   Future<double> getTotalExpenses(DateTime start, DateTime end) async {
     return await _repository.getTotalExpenses(start, end);

@@ -57,7 +57,10 @@ class CategoryRepository {
   }
 
   Future<void> deleteCategory(String id) async {
-    await _dbHelper.delete(_table, id);
+    await _dbHelper.transaction((txn) async {
+      await txn.delete('category_budgets', where: 'categoryId = ?', whereArgs: [id]);
+      await txn.delete(_table, where: 'id = ?', whereArgs: [id]);
+    });
   }
 
   Future<Category?> getCategoryById(String id) async {

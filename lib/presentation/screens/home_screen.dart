@@ -49,9 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final expenseProvider = context.read<ExpenseProvider>();
     final incomeProvider = context.read<IncomeProvider>();
     final showLoading = !silentReload;
-    await accountProvider.loadAccounts(showLoading: showLoading);
-    await expenseProvider.loadExpenses(showLoading: showLoading);
-    await incomeProvider.loadIncomes(showLoading: showLoading);
+    await Future.wait([
+      accountProvider.loadAccounts(showLoading: showLoading),
+      expenseProvider.loadExpenses(showLoading: showLoading),
+      incomeProvider.loadIncomes(showLoading: showLoading),
+    ]);
   }
 
   Future<void> _checkForAppUpdate() async {

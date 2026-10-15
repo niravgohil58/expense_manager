@@ -50,42 +50,31 @@ class _ReportScreenState extends State<ReportScreen> {
     final udharProvider = context.read<UdharProvider>();
     final accountProvider = context.read<AccountProvider>();
 
-    await expenseProvider.loadExpenses(showLoading: !silent);
-    if (!mounted) return;
-    await incomeProvider.loadIncomes(showLoading: !silent);
-    if (!mounted) return;
-    await udharProvider.loadUdhar(showLoading: false);
-    if (!mounted) return;
-    await accountProvider.loadAccounts(showLoading: false);
+    await Future.wait([
+      expenseProvider.loadExpenses(showLoading: !silent),
+      incomeProvider.loadIncomes(showLoading: !silent),
+      udharProvider.loadUdhar(showLoading: false),
+      accountProvider.loadAccounts(showLoading: false),
+    ]);
     if (!mounted) return;
 
     final start = DateTime(_selectedYear, 1, 1);
     final end = DateTime(_selectedYear, 12, 31, 23, 59, 59);
 
-    _categoryData =
-        await expenseProvider.getExpensesByCategories(start, end);
-
-    _monthlyExpenseData = List.filled(12, 0);
-    _monthlyIncomeData = List.filled(12, 0);
-    for (int month = 1; month <= 12; month++) {
-      final expenses =
-          await expenseProvider.getExpensesForMonth(_selectedYear, month);
-      double expenseTotal = 0;
-      for (final expense in expenses) {
-        expenseTotal += expense.amount;
-      }
-      _monthlyExpenseData[month - 1] = expenseTotal;
-
-      final incomes =
-          await incomeProvider.getIncomesForMonth(_selectedYear, month);
-      double incomeTotal = 0;
-      for (final income in incomes) {
-        incomeTotal += income.amount;
-      }
-      _monthlyIncomeData[month - 1] = incomeTotal;
-    }
-
+    final results = await Future.wait([
+      expenseProvider.getExpensesByCategories(start, end),
+      expenseProvider.getMonthlyTotalsForYear(_selectedYear),
+      incomeProvider.getMonthlyTotalsForYear(_selectedYear),
+    ]);
     if (!mounted) return;
+
+    _categoryData = results[0] as Map<Category, double>;
+    final expenseTotals = results[1] as Map<int, double>;
+    final incomeTotals = results[2] as Map<int, double>;
+
+    _monthlyExpenseData = List.generate(12, (m) => expenseTotals[m + 1] ?? 0.0);
+    _monthlyIncomeData = List.generate(12, (m) => incomeTotals[m + 1] ?? 0.0);
+
     setState(() {
       if (!silent) {
         _isLoading = false;

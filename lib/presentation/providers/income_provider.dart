@@ -57,6 +57,11 @@ class IncomeProvider extends ChangeNotifier {
     return _repository.getIncomesByDateRange(start, end);
   }
 
+  /// Get monthly aggregate totals (1..12) for [year] via a single query
+  Future<Map<int, double>> getMonthlyTotalsForYear(int year) async {
+    return await _repository.getMonthlyTotalsForYear(year);
+  }
+
   Future<void> setIncomeFilters(IncomeFilters filters) async {
     _incomeListFilters = filters;
     try {

@@ -69,11 +69,12 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
   Future<void> _saveAll() async {
     final b = context.read<BudgetProvider>();
     final cats = context.read<CategoryProvider>();
+    final limits = <String, double>{};
     for (final c in cats.enabledCategories) {
       final text = _controllers[c.id]?.text.trim() ?? '';
-      final v = double.tryParse(text) ?? 0;
-      await b.saveLimit(c.id, v);
+      limits[c.id] = double.tryParse(text) ?? 0;
     }
+    await b.saveLimitsBatch(limits);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.budgetsSave)),

@@ -94,6 +94,31 @@ class IncomeRepository {
     return incomes;
   }
 
+  /// Returns a map of month (1..12) -> total incomes for [year] via a single aggregate query.
+  Future<Map<int, double>> getMonthlyTotalsForYear(int year) async {
+    final db = await _databaseHelper.database;
+    final start = DateTime(year, 1, 1).toIso8601String();
+    final end = DateTime(year, 12, 31, 23, 59, 59).toIso8601String();
+    final results = await db.rawQuery('''
+      SELECT 
+        CAST(strftime('%m', date) AS INTEGER) AS m,
+        SUM(amount) AS total
+      FROM $_incomeTable
+      WHERE date >= ? AND date <= ?
+      GROUP BY m
+    ''', [start, end]);
+
+    final map = <int, double>{};
+    for (final row in results) {
+      final m = row['m'];
+      final total = row['total'];
+      if (m is int && total is num) {
+        map[m] = total.toDouble();
+      }
+    }
+    return map;
+  }
+
   /// Insert income and credit account in one transaction.
   Future<void> addIncome(Income income) async {
     await _databaseHelper.transaction((txn) async {

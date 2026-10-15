@@ -46,7 +46,7 @@
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This app requires speech recognition permission to convert your voice commands to text.</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-7088644265461822~1167020274</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Expense Manager attaches receipt photos from your library to expense entries.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

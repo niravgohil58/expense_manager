@@ -120,6 +120,12 @@ class AdsController extends ChangeNotifier {
     }
 
     try {
+      await _requestConsentIfRequired();
+    } catch (e) {
+      debugPrint('[ExpenseAds] Consent gathering error: $e');
+    }
+
+    try {
       final initResponse = await MobileAds.instance.initialize();
       debugPrint(
         '[ExpenseAds] MobileAds.initialize OK — '
@@ -142,6 +148,36 @@ class AdsController extends ChangeNotifier {
     notifyListeners();
     unawaited(preloadInterstitial());
     unawaited(loadAppOpenAd());
+  }
+
+  Future<void> _requestConsentIfRequired() async {
+    final completer = Completer<void>();
+    final params = ConsentRequestParameters();
+
+    ConsentInformation.instance.requestConsentInfoUpdate(
+      params,
+      () async {
+        ConsentForm.loadAndShowConsentFormIfRequired(
+          (loadAndShowError) {
+            if (loadAndShowError != null) {
+              debugPrint('[ExpenseAds] ConsentForm error: ${loadAndShowError.message}');
+            }
+            if (!completer.isCompleted) completer.complete();
+          },
+        );
+      },
+      (FormError error) {
+        debugPrint('[ExpenseAds] ConsentInfoUpdate error: ${error.message}');
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
+
+    return completer.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        debugPrint('[ExpenseAds] Consent request timed out, proceeding.');
+      },
+    );
   }
 
   /// Pull latest Remote Config (respects minimum fetch interval outside debug).

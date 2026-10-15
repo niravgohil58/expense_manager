@@ -22,6 +22,7 @@ import '../../l10n/app_localizations.dart';
 import '../../core/localization/l10n_helpers.dart';
 
 import '../providers/category_provider.dart';
+import '../providers/lock_provider.dart';
 import '../../data/models/category_model.dart';
 // For ManageCategoriesScreen route
 
@@ -102,6 +103,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   Future<void> _pickReceipt() async {
+    context.read<LockProvider>().suppressLockForExternalIntent();
     final picker = ImagePicker();
     final x = await picker.pickImage(source: ImageSource.gallery);
     if (x == null || !mounted) return;

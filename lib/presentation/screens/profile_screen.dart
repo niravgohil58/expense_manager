@@ -80,8 +80,67 @@ class ProfileScreen extends StatelessWidget {
                   label: Text(l10n.profileSignOut),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
-                    backgroundColor: scheme.error,
-                    foregroundColor: scheme.onError,
+                    backgroundColor: scheme.primary,
+                    foregroundColor: scheme.onPrimary,
+                  ),
+                ),
+                const SizedBox(height: DesignConstants.spacingMd),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Delete Account'),
+                        content: const Text(
+                          'Are you sure you want to delete your account? '
+                          'This will permanently delete your cloud profile and authentication credentials. '
+                          'Your local device ledger will remain intact.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(backgroundColor: scheme.error),
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text('Delete Permanently'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmed != true || !context.mounted) return;
+
+                    try {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final ok = await auth.deleteAccount(context);
+                      if (ok && context.mounted) {
+                        messenger.showSnackBar(
+                          const SnackBar(content: Text('Account deleted successfully.')),
+                        );
+                        context.go('/login');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              e.toString().contains('requires-recent-login')
+                                  ? 'For security, please log out and log in again before deleting your account.'
+                                  : 'Could not delete account: $e',
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.delete_forever_rounded),
+                  label: const Text('Delete Account'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    foregroundColor: scheme.error,
+                    side: BorderSide(color: scheme.error),
                   ),
                 ),
               ],

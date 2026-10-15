@@ -48,4 +48,34 @@ class BudgetRepository {
       [categoryId, year, month, limitAmount],
     );
   }
+
+  /// Atomically saves or deletes multiple category limits in a single transaction.
+  Future<void> upsertLimitsBatch({
+    required int year,
+    required int month,
+    required Map<String, double> limits,
+  }) async {
+    await _db.transaction((txn) async {
+      for (final entry in limits.entries) {
+        final categoryId = entry.key;
+        final limitAmount = entry.value;
+        if (limitAmount <= 0) {
+          await txn.delete(
+            _table,
+            where: 'categoryId = ? AND year = ? AND month = ?',
+            whereArgs: [categoryId, year, month],
+          );
+        } else {
+          await txn.execute(
+            '''
+            INSERT INTO $_table (categoryId, year, month, limitAmount)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(categoryId, year, month) DO UPDATE SET limitAmount = excluded.limitAmount
+            ''',
+            [categoryId, year, month, limitAmount],
+          );
+        }
+      }
+    });
+  }
 }

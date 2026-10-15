@@ -90,10 +90,16 @@ class VoiceCommandService {
   ParsedTransaction parseCommand(String text, List<String> categories, {List<String>? accounts}) {
     final cleanText = text.toLowerCase().trim();
 
-    // 1. Identify Type (English-only)
+    // 1. Identify Type (Multilingual + English)
     VoiceTransactionType type = VoiceTransactionType.expense;
-    final incomeKeywords = ['salary', 'got', 'received', 'recieved', 'earned', 'income', 'bonus', 'refund', 'earn', 'inward'];
-    final expenseKeywords = ['spent', 'paid', 'expense', 'bought', 'cost', 'purchase', 'outward'];
+    final incomeKeywords = [
+      'salary', 'got', 'received', 'recieved', 'earned', 'income', 'bonus', 'refund', 'earn', 'inward',
+      'aaye', 'mila', 'mili', 'kamaya', 'tankha', 'salario', 'ingreso', 'recu', 'revenu', 'einnahme'
+    ];
+    final expenseKeywords = [
+      'spent', 'paid', 'expense', 'bought', 'cost', 'purchase', 'outward',
+      'kharch', 'kharcha', 'diya', 'diye', 'bhara', 'kharida', 'gasto', 'pagado', 'depense', 'paye', 'ausgabe'
+    ];
 
     int incomeScore = 0;
     int expenseScore = 0;
@@ -138,18 +144,18 @@ class VoiceCommandService {
       }
     }
 
-    // 5. Extract Note (clean up amounts, categories, and accounts)
+    // 5. Extract Note (clean up amounts, categories, and accounts safely)
     String note = text;
-    final forMatch = RegExp(r'\bfor\s+(.+)$', caseSensitive: false).firstMatch(text);
+    final forMatch = RegExp(r'\b(?:for|ke liye|para|pour)\s+(.+)$', caseSensitive: false).firstMatch(text);
     if (forMatch != null) {
       note = forMatch.group(1)?.trim() ?? text;
     } else {
       String tempNote = text;
       if (matchedCategory != null) {
-        tempNote = tempNote.replaceAll(RegExp(matchedCategory, caseSensitive: false), '');
+        tempNote = tempNote.replaceAll(RegExp(RegExp.escape(matchedCategory), caseSensitive: false), '');
       }
       if (matchedAccount != null) {
-        tempNote = tempNote.replaceAll(RegExp(matchedAccount, caseSensitive: false), '');
+        tempNote = tempNote.replaceAll(RegExp(RegExp.escape(matchedAccount), caseSensitive: false), '');
       }
       if (amount != null) {
         tempNote = tempNote.replaceAll(amount.toString(), '');
@@ -160,7 +166,8 @@ class VoiceCommandService {
         r'\bspent\b', r'\bgot\b', r'\breceived\b', r'\brecieved\b', r'\bearned\b',
         r'\bsalary\b', r'\bpaid\b', r'\bexpense\b', r'\bbought\b', r'\bon\b',
         r'\bin\b', r'\ba\b', r'\bthe\b', r'\brupees\b', r'\brupee\b', r'\brs\b',
-        r'\binr\b', r'\bof\b', r'\bfor\b', r'\bfrom\b', r'\bto\b', r'\binto\b', r'\busing\b', r'\bby\b'
+        r'\binr\b', r'\bof\b', r'\bfor\b', r'\bfrom\b', r'\bto\b', r'\binto\b', r'\busing\b', r'\bby\b',
+        r'\brupya\b', r'\brupaye\b', r'\bka\b', r'\bki\b', r'\bke\b', r'\bme\b', r'\bse\b'
       ];
       for (final pattern in stopWords) {
         tempNote = tempNote.replaceAll(

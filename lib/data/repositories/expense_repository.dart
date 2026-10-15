@@ -218,6 +218,31 @@ class ExpenseRepository {
     return getExpensesByDateRange(start, end);
   }
 
+  /// Returns a map of month (1..12) -> total expenses for [year] via a single aggregate query.
+  Future<Map<int, double>> getMonthlyTotalsForYear(int year) async {
+    final db = await _dbHelper.database;
+    final start = DateTime(year, 1, 1).toIso8601String();
+    final end = DateTime(year, 12, 31, 23, 59, 59).toIso8601String();
+    final results = await db.rawQuery('''
+      SELECT 
+        CAST(strftime('%m', date) AS INTEGER) AS m,
+        SUM(amount) AS total
+      FROM $_expenseTable
+      WHERE date >= ? AND date <= ?
+      GROUP BY m
+    ''', [start, end]);
+
+    final map = <int, double>{};
+    for (final row in results) {
+      final m = row['m'];
+      final total = row['total'];
+      if (m is int && total is num) {
+        map[m] = total.toDouble();
+      }
+    }
+    return map;
+  }
+
   /// Get total expenses for a date range
   Future<double> getTotalExpenses(DateTime start, DateTime end) async {
     final expenses = await getExpensesByDateRange(start, end);
@@ -311,8 +336,22 @@ class ExpenseRepository {
     return map != null ? Transfer.fromMap(map) : null;
   }
 
-  /// Delete transfer
+  /// Delete transfer and revert account balances atomically.
   Future<void> deleteTransfer(String id) async {
-    await _dbHelper.delete(_transferTable, id);
+    final transfer = await getTransferById(id);
+    if (transfer == null) return;
+    await _dbHelper.transaction((txn) async {
+      await _accountRepository.applyBalanceDeltaTxn(
+        txn,
+        transfer.fromAccountId,
+        transfer.amount,
+      );
+      await _accountRepository.applyBalanceDeltaTxn(
+        txn,
+        transfer.toAccountId,
+        -transfer.amount,
+      );
+      await txn.delete(_transferTable, where: 'id = ?', whereArgs: [id]);
+    });
   }
 }

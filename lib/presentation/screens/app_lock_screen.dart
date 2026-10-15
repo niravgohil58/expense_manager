@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -19,14 +21,43 @@ class AppLockScreen extends StatefulWidget {
 class _AppLockScreenState extends State<AppLockScreen> {
   final _controller = TextEditingController();
   String? _error;
+  int _failedAttempts = 0;
+  int _lockoutSeconds = 0;
+  Timer? _lockoutTimer;
 
   @override
   void dispose() {
+    _lockoutTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
+  void _startLockoutTimer() {
+    setState(() {
+      _lockoutSeconds = 30;
+      _error = 'Too many incorrect attempts. Please wait 30s.';
+    });
+    _lockoutTimer?.cancel();
+    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_lockoutSeconds > 1) {
+          _lockoutSeconds--;
+          _error = 'Too many incorrect attempts. Please wait ${_lockoutSeconds}s.';
+        } else {
+          _lockoutSeconds = 0;
+          _error = null;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
   Future<void> _submit() async {
+    if (_lockoutSeconds > 0) return;
     final pin = _controller.text.trim();
     if (pin.length < 4) {
       setState(() => _error = AppLocalizations.of(context)!.lockEnterDigits);
@@ -35,10 +66,18 @@ class _AppLockScreenState extends State<AppLockScreen> {
     final ok = await context.read<LockProvider>().verifyPin(pin);
     if (!mounted) return;
     if (!ok) {
-      setState(() {
-        _error = AppLocalizations.of(context)!.lockIncorrectPin;
-        _controller.clear();
-      });
+      _failedAttempts++;
+      if (_failedAttempts >= 5) {
+        _startLockoutTimer();
+      } else {
+        setState(() {
+          final remaining = 5 - _failedAttempts;
+          _error = '${AppLocalizations.of(context)!.lockIncorrectPin} ($remaining attempts left)';
+          _controller.clear();
+        });
+      }
+    } else {
+      _failedAttempts = 0;
     }
   }
 
@@ -68,6 +107,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
               const SizedBox(height: DesignConstants.spacingLg),
               TextField(
                 controller: _controller,
+                enabled: _lockoutSeconds == 0,
                 obscureText: true,
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -88,8 +128,12 @@ class _AppLockScreenState extends State<AppLockScreen> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: _submit,
-                  child: Text(AppLocalizations.of(context)!.lockUnlock),
+                  onPressed: _lockoutSeconds > 0 ? null : _submit,
+                  child: Text(
+                    _lockoutSeconds > 0
+                        ? 'Wait ${_lockoutSeconds}s'
+                        : AppLocalizations.of(context)!.lockUnlock,
+                  ),
                 ),
               ),
             ],

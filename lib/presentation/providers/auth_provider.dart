@@ -42,12 +42,9 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> handleSuccessfulLogin(BuildContext context, User user) async {
     final bound = _prefs.boundLocalDataFirebaseUid;
-    final onboardingDone = _prefs.onboardingCompleted;
 
     if (bound != null && bound != user.uid) {
-      await DatabaseHelper.instance.wipeLocalDatabase();
-    } else if (bound == null && onboardingDone) {
-      // Legacy installs upgraded before Firebase: ledger wasn't keyed — tie cleanly.
+      // Different account logged in: wipe previous user's local database.
       await DatabaseHelper.instance.wipeLocalDatabase();
     }
 
@@ -166,9 +163,37 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> signOut() async {
     if (!_firebaseAuthEnabled) return;
-    await _googleSignIn().signOut();
+    try {
+      await _googleSignIn().signOut();
+    } catch (_) {}
     await FirebaseAuth.instance.signOut();
     notifyListeners();
+  }
+
+  /// Deletes user cloud profile and Firebase Auth account (compliance with Store policy).
+  Future<bool> deleteAccount(BuildContext context) async {
+    if (!_firebaseAuthEnabled) return false;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    try {
+      await _profileService.deleteRemoteProfile(user.uid);
+    } catch (e) {
+      debugPrint('[AuthProvider] remote profile delete failed (proceeding): $e');
+    }
+
+    try {
+      await _prefs.setBoundLocalDataFirebaseUid('');
+      await user.delete();
+      try {
+        await _googleSignIn().signOut();
+      } catch (_) {}
+      notifyListeners();
+      return true;
+    } on FirebaseAuthException catch (e) {
+      debugPrint('[AuthProvider] delete account error: ${e.code} - ${e.message}');
+      rethrow;
+    }
   }
 
   @override

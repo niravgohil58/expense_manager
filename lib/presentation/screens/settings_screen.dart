@@ -120,21 +120,18 @@ class SettingsScreen extends StatelessWidget {
 
     FilePickerResult? result;
     try {
-      // FileType.custom invokes a native path that can fail on some builds;
-      // FileType.any + JSON validation is more reliable on Android.
+      context.read<LockProvider>().suppressLockForExternalIntent();
       result = await FilePicker.platform.pickFiles(
         type: FileType.any,
         allowMultiple: false,
         withData: true,
       );
-    } on MissingPluginException catch (e) {
+    } catch (e) {
       if (context.mounted) {
         messenger.showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(
-              'File picker unavailable.\n'
-              'Stop the app completely, then run: flutter clean && flutter pub get && flutter run\n'
-              '$e',
+              'File picker could not be opened. Please check app storage permissions and try again.',
             ),
           ),
         );

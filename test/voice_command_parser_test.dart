@@ -86,5 +86,20 @@ void main() {
       expect(res.accountName, 'Cash');
       expect(res.note, 'Fuel');
     });
+
+    test('should parse command with regex special characters in category or account safely', () {
+      final specialCategories = ['Food (Cafe & Snacks)', 'Travel [Train]'];
+      final specialAccounts = ['Bank (Savings)'];
+      final res = service.parseCommand(
+        'Spent 250 on Food (Cafe & Snacks) from Bank (Savings) for coffee',
+        specialCategories,
+        accounts: specialAccounts,
+      );
+      expect(res.type, VoiceTransactionType.expense);
+      expect(res.amount, 250.0);
+      expect(res.categoryName, 'Food (Cafe & Snacks)');
+      expect(res.accountName, 'Bank (Savings)');
+      expect(res.note, 'Coffee');
+    });
   });
 }
